@@ -10,3 +10,19 @@ services:
         value: production
       - key: PORT
         value: 10000
+      - key: DATABASE_URL
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: GMAIL_CLIENT_ID
+        sync: false
+      - key: GMAIL_CLIENT_SECRET
+        sync: false
+      - key: GMAIL_REDIRECT_URI
+        value: https://khizrkazmi.com/api/gmail/callback
+      - key: FRONTEND_URL
+        value: https://khizrkazmi.com
+      - key: LOG_LEVEL
+        value: info
