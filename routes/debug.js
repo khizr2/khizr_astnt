@@ -34,6 +34,25 @@ router.get('/db-test', async (req, res) => {
     }
 });
 
+// Check environment variables
+router.get('/env-check', (req, res) => {
+    res.json({
+        status: 'success',
+        env: {
+            NODE_ENV: process.env.NODE_ENV,
+            PORT: process.env.PORT,
+            DATABASE_URL: process.env.DATABASE_URL ? 'SET' : 'NOT_SET',
+            JWT_SECRET: process.env.JWT_SECRET ? 'SET' : 'NOT_SET',
+            OPENAI_API_KEY: process.env.OPENAI_API_KEY ? 'SET' : 'NOT_SET',
+            GMAIL_CLIENT_ID: process.env.GMAIL_CLIENT_ID ? 'SET' : 'NOT_SET',
+            GMAIL_CLIENT_SECRET: process.env.GMAIL_CLIENT_SECRET ? 'SET' : 'NOT_SET',
+            FRONTEND_URL: process.env.FRONTEND_URL,
+            GMAIL_REDIRECT_URI: process.env.GMAIL_REDIRECT_URI,
+            LOG_LEVEL: process.env.LOG_LEVEL
+        }
+    });
+});
+
 // Test users table
 router.get('/users-test', async (req, res) => {
     try {
