@@ -12,6 +12,7 @@ const aiRoutes = require('./routes/ai');
 const ingestRoutes = require('./routes/ingest');
 const gmailRoutes = require('./routes/gmail');
 const notificationRoutes = require('./routes/notifications');
+const debugRoutes = require('./routes/debug');
 
 const { logger } = require('./utils/logger');
 
@@ -52,6 +53,7 @@ app.use('/api/ai', aiRoutes);
 app.use('/api/ingest', ingestRoutes);
 app.use('/api/gmail', gmailRoutes);
 app.use('/api/notifications', notificationRoutes);
+app.use('/api/debug', debugRoutes);
 // Health check endpoint
 app.get('/', (req, res) => {
     res.json({ 
