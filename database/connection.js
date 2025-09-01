@@ -1,6 +1,17 @@
 const { createClient } = require('@supabase/supabase-js');
 const { logger } = require('../utils/logger');
 
+// Check for required environment variables
+if (!process.env.SUPABASE_URL) {
+    logger.error('SUPABASE_URL environment variable is required');
+    throw new Error('SUPABASE_URL environment variable is required');
+}
+
+if (!process.env.SUPABASE_ANON_KEY) {
+    logger.error('SUPABASE_ANON_KEY environment variable is required');
+    throw new Error('SUPABASE_ANON_KEY environment variable is required');
+}
+
 // Create Supabase client
 const supabase = createClient(
     process.env.SUPABASE_URL,
