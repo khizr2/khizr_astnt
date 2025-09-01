@@ -1,0 +1,1186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Khizr Assistant</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&display=swap');
+        
+        :root {
+            --primary: #8B5CF6;
+            --secondary: #EF4444;
+            --bg: #0A0A0B;
+            --bg-card: #111115;
+            --text-primary: #E4E4E7;
+            --text-secondary: #71717A;
+            --text-accent: #A855F7;
+            --border: #27272A;
+            --border-accent: #3F3F46;
+        }
+
+        .theme-red {
+            --primary: #EF4444;
+            --text-accent: #F87171;
+        }
+
+        .theme-purple {
+            --primary: #8B5CF6;
+            --text-accent: #A855F7;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'JetBrains Mono', monospace;
+            background: var(--bg);
+            color: var(--text-primary);
+            line-height: 1.6;
+            font-weight: 400;
+            min-height: 100vh;
+            font-size: 14px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        /* Header - Minimal */
+        .header {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            margin-bottom: 60px;
+            padding-bottom: 20px;
+        }
+
+        .logo {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+            letter-spacing: -0.02em;
+        }
+
+        .theme-toggle {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .theme-btn {
+            width: 12px;
+            height: 12px;
+            border-radius: 2px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            opacity: 0.6;
+        }
+
+        .theme-btn.purple { background: #8B5CF6; }
+        .theme-btn.red { background: #EF4444; }
+        
+        .theme-btn:hover {
+            opacity: 1;
+            transform: scale(1.1);
+        }
+
+        .theme-btn.active {
+            opacity: 1;
+        }
+
+        /* Navigation - Code-like */
+        .nav {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .nav-btn {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: color 0.2s ease;
+            position: relative;
+            padding: 0;
+            font-family: inherit;
+            font-size: inherit;
+        }
+
+        .nav-btn:hover {
+            color: var(--text-primary);
+        }
+
+        .nav-btn.active {
+            color: var(--primary);
+        }
+
+        .nav-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 0;
+            width: 100%;
+            height: 1px;
+            background: var(--primary);
+        }
+
+        /* Main Layout */
+        .today-view {
+            display: grid;
+            grid-template-columns: 1.5fr 1fr;
+            gap: 60px;
+        }
+
+        /* Code-like Cards */
+        .code-card {
+            padding: 0;
+            margin-bottom: 48px;
+            font-size: 13px;
+        }
+
+        .code-card.boxed {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 24px;
+        }
+
+        .section-header {
+            color: var(--text-accent);
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        /* Top 3 Tasks - Minimal List */
+        .task-list {
+            list-style: none;
+        }
+
+        .task-item {
+            display: flex;
+            align-items: center;
+            padding: 8px 0;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .task-item:hover {
+            color: var(--primary);
+            padding-left: 12px;
+        }
+
+        .task-number {
+            color: var(--text-secondary);
+            font-size: 11px;
+            margin-right: 16px;
+            min-width: 20px;
+            font-weight: 500;
+        }
+
+        .task-title {
+            font-weight: 400;
+            flex: 1;
+        }
+
+        /* Time-bound Events - Terminal Style */
+        .time-list {
+            list-style: none;
+        }
+
+        .time-item {
+            display: flex;
+            align-items: center;
+            padding: 6px 0;
+            font-family: inherit;
+        }
+
+        .time {
+            color: var(--primary);
+            font-weight: 500;
+            min-width: 80px;
+            font-size: 12px;
+        }
+
+        .time-separator {
+            color: var(--text-secondary);
+            margin: 0 16px;
+            font-weight: 300;
+        }
+
+        .event-title {
+            color: var(--text-primary);
+            font-weight: 400;
+        }
+
+        /* AI Input - Terminal Style */
+        .ai-input-container {
+            position: relative;
+        }
+
+        .ai-prompt {
+            color: var(--text-accent);
+            font-size: 12px;
+            margin-bottom: 12px;
+            font-weight: 500;
+        }
+
+        .ai-textarea {
+            width: 100%;
+            background: transparent;
+            border: none;
+            padding: 0;
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 13px;
+            resize: none;
+            height: 100px;
+            transition: border-color 0.2s ease;
+        }
+
+        .ai-textarea:focus {
+            outline: none;
+        }
+
+        .ai-textarea::placeholder {
+            color: var(--text-secondary);
+            font-style: italic;
+        }
+
+        .ai-send-btn {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            background: var(--primary);
+            border: none;
+            border-radius: 3px;
+            padding: 6px 12px;
+            color: white;
+            cursor: pointer;
+            font-size: 11px;
+            font-family: inherit;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .ai-send-btn:hover {
+            opacity: 0.9;
+            transform: scale(0.98);
+        }
+
+        /* Mind Button */
+        .mind-btn {
+            background: transparent;
+            border: none;
+            padding: 0;
+            color: var(--primary);
+            cursor: pointer;
+            font-size: 13px;
+            font-family: inherit;
+            font-weight: 500;
+            width: 100%;
+            transition: all 0.2s ease;
+            text-align: left;
+        }
+
+        .mind-btn:hover {
+            color: var(--text-primary);
+        }
+
+        /* Project View */
+        .project-view {
+            display: none;
+        }
+
+        .project-view.active {
+            display: block;
+        }
+
+        .project-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .project-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 20px;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .project-card:hover {
+            border-color: var(--primary);
+        }
+
+        .project-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .project-meta {
+            color: var(--text-secondary);
+            font-size: 12px;
+            margin-bottom: 16px;
+        }
+
+        .progress-bar-container {
+            background: var(--border);
+            height: 2px;
+            border-radius: 1px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            background: var(--primary);
+            height: 100%;
+            border-radius: 1px;
+            transition: width 0.3s ease;
+        }
+
+        /* Project Landing - Side Projects on Hover */
+        .project-landing {
+            display: block;
+        }
+
+        .project-landing.hidden {
+            display: none;
+        }
+
+        .main-project {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 24px;
+            margin-bottom: 24px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .main-project:hover {
+            border-color: var(--primary);
+        }
+
+        .main-project-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text-primary);
+        }
+
+        .main-project-desc {
+            color: var(--text-secondary);
+            font-size: 13px;
+            margin-bottom: 16px;
+        }
+
+        .side-projects {
+            position: absolute;
+            left: 100%;
+            top: 0;
+            margin-left: 20px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 16px;
+            min-width: 200px;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.2s ease;
+            z-index: 10;
+        }
+
+        .main-project:hover .side-projects {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .side-project-item {
+            padding: 8px 12px;
+            margin: 4px 0;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border-radius: 4px;
+            font-size: 13px;
+        }
+
+        .side-project-item:hover {
+            background: rgba(139, 92, 246, 0.1);
+            color: var(--primary);
+        }
+
+        /* Individual Project Page */
+        .project-detail {
+            display: none;
+        }
+
+        .project-detail.active {
+            display: block;
+        }
+
+        .project-header-section {
+            margin-bottom: 40px;
+        }
+
+        .project-detail-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 32px;
+        }
+
+        .project-info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+
+        .info-section {
+            
+        }
+
+        .info-label {
+            color: var(--text-accent);
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        .info-content {
+            color: var(--text-primary);
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .project-body {
+            margin-bottom: 40px;
+        }
+
+        .project-section {
+            margin-bottom: 32px;
+        }
+
+        .project-section-title {
+            color: var(--text-accent);
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 16px;
+        }
+
+        .project-section-content {
+            color: var(--text-primary);
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .task-link {
+            color: var(--primary);
+            text-decoration: none;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .task-link:hover {
+            color: var(--text-primary);
+        }
+
+        .back-btn {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 13px;
+            cursor: pointer;
+            margin-bottom: 24px;
+            padding: 0;
+            font-family: inherit;
+            transition: color 0.2s ease;
+        }
+
+        .back-btn:hover {
+            color: var(--primary);
+        }
+
+        .back-btn::before {
+            content: '← ';
+            margin-right: 4px;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .side-projects {
+                position: static;
+                margin-left: 0;
+                margin-top: 16px;
+                opacity: 1;
+                pointer-events: all;
+            }
+
+            .project-info-grid {
+                grid-template-columns: 1fr;
+                gap: 24px;
+            }
+        }
+
+        /* Status Indicators */
+        .status {
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 2px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status.connected {
+            background: rgba(34, 197, 94, 0.1);
+            color: #22C55E;
+        }
+
+        .status.disconnected {
+            background: rgba(239, 68, 68, 0.1);
+            color: #EF4444;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px 16px;
+            }
+            
+            .today-view {
+                grid-template-columns: 1fr;
+                gap: 32px;
+            }
+
+            .nav {
+                gap: 20px;
+                margin-bottom: 32px;
+            }
+
+            .header {
+                margin-bottom: 40px;
+            }
+        }
+
+        /* Subtle animations */
+        .code-card {
+            opacity: 0;
+            transform: translateY(10px);
+            animation: fadeInUp 0.4s ease forwards;
+        }
+
+        .code-card:nth-child(2) { animation-delay: 0.1s; }
+        .code-card:nth-child(3) { animation-delay: 0.2s; }
+        .code-card:nth-child(4) { animation-delay: 0.3s; }
+
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body class="theme-purple">
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="theme-toggle">
+                <button class="theme-btn purple active" onclick="setTheme('purple')"></button>
+                <button class="theme-btn red" onclick="setTheme('red')"></button>
+            </div>
+        </header>
+
+        <!-- Navigation -->
+        <nav class="nav">
+            <button class="nav-btn active" onclick="showView('today')">today</button>
+            <button class="nav-btn" onclick="showView('projects')">projects</button>
+            <button class="nav-btn" onclick="showView('goals')">goals</button>
+            <button class="nav-btn" onclick="showView('insights')">insights</button>
+        </nav>
+
+        <!-- Today View -->
+        <div id="today-view" class="today-view">
+            <div class="main-content">
+                <!-- Top 3 Tasks -->
+                <div class="code-card">
+                    <div class="section-header">top3</div>
+                    <ul class="task-list">
+                        <li class="task-item">
+                            <span class="task-number">1.</span>
+                            <span class="task-title">sell bidu</span>
+                        </li>
+                        <li class="task-item">
+                            <span class="task-number">2.</span>
+                            <span class="task-title">review quarterly plan</span>
+                        </li>
+                        <li class="task-item">
+                            <span class="task-number">3.</span>
+                            <span class="task-title">call mom</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- AI Input -->
+                <div class="code-card">
+                    <div class="section-header">process</div>
+                    <div class="ai-input-container">
+                        <div class="ai-prompt">tell me what's on your mind</div>
+                        <textarea 
+                            class="ai-textarea" 
+                            placeholder="need to prep for client meeting, also buy groceries..."
+                            id="aiNote"
+                        ></textarea>
+                        <button class="ai-send-btn" onclick="processAINote()">run</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sidebar">
+                <!-- Time-bound Events -->
+                <div class="code-card">
+                    <div class="section-header">timebound</div>
+                    <ul class="time-list">
+                        <li class="time-item">
+                            <span class="time">1:00 PM</span>
+                            <span class="time-separator">-</span>
+                            <span class="event-title">meeting with neil</span>
+                        </li>
+                        <li class="time-item">
+                            <span class="time">2:00 PM</span>
+                            <span class="time-separator">-</span>
+                            <span class="event-title">party</span>
+                        </li>
+                        <li class="time-item">
+                            <span class="time">6:00 PM</span>
+                            <span class="time-separator">-</span>
+                            <span class="event-title">gym session</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- On My Mind -->
+                <button class="mind-btn" onclick="showMindPage()">
+                    on my mind
+                </button>
+            </div>
+        </div>
+
+        <!-- Project View -->
+        <div id="project-view" class="project-view">
+            <!-- Project Landing Page -->
+            <div id="project-landing" class="project-landing">
+                <div class="code-card boxed">
+                    <div class="section-header">active projects</div>
+                    
+                    <!-- Main Project 1 -->
+                    <div class="main-project" onclick="openProject('website-redesign')">
+                        <div class="main-project-title">website redesign</div>
+                        <div class="main-project-desc">3/5 tasks completed • Due next week</div>
+                        <div class="progress-bar-container">
+                            <div class="progress-bar" style="width: 60%"></div>
+                        </div>
+                        
+                        <!-- Side projects appear on hover -->
+                        <div class="side-projects">
+                            <div class="side-project-item" onclick="event.stopPropagation(); openProject('frontend-redesign')">
+                                frontend redesign
+                            </div>
+                            <div class="side-project-item" onclick="event.stopPropagation(); openProject('backend-api')">
+                                backend api
+                            </div>
+                            <div class="side-project-item" onclick="event.stopPropagation(); openProject('database-migration')">
+                                database migration
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Main Project 2 -->
+                    <div class="main-project" onclick="openProject('health-goals')">
+                        <div class="main-project-title">health goals</div>
+                        <div class="main-project-desc">1/3 tasks completed • Ongoing</div>
+                        <div class="progress-bar-container">
+                            <div class="progress-bar" style="width: 33%"></div>
+                        </div>
+                        
+                        <div class="side-projects">
+                            <div class="side-project-item" onclick="event.stopPropagation(); openProject('gym-routine')">
+                                gym routine
+                            </div>
+                            <div class="side-project-item" onclick="event.stopPropagation(); openProject('nutrition-plan')">
+                                nutrition plan
+                            </div>
+                            <div class="side-project-item" onclick="event.stopPropagation(); openProject('sleep-schedule')">
+                                sleep schedule
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Main Project 3 -->
+                    <div class="main-project" onclick="openProject('learn-react')">
+                        <div class="main-project-title">learn react</div>
+                        <div class="main-project-desc">2/8 tasks completed • 2 months left</div>
+                        <div class="progress-bar-container">
+                            <div class="progress-bar" style="width: 25%"></div>
+                        </div>
+                        
+                        <div class="side-projects">
+                            <div class="side-project-item" onclick="event.stopPropagation(); openProject('react-basics')">
+                                react basics
+                            </div>
+                            <div class="side-project-item" onclick="event.stopPropagation(); openProject('state-management')">
+                                state management
+                            </div>
+                            <div class="side-project-item" onclick="event.stopPropagation(); openProject('react-router')">
+                                react router
+                            </div>
+                            <div class="side-project-item" onclick="event.stopPropagation(); openProject('testing-react')">
+                                testing react
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Main Project 4 -->
+                    <div class="main-project" onclick="openProject('personal-finance')">
+                        <div class="main-project-title">personal finance</div>
+                        <div class="main-project-desc">5/7 tasks completed • On track</div>
+                        <div class="progress-bar-container">
+                            <div class="progress-bar" style="width: 71%"></div>
+                        </div>
+                        
+                        <div class="side-projects">
+                            <div class="side-project-item" onclick="event.stopPropagation(); openProject('budget-tracking')">
+                                budget tracking
+                            </div>
+                            <div class="side-project-item" onclick="event.stopPropagation(); openProject('investment-portfolio')">
+                                investment portfolio
+                            </div>
+                            <div class="side-project-item" onclick="event.stopPropagation(); openProject('emergency-fund')">
+                                emergency fund
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Main Project 5 -->
+                    <div class="main-project" onclick="openProject('side-business')">
+                        <div class="main-project-title">side business</div>
+                        <div class="main-project-desc">0/12 tasks completed • Just started</div>
+                        <div class="progress-bar-container">
+                            <div class="progress-bar" style="width: 5%"></div>
+                        </div>
+                        
+                        <div class="side-projects">
+                            <div class="side-project-item" onclick="event.stopPropagation(); openProject('market-research')">
+                                market research
+                            </div>
+                            <div class="side-project-item" onclick="event.stopPropagation(); openProject('business-plan')">
+                                business plan
+                            </div>
+                            <div class="side-project-item" onclick="event.stopPropagation(); openProject('mvp-development')">
+                                mvp development
+                            </div>
+                            <div class="side-project-item" onclick="event.stopPropagation(); openProject('legal-setup')">
+                                legal setup
+                            </div>
+                            <div class="side-project-item" onclick="event.stopPropagation(); openProject('branding')">
+                                branding
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Main Project 6 -->
+                    <div class="main-project" onclick="openProject('home-improvement')">
+                        <div class="main-project-title">home improvement</div>
+                        <div class="main-project-desc">3/6 tasks completed • Summer project</div>
+                        <div class="progress-bar-container">
+                            <div class="progress-bar" style="width: 50%"></div>
+                        </div>
+                        
+                        <div class="side-projects">
+                            <div class="side-project-item" onclick="event.stopPropagation(); openProject('kitchen-renovation')">
+                                kitchen renovation
+                            </div>
+                            <div class="side-project-item" onclick="event.stopPropagation(); openProject('backyard-landscaping')">
+                                backyard landscaping
+                            </div>
+                            <div class="side-project-item" onclick="event.stopPropagation(); openProject('smart-home-setup')">
+                                smart home setup
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Individual Project Detail Page -->
+            <div id="project-detail" class="project-detail">
+                <button class="back-btn" onclick="backToProjects()">back to projects</button>
+                
+                <div class="project-header-section">
+                    <div id="project-detail-title" class="project-detail-title">frontend redesign</div>
+                    
+                    <div class="project-info-grid">
+                        <div class="info-section">
+                            <div class="info-label">most recent</div>
+                            <div class="info-content" id="most-recent">
+                                completed wireframes for homepage and about page
+                            </div>
+                        </div>
+                        
+                        <div class="info-section">
+                            <div class="info-label">next step</div>
+                            <div class="info-content" id="next-step">
+                                start development of new landing page
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="project-body">
+                    <div class="project-section">
+                        <div class="project-section-title">tasks</div>
+                        <div class="project-section-content">
+                            <div class="task-link" onclick="goToTasks()">view all tasks for this project →</div>
+                        </div>
+                    </div>
+
+                    <div class="project-section">
+                        <div class="project-section-title">details</div>
+                        <div class="project-section-content" id="project-details">
+                            Redesigning the company website to improve user experience and conversion rates. 
+                            Focus on modern design principles, faster load times, and mobile responsiveness.
+                            
+                            <br><br>
+                            
+                            Key goals:
+                            <br>• Reduce bounce rate by 30%
+                            <br>• Improve page load speed to under 2s  
+                            <br>• Implement responsive design for all devices
+                            <br>• Update brand visual identity
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = "https://khizr-assistant-api.onrender.com";
+        // Theme switching
+        function setTheme(theme) {
+            document.body.className = `theme-${theme}`;
+            
+            // Update active theme button
+            document.querySelectorAll('.theme-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.querySelector(`.theme-btn.${theme}`).classList.add('active');
+            
+            localStorage.setItem('theme', theme);
+        }
+
+        // Load saved theme
+        const savedTheme = localStorage.getItem('theme') || 'purple';
+        setTheme(savedTheme);
+
+        // View switching
+        function showView(viewName) {
+            // Hide all views
+            document.querySelectorAll('[id$="-view"]').forEach(view => {
+                view.style.display = 'none';
+                view.classList.remove('active');
+            });
+
+            // Show selected view
+            if (viewName === 'today') {
+                document.getElementById('today-view').style.display = 'grid';
+            } else if (viewName === 'projects') {
+                document.getElementById('project-view').style.display = 'block';
+                document.getElementById('project-view').classList.add('active');
+                // Make sure we show the landing page, not detail page
+                document.getElementById('project-landing').classList.remove('hidden');
+                document.getElementById('project-detail').classList.remove('active');
+            } else {
+                const viewElement = document.getElementById(`${viewName}-view`);
+                if (viewElement) {
+                    viewElement.style.display = 'block';
+                    viewElement.classList.add('active');
+                }
+            }
+
+            // Update nav buttons
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Find the clicked nav button and make it active
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                if (btn.textContent.toLowerCase() === viewName.toLowerCase()) {
+                    btn.classList.add('active');
+                }
+            });
+        }
+
+        // AI Note processing
+        function processAINote() {
+            const note = document.getElementById('aiNote').value;
+            if (!note.trim()) return;
+
+            console.log('Processing note:', note);
+            
+            const btn = document.querySelector('.ai-send-btn');
+            const originalText = btn.textContent;
+            btn.textContent = 'processing...';
+            btn.disabled = true;
+
+            setTimeout(() => {
+                btn.textContent = 'done';
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                    btn.disabled = false;
+                    document.getElementById('aiNote').value = '';
+                }, 1000);
+            }, 1500);
+        }
+
+        // On My Mind page
+        function showMindPage() {
+            console.log('Opening mind page...');
+        }
+
+        // Project navigation
+        function openProject(projectId) {
+            // Hide landing page
+            document.getElementById('project-landing').classList.add('hidden');
+            
+            // Show detail page
+            document.getElementById('project-detail').classList.add('active');
+            
+            // Update content based on project
+            updateProjectDetail(projectId);
+        }
+
+        function backToProjects() {
+            // Hide detail page
+            document.getElementById('project-detail').classList.remove('active');
+            
+            // Show landing page
+            document.getElementById('project-landing').classList.remove('hidden');
+        }
+
+        function updateProjectDetail(projectId) {
+            const projects = {
+                // Website Redesign Projects
+                'website-redesign': {
+                    title: 'website redesign',
+                    mostRecent: 'completed wireframes for homepage and about page',
+                    nextStep: 'start development of new landing page',
+                    details: 'Redesigning the company website to improve user experience and conversion rates. Focus on modern design principles, faster load times, and mobile responsiveness.\n\nKey goals:\n• Reduce bounce rate by 30%\n• Improve page load speed to under 2s\n• Implement responsive design for all devices\n• Update brand visual identity'
+                },
+                'frontend-redesign': {
+                    title: 'frontend redesign',
+                    mostRecent: 'completed wireframes for homepage and about page',
+                    nextStep: 'start development of new landing page',
+                    details: 'Frontend component of the website redesign. Focus on React components, responsive design, and performance optimization.\n\nScope:\n• Homepage redesign\n• Product pages\n• Contact forms\n• Mobile optimization'
+                },
+                'backend-api': {
+                    title: 'backend api',
+                    mostRecent: 'set up express server and database connection',
+                    nextStep: 'implement user authentication endpoints',
+                    details: 'Building the backend API to support the new website. Includes user management, content management, and analytics tracking.\n\nFeatures:\n• REST API endpoints\n• User authentication\n• Database integration\n• Analytics tracking'
+                },
+                'database-migration': {
+                    title: 'database migration',
+                    mostRecent: 'exported current database schema',
+                    nextStep: 'create migration scripts for new structure',
+                    details: 'Migrating from old database structure to new optimized schema. Focus on data integrity and minimal downtime.\n\nTasks:\n• Schema optimization\n• Data migration scripts\n• Backup procedures\n• Testing protocols'
+                },
+
+                // Health Goals Projects
+                'health-goals': {
+                    title: 'health goals',
+                    mostRecent: 'completed week 1 of gym routine',
+                    nextStep: 'meal prep for next week',
+                    details: 'Personal health and fitness goals for 2024. Focus on consistent exercise, better nutrition, and improved sleep schedule.\n\nTargets:\n• Exercise 4x per week\n• Lose 15 pounds\n• Improve sleep quality\n• Meal prep consistently'
+                },
+                'gym-routine': {
+                    title: 'gym routine',
+                    mostRecent: 'completed week 1 of gym routine',
+                    nextStep: 'increase weights for next session',
+                    details: '3x per week strength training program. Focus on compound movements and progressive overload.\n\nSchedule:\n• Monday: Upper body\n• Wednesday: Lower body\n• Friday: Full body\n• Track progress weekly'
+                },
+                'nutrition-plan': {
+                    title: 'nutrition plan',
+                    mostRecent: 'calculated daily calorie targets',
+                    nextStep: 'meal prep for next week',
+                    details: 'Structured nutrition plan to support fitness goals. Focus on whole foods, adequate protein, and meal timing.\n\nPlan:\n• 2000 calories daily\n• 150g protein target\n• Meal prep Sundays\n• Track macros'
+                },
+                'sleep-schedule': {
+                    title: 'sleep schedule',
+                    mostRecent: 'established bedtime routine',
+                    nextStep: 'track sleep quality for one week',
+                    details: 'Improving sleep quality and consistency. Target 7-8 hours per night with consistent schedule.\n\nRoutine:\n• 10:30 PM bedtime\n• 6:30 AM wake up\n• No screens 1hr before bed\n• Sleep tracking'
+                },
+
+                // Learn React Projects
+                'learn-react': {
+                    title: 'learn react',
+                    mostRecent: 'completed react fundamentals course',
+                    nextStep: 'build first practice project',
+                    details: 'Learning React development to advance frontend skills. Includes hooks, state management, and modern best practices.\n\nCurriculum:\n• React fundamentals\n• Hooks and state\n• Component patterns\n• Testing strategies'
+                },
+                'react-basics': {
+                    title: 'react basics',
+                    mostRecent: 'completed react fundamentals course',
+                    nextStep: 'practice with hooks and state',
+                    details: 'Foundational React concepts including components, props, state, and lifecycle methods.\n\nTopics covered:\n• JSX syntax\n• Component structure\n• Props and state\n• Event handling'
+                },
+                'state-management': {
+                    title: 'state management',
+                    mostRecent: 'read about Redux and Context API',
+                    nextStep: 'build project using useContext',
+                    details: 'Learning different approaches to state management in React applications.\n\nApproaches:\n• useState and useReducer\n• Context API\n• Redux Toolkit\n• Zustand'
+                },
+                'react-router': {
+                    title: 'react router',
+                    mostRecent: 'watched tutorial videos',
+                    nextStep: 'implement routing in practice project',
+                    details: 'Learning client-side routing in React applications using React Router.\n\nConcepts:\n• Route configuration\n• Navigation\n• URL parameters\n• Nested routing'
+                },
+                'testing-react': {
+                    title: 'testing react',
+                    mostRecent: 'set up testing environment',
+                    nextStep: 'write first component tests',
+                    details: 'Learning to test React components and applications effectively.\n\nTools:\n• Jest framework\n• React Testing Library\n• Component testing\n• Integration testing'
+                },
+
+                // Personal Finance Projects
+                'personal-finance': {
+                    title: 'personal finance',
+                    mostRecent: 'reviewed investment portfolio performance',
+                    nextStep: 'set up automatic savings transfers',
+                    details: 'Managing and optimizing personal finances. Focus on budgeting, investing, and building wealth.\n\nGoals:\n• Emergency fund: 6 months expenses\n• Investment: 20% of income\n• Budget tracking\n• Debt reduction'
+                },
+                'budget-tracking': {
+                    title: 'budget tracking',
+                    mostRecent: 'set up budget categories in app',
+                    nextStep: 'review monthly spending patterns',
+                    details: 'Tracking monthly income and expenses to optimize spending habits.\n\nCategories:\n• Fixed expenses\n• Variable expenses\n• Savings goals\n• Investment contributions'
+                },
+                'investment-portfolio': {
+                    title: 'investment portfolio',
+                    mostRecent: 'reviewed portfolio allocation',
+                    nextStep: 'rebalance asset allocation',
+                    details: 'Building and managing investment portfolio for long-term wealth building.\n\nStrategy:\n• 70% stocks, 30% bonds\n• Diversified index funds\n• Regular contributions\n• Quarterly reviews'
+                },
+                'emergency-fund': {
+                    title: 'emergency fund',
+                    mostRecent: 'opened high-yield savings account',
+                    nextStep: 'set up automatic monthly transfers',
+                    details: 'Building emergency fund to cover 6 months of expenses.\n\nTarget: $15,000\n\nProgress:\n• Current: $8,500\n• Monthly contribution: $500\n• Estimated completion: 13 months'
+                },
+
+                // Side Business Projects
+                'side-business': {
+                    title: 'side business',
+                    mostRecent: 'brainstormed business ideas',
+                    nextStep: 'conduct market research on top 3 ideas',
+                    details: 'Starting a side business to generate additional income. Focus on scalable, location-independent opportunities.\n\nIdeas being considered:\n• SaaS product\n• Consulting services\n• Digital products\n• E-commerce'
+                },
+                'market-research': {
+                    title: 'market research',
+                    mostRecent: 'identified target market segments',
+                    nextStep: 'survey potential customers',
+                    details: 'Researching market opportunities and validating business ideas.\n\nResearch areas:\n• Market size analysis\n• Competitor analysis\n• Customer pain points\n• Pricing strategies'
+                },
+                'business-plan': {
+                    title: 'business plan',
+                    mostRecent: 'outlined business model canvas',
+                    nextStep: 'write executive summary',
+                    details: 'Creating comprehensive business plan for potential investors and personal clarity.\n\nSections:\n• Executive summary\n• Market analysis\n• Financial projections\n• Marketing strategy'
+                },
+                'mvp-development': {
+                    title: 'mvp development',
+                    mostRecent: 'defined core features for MVP',
+                    nextStep: 'create wireframes and user flow',
+                    details: 'Building minimum viable product to test market assumptions.\n\nMVP scope:\n• Core feature set\n• Simple UI/UX\n• Basic analytics\n• User feedback system'
+                },
+                'legal-setup': {
+                    title: 'legal setup',
+                    mostRecent: 'researched business entity types',
+                    nextStep: 'consult with business attorney',
+                    details: 'Setting up proper legal structure for the business.\n\nConsiderations:\n• Business entity type (LLC vs Corp)\n• Tax implications\n• Liability protection\n• Licensing requirements'
+                },
+                'branding': {
+                    title: 'branding',
+                    mostRecent: 'collected visual inspiration',
+                    nextStep: 'design logo concepts',
+                    details: 'Developing brand identity and marketing materials.\n\nBrand elements:\n• Logo design\n• Color palette\n• Typography\n• Brand voice and messaging'
+                },
+
+                // Home Improvement Projects
+                'home-improvement': {
+                    title: 'home improvement',
+                    mostRecent: 'got quotes from contractors',
+                    nextStep: 'select contractor for kitchen renovation',
+                    details: 'Summer home improvement projects to increase property value and livability.\n\nPlanned improvements:\n• Kitchen renovation\n• Backyard landscaping\n• Smart home upgrades\n• Energy efficiency improvements'
+                },
+                'kitchen-renovation': {
+                    title: 'kitchen renovation',
+                    mostRecent: 'finalized cabinet and countertop selections',
+                    nextStep: 'schedule contractor start date',
+                    details: 'Complete kitchen remodel including cabinets, countertops, appliances, and flooring.\n\nScope:\n• New cabinets and hardware\n• Quartz countertops\n• Stainless steel appliances\n• Luxury vinyl flooring'
+                },
+                'backyard-landscaping': {
+                    title: 'backyard landscaping',
+                    mostRecent: 'designed landscape layout',
+                    nextStep: 'order plants and materials',
+                    details: 'Transforming backyard into functional outdoor living space.\n\nPlans:\n• Patio installation\n• Garden beds\n• Irrigation system\n• Outdoor lighting'
+                },
+                'smart-home-setup': {
+                    title: 'smart home setup',
+                    mostRecent: 'installed smart thermostat',
+                    nextStep: 'set up smart lighting system',
+                    details: 'Upgrading home with smart technology for convenience and energy savings.\n\nDevices:\n• Smart thermostat\n• Smart lighting\n• Security cameras\n• Smart locks'
+                }
+            };
+
+            const project = projects[projectId];
+            if (project) {
+                document.getElementById('project-detail-title').textContent = project.title;
+                document.getElementById('most-recent').textContent = project.mostRecent;
+                document.getElementById('next-step').textContent = project.nextStep;
+                document.getElementById('project-details').innerHTML = project.details.replace(/\n/g, '<br>');
+            }
+        }
+
+        function goToTasks() {
+            // Switch to today view and show tasks
+            showView('today');
+            console.log('Showing tasks for this project...');
+        }
+    </script>
+</body>
+</html>
