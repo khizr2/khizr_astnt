@@ -95,6 +95,23 @@
             opacity: 1;
         }
 
+        .logout-btn {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 16px;
+            padding: 4px;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+            margin-left: 16px;
+        }
+
+        .logout-btn:hover {
+            color: var(--primary);
+            background: rgba(139, 92, 246, 0.1);
+        }
+
         /* Navigation - Code-like */
         .nav {
             display: flex;
@@ -957,6 +974,7 @@
                 <button class="theme-btn purple active" onclick="setTheme('purple')"></button>
                 <button class="theme-btn red" onclick="setTheme('red')"></button>
             </div>
+            <button class="logout-btn" onclick="logout()" title="Logout">🚪</button>
         </header>
 
         <!-- Navigation -->
@@ -1335,6 +1353,36 @@
     </div>
 
     <script type="module">
+/* ========= Authentication Check ========= */
+// Check if user is authenticated before loading the app
+function checkAuthentication() {
+    const gateAuth = localStorage.getItem('khizr_assistant_gate');
+    if (!gateAuth) {
+        window.location.href = 'index.html';
+        return false;
+    }
+    
+    try {
+        const authData = JSON.parse(gateAuth);
+        if (!authData.authenticated || Date.now() > authData.expires) {
+            localStorage.removeItem('khizr_assistant_gate');
+            window.location.href = 'index.html';
+            return false;
+        }
+        return true;
+    } catch (error) {
+        localStorage.removeItem('khizr_assistant_gate');
+        window.location.href = 'index.html';
+        return false;
+    }
+}
+
+// Redirect to login if not authenticated
+if (!checkAuthentication()) {
+    // Stop execution if not authenticated
+    throw new Error('Authentication required');
+}
+
 /* ========= Supabase Auth: init + token sync ========= */
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
@@ -1467,27 +1515,6 @@ function showMindPage() {
 
     // Update nav buttons
     document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
-}
-
-function saveMindNote() {
-    const input = document.getElementById('mindInput');
-    const content = input.value.trim();
-    
-    if (!content) return;
-    
-    console.log('Saving mind note:', content);
-    // TODO: Implement with backend
-    
-    // Clear input
-    input.value = '';
-    
-    // Show success feedback
-    const btn = document.querySelector('.mind-save-btn');
-    const originalText = btn.textContent;
-    btn.textContent = 'saved!';
-    setTimeout(() => {
-        btn.textContent = originalText;
-    }, 1000);
 }
 
 // Project navigation
@@ -2056,6 +2083,16 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 });
+
+// Logout function
+function logout() {
+    // Clear authentication
+    localStorage.removeItem('khizr_assistant_gate');
+    localStorage.removeItem('khizr_assistant_auth');
+    
+    // Redirect to login page
+    window.location.href = 'index.html';
+}
 
 </script>
 </body>
