@@ -1,7 +1,7 @@
 // routes/ingest.js
 const express = require('express');
 const router = express.Router();
-const pool = require('../database/pool'); // your existing pg pool
+const pool = require('../database/connection'); // your existing pg pool
 
 // allowed categories
 const CATS = new Set(['task','idea','topic','health','life','home','spirituality']);
