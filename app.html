@@ -346,6 +346,150 @@
             display: block;
         }
 
+        /* Project Items */
+        .project-item {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 16px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .project-item:hover {
+            border-color: var(--primary);
+            background: rgba(139, 92, 246, 0.04);
+        }
+
+        .project-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        .project-desc {
+            color: var(--text-secondary);
+            font-size: 12px;
+        }
+
+        /* Mind Textarea */
+        .mind-textarea {
+            width: 100%;
+            min-height: 120px;
+            background: transparent;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 16px;
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 13px;
+            resize: vertical;
+            transition: border-color 0.2s ease;
+        }
+
+        .mind-textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .mind-textarea::placeholder {
+            color: var(--text-secondary);
+            font-style: italic;
+        }
+
+        .mind-save-btn {
+            background: var(--primary);
+            border: none;
+            border-radius: 4px;
+            padding: 8px 16px;
+            color: white;
+            cursor: pointer;
+            font-size: 12px;
+            font-family: inherit;
+            font-weight: 500;
+            margin-top: 12px;
+            transition: all 0.2s ease;
+        }
+
+        .mind-save-btn:hover {
+            opacity: 0.9;
+        }
+
+        /* Big Page Input */
+        .big-page-input {
+            width: 100%;
+            min-height: 200px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 20px;
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 13px;
+            resize: vertical;
+            transition: border-color 0.2s ease;
+        }
+
+        .big-page-input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .big-page-input::placeholder {
+            color: var(--text-secondary);
+            font-style: italic;
+        }
+
+        .process-btn {
+            background: var(--primary);
+            border: none;
+            border-radius: 4px;
+            padding: 8px 16px;
+            color: white;
+            cursor: pointer;
+            font-size: 12px;
+            font-family: inherit;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .process-btn:hover {
+            opacity: 0.9;
+        }
+
+        .process-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .processing-status {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 16px;
+        }
+
+        /* Email Controls */
+        .gmail-connect-btn, .refresh-emails-btn {
+            background: var(--primary);
+            border: none;
+            border-radius: 4px;
+            padding: 8px 16px;
+            color: white;
+            cursor: pointer;
+            font-size: 12px;
+            font-family: inherit;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            margin-right: 8px;
+        }
+
+        .gmail-connect-btn:hover, .refresh-emails-btn:hover {
+            opacity: 0.9;
+        }
+
         /* Responsive */
         @media (max-width: 768px) {
             .container {
@@ -478,28 +622,66 @@
         <div id="project-view" class="project-view">
             <div class="code-card boxed">
                 <div class="section-header">projects</div>
-                <p>Project management coming soon...</p>
+                <div class="project-list">
+                    <div class="project-item" onclick="openProject('website-redesign')">
+                        <div class="project-title">website redesign</div>
+                        <div class="project-desc">3/5 tasks completed • Due next week</div>
+                    </div>
+                    <div class="project-item" onclick="openProject('health-goals')">
+                        <div class="project-title">health goals</div>
+                        <div class="project-desc">1/3 tasks completed • Ongoing</div>
+                    </div>
+                    <div class="project-item" onclick="openProject('learn-react')">
+                        <div class="project-title">learn react</div>
+                        <div class="project-desc">2/8 tasks completed • 2 months left</div>
+                    </div>
+                </div>
             </div>
         </div>
 
         <div id="mind-view" class="mind-view">
             <div class="code-card boxed">
                 <div class="section-header">on my mind</div>
-                <p>Mind notes coming soon...</p>
+                <textarea 
+                    id="mindInput" 
+                    class="mind-textarea" 
+                    placeholder="Share your thoughts, ideas, concerns..."
+                ></textarea>
+                <button class="mind-save-btn" onclick="saveMindNote()">save thought</button>
             </div>
         </div>
 
         <div id="bigpage-view" class="bigpage-view">
             <div class="code-card boxed">
                 <div class="section-header">big page</div>
-                <p>Big page processing coming soon...</p>
+                <textarea 
+                    id="bigPageInput" 
+                    class="big-page-input" 
+                    placeholder="Dump your thoughts here..."
+                ></textarea>
+                <div class="big-page-controls" style="margin-top:12px; display:flex; gap:8px; justify-content:flex-end">
+                    <button id="processBigPage" class="process-btn" onclick="processBigPage()">process & organize</button>
+                </div>
+                <div id="processingStatus" class="processing-status" style="display:none; margin-top:12px">
+                    <div id="statusMessage"></div>
+                </div>
             </div>
         </div>
 
         <div id="emails-view" class="emails-view">
             <div class="code-card boxed">
                 <div class="section-header">emails</div>
-                <p>Email integration coming soon...</p>
+                <div class="emails-controls" style="margin-bottom: 20px;">
+                    <button class="gmail-connect-btn" id="gmailConnectBtn" onclick="connectGmail()" style="display:none">
+                        Connect Gmail
+                    </button>
+                    <button class="refresh-emails-btn" onclick="refreshEmails()">
+                        Refresh
+                    </button>
+                </div>
+                <div class="emails-list" id="emailsList">
+                    <p>Email integration coming soon...</p>
+                </div>
             </div>
         </div>
     </div>
@@ -582,6 +764,79 @@
 
         function deleteTask(taskId) {
             console.log('Deleting task:', taskId);
+        }
+
+        // Project management
+        function openProject(projectId) {
+            console.log('Opening project:', projectId);
+            // TODO: Implement project detail view
+        }
+
+        // Mind notes
+        function saveMindNote() {
+            const input = document.getElementById('mindInput');
+            const content = input.value.trim();
+            
+            if (!content) return;
+            
+            console.log('Saving mind note:', content);
+            
+            // Show success feedback
+            const btn = document.querySelector('.mind-save-btn');
+            const originalText = btn.textContent;
+            btn.textContent = 'saved!';
+            setTimeout(() => {
+                btn.textContent = originalText;
+                input.value = '';
+            }, 1000);
+        }
+
+        // Big page processing
+        function processBigPage() {
+            const input = document.getElementById('bigPageInput');
+            const content = input.value.trim();
+            
+            if (!content) return;
+
+            const processBtn = document.getElementById('processBigPage');
+            const processingStatus = document.getElementById('processingStatus');
+            const statusMessage = document.getElementById('statusMessage');
+
+            // Show processing status
+            processingStatus.style.display = 'block';
+            statusMessage.textContent = 'Processing your thoughts...';
+            processBtn.disabled = true;
+
+            // Simulate processing
+            setTimeout(() => {
+                statusMessage.textContent = 'Organizing into categories...';
+                
+                setTimeout(() => {
+                    statusMessage.textContent = 'Creating structured entries...';
+                    
+                    setTimeout(() => {
+                        statusMessage.textContent = 'Done! Your thoughts have been organized.';
+                        
+                        // Re-enable button after a delay
+                        setTimeout(() => {
+                            processBtn.disabled = false;
+                            input.value = '';
+                            processingStatus.style.display = 'none';
+                        }, 2000);
+                    }, 1000);
+                }, 1000);
+            }, 1000);
+        }
+
+        // Email functionality
+        function connectGmail() {
+            console.log('Connecting to Gmail...');
+            // TODO: Implement Gmail OAuth
+        }
+
+        function refreshEmails() {
+            console.log('Refreshing emails...');
+            // TODO: Implement email refresh
         }
 
         // Initialize
