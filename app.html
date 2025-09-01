@@ -947,6 +947,335 @@
             }
         }
 
+        /* Header Actions */
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .notification-btn {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 16px;
+            padding: 4px;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .notification-btn:hover {
+            color: var(--primary);
+            background: rgba(139, 92, 246, 0.1);
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            background: var(--secondary);
+            color: white;
+            border-radius: 50%;
+            width: 16px;
+            height: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: 600;
+        }
+
+        /* Notification Popup */
+        .notification-popup {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            width: 400px;
+            max-height: 500px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+            overflow: hidden;
+        }
+
+        .notification-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px;
+            border-bottom: 1px solid var(--border);
+            background: var(--bg-card);
+        }
+
+        .notification-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .notification-close {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 18px;
+            padding: 0;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+        }
+
+        .notification-close:hover {
+            color: var(--primary);
+            background: rgba(139, 92, 246, 0.1);
+        }
+
+        .notification-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .notification-item {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .notification-item:hover {
+            background: rgba(139, 92, 246, 0.05);
+        }
+
+        .notification-item:last-child {
+            border-bottom: none;
+        }
+
+        .notification-item-title {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        .notification-item-message {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+
+        .notification-item-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .notification-action-btn {
+            background: none;
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 11px;
+            padding: 4px 8px;
+            border-radius: 3px;
+            transition: all 0.2s ease;
+        }
+
+        .notification-action-btn.approve {
+            border-color: #22C55E;
+            color: #22C55E;
+        }
+
+        .notification-action-btn.approve:hover {
+            background: #22C55E;
+            color: white;
+        }
+
+        .notification-action-btn.deny {
+            border-color: #EF4444;
+            color: #EF4444;
+        }
+
+        .notification-action-btn.deny:hover {
+            background: #EF4444;
+            color: white;
+        }
+
+        /* Email View */
+        .emails-view {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .emails-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .emails-controls {
+            display: flex;
+            gap: 12px;
+        }
+
+        .gmail-connect-btn, .refresh-emails-btn {
+            background: var(--primary);
+            border: none;
+            border-radius: 4px;
+            padding: 8px 16px;
+            color: white;
+            cursor: pointer;
+            font-size: 12px;
+            font-family: inherit;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .gmail-connect-btn:hover, .refresh-emails-btn:hover {
+            opacity: 0.9;
+        }
+
+        .emails-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+
+        .email-stat {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 16px;
+            text-align: center;
+        }
+
+        .email-stat-number {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 4px;
+        }
+
+        .email-stat-label {
+            font-size: 12px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .emails-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .email-item {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 16px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .email-item:hover {
+            border-color: var(--primary);
+            box-shadow: 0 2px 8px rgba(139, 92, 246, 0.1);
+        }
+
+        .email-item.unread {
+            border-left: 3px solid var(--primary);
+        }
+
+        .email-item.important {
+            border-left: 3px solid var(--secondary);
+        }
+
+        .email-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 8px;
+        }
+
+        .email-sender {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .email-date {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .email-subject {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: 6px;
+        }
+
+        .email-snippet {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            line-height: 1.4;
+        }
+
+        .email-summary {
+            font-size: 12px;
+            color: var(--text-accent);
+            background: rgba(139, 92, 246, 0.1);
+            padding: 8px;
+            border-radius: 4px;
+            margin-bottom: 8px;
+        }
+
+        .email-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .email-action-btn {
+            background: none;
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 11px;
+            padding: 4px 8px;
+            border-radius: 3px;
+            transition: all 0.2s ease;
+        }
+
+        .email-action-btn:hover {
+            color: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .email-priority {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+
+        .email-priority.priority-1 { background: #EF4444; }
+        .email-priority.priority-2 { background: #F97316; }
+        .email-priority.priority-3 { background: #EAB308; }
+        .email-priority.priority-4 { background: #22C55E; }
+        .email-priority.priority-5 { background: #6B7280; }
+
         /* Subtle animations */
         .code-card {
             opacity: 0;
@@ -974,8 +1303,27 @@
                 <button class="theme-btn purple active" onclick="setTheme('purple')"></button>
                 <button class="theme-btn red" onclick="setTheme('red')"></button>
             </div>
-            <button class="logout-btn" onclick="logout()" title="Logout">🚪</button>
+            <div class="header-actions">
+                <button class="notification-btn" onclick="toggleNotificationPopup()" title="Notifications">
+                    🔔
+                    <div class="notification-badge" id="notificationBadge" style="display:none">
+                        <span class="notification-count" id="notificationCount">0</span>
+                    </div>
+                </button>
+                <button class="logout-btn" onclick="logout()" title="Logout">🚪</button>
+            </div>
         </header>
+
+        <!-- Notification Popup -->
+        <div class="notification-popup" id="notificationPopup" style="display:none">
+            <div class="notification-header">
+                <span class="notification-title">Notifications</span>
+                <button class="notification-close" onclick="closeNotificationPopup()">×</button>
+            </div>
+            <div class="notification-list" id="notificationList">
+                <!-- Notifications will be populated here -->
+            </div>
+        </div>
 
         <!-- Navigation -->
         <nav class="nav">
@@ -984,6 +1332,7 @@
             <button class="nav-btn" onclick="showView('goals')">goals</button>
             <button class="nav-btn" onclick="showView('insights')">insights</button>
             <button class="nav-btn" onclick="showView('bigpage')">big page</button>
+            <button class="nav-btn" onclick="showView('emails')">emails</button>
         </nav>
 
         <!-- Today View -->
@@ -1334,6 +1683,29 @@
             <div class="section-header">recent entries</div>
             <div id="recentEntries">Loading recent entries...</div>
           </div>
+        </div>
+
+        <!-- Email View -->
+        <div id="emails-view" class="emails-view" style="display:none">
+            <div class="emails-header">
+                <div class="section-header">emails</div>
+                <div class="emails-controls">
+                    <button class="gmail-connect-btn" id="gmailConnectBtn" onclick="connectGmail()" style="display:none">
+                        Connect Gmail
+                    </button>
+                    <button class="refresh-emails-btn" onclick="refreshEmails()">
+                        Refresh
+                    </button>
+                </div>
+            </div>
+
+            <div class="emails-stats" id="emailsStats">
+                <!-- Email statistics will be shown here -->
+            </div>
+
+            <div class="emails-list" id="emailsList">
+                <!-- Emails will be populated here -->
+            </div>
         </div>
     </div>
 
@@ -2054,6 +2426,293 @@ function checkAppAuth() {
 
 // Run auth check on page load
 checkAppAuth();
+
+// Email and Notification Functions
+let gmailConnected = false;
+let notificationCount = 0;
+
+// Check Gmail connection status
+async function checkGmailStatus() {
+    try {
+        const response = await apiCall('/api/gmail/status');
+        gmailConnected = response.connected;
+        
+        const connectBtn = document.getElementById('gmailConnectBtn');
+        if (connectBtn) {
+            connectBtn.style.display = gmailConnected ? 'none' : 'block';
+        }
+        
+        if (gmailConnected) {
+            loadEmails();
+            loadNotifications();
+        }
+    } catch (error) {
+        console.error('Error checking Gmail status:', error);
+    }
+}
+
+// Connect Gmail
+async function connectGmail() {
+    try {
+        const response = await apiCall('/api/gmail/auth');
+        window.open(response.authUrl, '_blank', 'width=500,height=600');
+    } catch (error) {
+        console.error('Error connecting Gmail:', error);
+    }
+}
+
+// Load emails
+async function loadEmails() {
+    try {
+        const emails = await apiCall('/api/gmail/emails?limit=20');
+        renderEmails(emails);
+        
+        const stats = await apiCall('/api/gmail/stats');
+        renderEmailStats(stats);
+    } catch (error) {
+        console.error('Error loading emails:', error);
+    }
+}
+
+// Refresh emails from Gmail
+async function refreshEmails() {
+    try {
+        const emails = await apiCall('/api/gmail/emails?limit=20&refresh=true');
+        renderEmails(emails);
+        
+        const stats = await apiCall('/api/gmail/stats');
+        renderEmailStats(stats);
+    } catch (error) {
+        console.error('Error refreshing emails:', error);
+    }
+}
+
+// Render emails
+function renderEmails(emails) {
+    const emailsList = document.getElementById('emailsList');
+    if (!emailsList) return;
+    
+    emailsList.innerHTML = emails.map(email => `
+        <div class="email-item ${email.status === 'unread' ? 'unread' : ''} ${email.is_important ? 'important' : ''}" onclick="openEmail('${email.id}')">
+            <div class="email-header">
+                <div class="email-sender">
+                    <span class="email-priority priority-${email.priority}"></span>
+                    ${email.sender}
+                </div>
+                <div class="email-date">${formatDate(email.received_at)}</div>
+            </div>
+            <div class="email-subject">${email.subject}</div>
+            <div class="email-snippet">${email.content_snippet}</div>
+            ${email.summary ? `<div class="email-summary">${email.summary}</div>` : ''}
+            <div class="email-actions">
+                <button class="email-action-btn" onclick="event.stopPropagation(); markEmailRead('${email.id}')">
+                    ${email.status === 'unread' ? 'Mark Read' : 'Mark Unread'}
+                </button>
+                <button class="email-action-btn" onclick="event.stopPropagation(); generateResponse('${email.id}')">
+                    Reply
+                </button>
+            </div>
+        </div>
+    `).join('');
+}
+
+// Render email statistics
+function renderEmailStats(stats) {
+    const statsContainer = document.getElementById('emailsStats');
+    if (!statsContainer) return;
+    
+    statsContainer.innerHTML = `
+        <div class="email-stat">
+            <div class="email-stat-number">${stats.total_emails || 0}</div>
+            <div class="email-stat-label">Total</div>
+        </div>
+        <div class="email-stat">
+            <div class="email-stat-number">${stats.unread_count || 0}</div>
+            <div class="email-stat-label">Unread</div>
+        </div>
+        <div class="email-stat">
+            <div class="email-stat-number">${stats.important_count || 0}</div>
+            <div class="email-stat-label">Important</div>
+        </div>
+        <div class="email-stat">
+            <div class="email-stat-number">${stats.urgent_count || 0}</div>
+            <div class="email-stat-label">Urgent</div>
+        </div>
+    `;
+}
+
+// Load notifications
+async function loadNotifications() {
+    try {
+        const notifications = await apiCall('/api/notifications?status=pending');
+        notificationCount = notifications.length;
+        updateNotificationBadge();
+        renderNotifications(notifications);
+    } catch (error) {
+        console.error('Error loading notifications:', error);
+    }
+}
+
+// Update notification badge
+function updateNotificationBadge() {
+    const badge = document.getElementById('notificationBadge');
+    const count = document.getElementById('notificationCount');
+    
+    if (badge && count) {
+        if (notificationCount > 0) {
+            badge.style.display = 'flex';
+            count.textContent = notificationCount > 99 ? '99+' : notificationCount;
+        } else {
+            badge.style.display = 'none';
+        }
+    }
+}
+
+// Render notifications
+function renderNotifications(notifications) {
+    const notificationList = document.getElementById('notificationList');
+    if (!notificationList) return;
+    
+    notificationList.innerHTML = notifications.map(notification => `
+        <div class="notification-item">
+            <div class="notification-item-title">${notification.title}</div>
+            <div class="notification-item-message">${notification.message}</div>
+            <div class="notification-item-actions">
+                <button class="notification-action-btn approve" onclick="approveNotification('${notification.id}')">
+                    Approve
+                </button>
+                <button class="notification-action-btn deny" onclick="denyNotification('${notification.id}')">
+                    Deny
+                </button>
+            </div>
+        </div>
+    `).join('');
+}
+
+// Toggle notification popup
+function toggleNotificationPopup() {
+    const popup = document.getElementById('notificationPopup');
+    if (popup) {
+        popup.style.display = popup.style.display === 'none' ? 'block' : 'none';
+    }
+}
+
+// Close notification popup
+function closeNotificationPopup() {
+    const popup = document.getElementById('notificationPopup');
+    if (popup) {
+        popup.style.display = 'none';
+    }
+}
+
+// Approve notification
+async function approveNotification(notificationId) {
+    try {
+        await apiCall(`/api/notifications/${notificationId}`, {
+            method: 'PUT',
+            body: JSON.stringify({ status: 'approved' })
+        });
+        
+        loadNotifications();
+        closeNotificationPopup();
+    } catch (error) {
+        console.error('Error approving notification:', error);
+    }
+}
+
+// Deny notification
+async function denyNotification(notificationId) {
+    try {
+        await apiCall(`/api/notifications/${notificationId}`, {
+            method: 'PUT',
+            body: JSON.stringify({ status: 'denied' })
+        });
+        
+        loadNotifications();
+        closeNotificationPopup();
+    } catch (error) {
+        console.error('Error denying notification:', error);
+    }
+}
+
+// Open email details
+function openEmail(emailId) {
+    console.log('Opening email:', emailId);
+    // TODO: Implement email detail view
+}
+
+// Mark email as read/unread
+async function markEmailRead(emailId) {
+    try {
+        await apiCall(`/api/gmail/emails/${emailId}`, {
+            method: 'PUT',
+            body: JSON.stringify({ status: 'read' })
+        });
+        
+        loadEmails();
+    } catch (error) {
+        console.error('Error marking email as read:', error);
+    }
+}
+
+// Generate AI response for email
+async function generateResponse(emailId) {
+    try {
+        const response = await apiCall(`/api/gmail/emails/${emailId}/respond`, {
+            method: 'POST',
+            body: JSON.stringify({ context: '' })
+        });
+        
+        // Show response in a modal or new window
+        alert('AI Response:\n\n' + response.response);
+    } catch (error) {
+        console.error('Error generating response:', error);
+    }
+}
+
+// Format date
+function formatDate(dateString) {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffTime = Math.abs(now - date);
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    
+    if (diffDays === 1) {
+        return 'Today';
+    } else if (diffDays === 2) {
+        return 'Yesterday';
+    } else if (diffDays <= 7) {
+        return date.toLocaleDateString('en-US', { weekday: 'short' });
+    } else {
+        return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    }
+}
+
+// Initialize email functionality
+document.addEventListener('DOMContentLoaded', function() {
+    updateDateDisplay();
+    
+    // Add Enter key support for new task input
+    const newTaskInput = document.getElementById('newTaskInput');
+    if (newTaskInput) {
+        newTaskInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                addNewTask();
+            }
+        });
+    }
+    
+    // Check Gmail status on load
+    checkGmailStatus();
+    
+    // Check for Gmail connection success
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('gmail') === 'connected') {
+        setTimeout(() => {
+            checkGmailStatus();
+        }, 1000);
+    }
+});
 </script>
 </body>
 </html>
