@@ -6,10 +6,9 @@ const gmailService = require('../services/gmail');
 const emailAI = require('../services/emailAI');
 
 const router = express.Router();
-router.use(authenticateToken);
 
-// Get Gmail auth URL
-router.get('/auth', async (req, res) => {
+// Get Gmail auth URL (requires auth)
+router.get('/auth', authenticateToken, async (req, res) => {
     try {
         const authUrl = gmailService.generateAuthUrl(req.user.id);
         res.json({ authUrl });
@@ -19,7 +18,7 @@ router.get('/auth', async (req, res) => {
     }
 });
 
-// Handle OAuth callback
+// Handle OAuth callback (must be public endpoint for Google redirect)
 router.get('/callback', async (req, res) => {
     try {
         const { code, state } = req.query;
@@ -29,17 +28,18 @@ router.get('/callback', async (req, res) => {
         }
 
         await gmailService.handleCallback(code, state);
-        
+
         // Redirect to frontend with success message
-        res.redirect('/app.html?gmail=connected');
+        const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:8002';
+        res.redirect(`${frontendUrl}/app.html?gmail=connected`);
     } catch (error) {
         logger.error('Error handling Gmail callback:', error);
         res.redirect('/app.html?gmail=error');
     }
 });
 
-// Check Gmail connection status
-router.get('/status', async (req, res) => {
+// Check Gmail connection status (requires auth)
+router.get('/status', authenticateToken, async (req, res) => {
     try {
         const tokens = await gmailService.getTokens(req.user.id);
         res.json({ 
@@ -52,8 +52,8 @@ router.get('/status', async (req, res) => {
     }
 });
 
-// Fetch and process emails
-router.get('/emails', async (req, res) => {
+// Fetch and process emails (requires auth)
+router.get('/emails', authenticateToken, async (req, res) => {
     try {
         const { limit = 20, refresh = false } = req.query;
 
