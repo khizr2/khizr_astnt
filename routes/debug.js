@@ -1,5 +1,5 @@
 const express = require('express');
-const { query } = require('../database/connection');
+const { supabase } = require('../database/connection');
 const { logger } = require('../utils/logger');
 
 const router = express.Router();
@@ -7,19 +7,27 @@ const router = express.Router();
 // Debug endpoint to test database connection
 router.get('/db-test', async (req, res) => {
     try {
-        logger.info('Testing database connection...');
+        logger.info('Testing Supabase connection...');
         
-        // Test basic query
-        const result = await query('SELECT NOW() as current_time, version() as db_version');
+        // Test basic query using Supabase client
+        const { data, error } = await supabase
+            .from('users')
+            .select('id')
+            .limit(1);
+        
+        if (error) {
+            throw error;
+        }
         
         res.json({
             status: 'success',
             database: 'connected',
-            current_time: result.rows[0].current_time,
-            db_version: result.rows[0].db_version.substring(0, 50) + '...',
+            current_time: new Date().toISOString(),
+            user_count: data ? data.length : 0,
             env: {
                 node_env: process.env.NODE_ENV,
-                has_db_url: !!process.env.DATABASE_URL,
+                has_supabase_url: !!process.env.SUPABASE_URL,
+                has_supabase_key: !!process.env.SUPABASE_ANON_KEY,
                 has_jwt_secret: !!process.env.JWT_SECRET
             }
         });
@@ -36,16 +44,17 @@ router.get('/db-test', async (req, res) => {
 
 // Check environment variables
 router.get('/env-check', (req, res) => {
-    const dbUrl = process.env.DATABASE_URL;
-    const maskedDbUrl = dbUrl ? dbUrl.replace(/:[^:@]*@/, ':****@') : 'NOT_SET';
+    const supabaseUrl = process.env.SUPABASE_URL;
+    const maskedUrl = supabaseUrl ? supabaseUrl.replace(/https:\/\/([^.]+)\./, 'https://***.') : 'NOT_SET';
     
     res.json({
         status: 'success',
         env: {
             NODE_ENV: process.env.NODE_ENV,
             PORT: process.env.PORT,
-            DATABASE_URL: maskedDbUrl,
-            DATABASE_URL_LENGTH: dbUrl ? dbUrl.length : 0,
+            SUPABASE_URL: maskedUrl,
+            SUPABASE_ANON_KEY: process.env.SUPABASE_ANON_KEY ? 'SET' : 'NOT_SET',
+            SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY ? 'SET' : 'NOT_SET',
             JWT_SECRET: process.env.JWT_SECRET ? 'SET' : 'NOT_SET',
             OPENAI_API_KEY: process.env.OPENAI_API_KEY ? 'SET' : 'NOT_SET',
             GMAIL_CLIENT_ID: process.env.GMAIL_CLIENT_ID ? 'SET' : 'NOT_SET',
@@ -60,10 +69,17 @@ router.get('/env-check', (req, res) => {
 // Test users table
 router.get('/users-test', async (req, res) => {
     try {
-        const result = await query('SELECT COUNT(*) as user_count FROM users');
+        const { count, error } = await supabase
+            .from('users')
+            .select('*', { count: 'exact', head: true });
+        
+        if (error) {
+            throw error;
+        }
+        
         res.json({
             status: 'success',
-            user_count: result.rows[0].user_count
+            user_count: count || 0
         });
     } catch (error) {
         logger.error('Users test error:', error);
