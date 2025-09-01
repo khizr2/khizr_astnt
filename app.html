@@ -1,895 +1,1282 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Khizr Assistant</title>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&display=swap');
-        
-        :root {
-            --primary: #8B5CF6;
-            --secondary: #EF4444;
-            --bg: #0A0A0B;
-            --bg-card: #111115;
-            --text-primary: #E4E4E7;
-            --text-secondary: #71717A;
-            --text-accent: #A855F7;
-            --border: #27272A;
-            --border-accent: #3F3F46;
-        }
-
-        .theme-red {
-            --primary: #EF4444;
-            --text-accent: #F87171;
-        }
-
-        .theme-purple {
-            --primary: #8B5CF6;
-            --text-accent: #A855F7;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'JetBrains Mono', monospace;
-            background: var(--bg);
-            color: var(--text-primary);
-            line-height: 1.6;
-            font-weight: 400;
-            min-height: 100vh;
-            font-size: 14px;
-        }
-
-        .container {
-            max-width: 900px;
-            margin: 0 auto;
-            padding: 40px 20px;
-        }
-
-        /* Header */
-        .header {
-            display: flex;
-            justify-content: flex-end;
-            align-items: center;
-            margin-bottom: 60px;
-            padding-bottom: 20px;
-        }
-
-        .theme-toggle {
-            display: flex;
-            gap: 8px;
-            align-items: center;
-        }
-
-        .theme-btn {
-            width: 12px;
-            height: 12px;
-            border-radius: 2px;
-            border: none;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            opacity: 0.6;
-        }
-
-        .theme-btn.purple { background: #8B5CF6; }
-        .theme-btn.red { background: #EF4444; }
-        
-        .theme-btn:hover {
-            opacity: 1;
-            transform: scale(1.1);
-        }
-
-        .theme-btn.active {
-            opacity: 1;
-        }
-
-        .logout-btn {
-            background: none;
-            border: none;
-            color: var(--text-secondary);
-            cursor: pointer;
-            font-size: 16px;
-            padding: 4px;
-            border-radius: 4px;
-            transition: all 0.2s ease;
-            margin-left: 16px;
-        }
-
-        .logout-btn:hover {
-            color: var(--primary);
-            background: rgba(139, 92, 246, 0.1);
-        }
-
-        /* Navigation */
-        .nav {
-            display: flex;
-            gap: 30px;
-            margin-bottom: 40px;
-            font-size: 13px;
-            font-weight: 500;
-        }
-
-        .nav-btn {
-            background: none;
-            border: none;
-            color: var(--text-secondary);
-            cursor: pointer;
-            transition: color 0.2s ease;
-            position: relative;
-            padding: 0;
-            font-family: inherit;
-            font-size: inherit;
-        }
-
-        .nav-btn:hover {
-            color: var(--text-primary);
-        }
-
-        .nav-btn.active {
-            color: var(--primary);
-        }
-
-        .nav-btn.active::after {
-            content: '';
-            position: absolute;
-            bottom: -8px;
-            left: 0;
-            width: 100%;
-            height: 1px;
-            background: var(--primary);
-        }
-
-        /* Main Layout */
-        .today-view {
-            display: grid;
-            grid-template-columns: 1.5fr 1fr;
-            gap: 60px;
-        }
-
-        /* Cards */
-        .code-card {
-            padding: 0;
-            margin-bottom: 48px;
-            font-size: 13px;
-        }
-
-        .code-card.boxed {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            padding: 24px;
-        }
-
-        .section-header {
-            color: var(--text-accent);
-            font-size: 12px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 20px;
-        }
-
-        /* Tasks */
-        .task-list {
-            list-style: none;
-        }
-
-        .task-item {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 8px 0;
-            transition: all 0.2s ease;
-            cursor: pointer;
-        }
-
-        .task-item:hover {
-            color: var(--primary);
-            padding-left: 12px;
-        }
-
-        .task-title {
-            font-weight: 400;
-            flex: 1;
-        }
-
-        .task-actions {
-            display: flex;
-            gap: 4px;
-            opacity: 0;
-            transition: opacity 0.2s ease;
-        }
-
-        .task-item:hover .task-actions {
-            opacity: 1;
-        }
-
-        .task-action-btn {
-            background: none;
-            border: none;
-            color: var(--text-secondary);
-            cursor: pointer;
-            font-size: 12px;
-            padding: 2px;
-            border-radius: 2px;
-            transition: all 0.2s ease;
-        }
-
-        .task-action-btn:hover {
-            color: var(--primary);
-            background: rgba(139, 92, 246, 0.1);
-        }
-
-        /* Date Display */
-        .date-display {
-            font-size: 16px;
-            font-weight: 500;
-            color: var(--text-primary);
-            text-transform: capitalize;
-        }
-
-        /* Time Events */
-        .time-list {
-            list-style: none;
-        }
-
-        .time-item {
-            display: flex;
-            align-items: center;
-            padding: 6px 0;
-            font-family: inherit;
-        }
-
-        .time {
-            color: var(--primary);
-            font-weight: 500;
-            min-width: 80px;
-            font-size: 12px;
-        }
-
-        .time-separator {
-            color: var(--text-secondary);
-            margin: 0 16px;
-            font-weight: 300;
-        }
-
-        .event-title {
-            color: var(--text-primary);
-            font-weight: 400;
-        }
-
-        /* AI Input */
-        .ai-input-container {
-            position: relative;
-        }
-
-        .ai-prompt {
-            color: var(--text-accent);
-            font-size: 12px;
-            margin-bottom: 12px;
-            font-weight: 500;
-        }
-
-        .ai-textarea {
-            width: 100%;
-            background: transparent;
-            border: none;
-            padding: 0;
-            color: var(--text-primary);
-            font-family: inherit;
-            font-size: 13px;
-            resize: none;
-            height: 100px;
-            transition: border-color 0.2s ease;
-        }
-
-        .ai-textarea:focus {
-            outline: none;
-        }
-
-        .ai-textarea::placeholder {
-            color: var(--text-secondary);
-            font-style: italic;
-        }
-
-        .ai-send-btn {
-            position: absolute;
-            bottom: 0;
-            right: 0;
-            background: var(--primary);
-            border: none;
-            border-radius: 3px;
-            padding: 6px 12px;
-            color: white;
-            cursor: pointer;
-            font-size: 11px;
-            font-family: inherit;
-            font-weight: 500;
-            transition: all 0.2s ease;
-        }
-
-        .ai-send-btn:hover {
-            opacity: 0.9;
-            transform: scale(0.98);
-        }
-
-        /* Mind Button */
-        .mind-btn {
-            background: transparent;
-            border: none;
-            padding: 0;
-            color: var(--primary);
-            cursor: pointer;
-            font-size: 13px;
-            font-family: inherit;
-            font-weight: 500;
-            width: 100%;
-            transition: all 0.2s ease;
-            text-align: left;
-        }
-
-        .mind-btn:hover {
-            color: var(--text-primary);
-        }
-
-        /* Views */
-        .project-view, .mind-view, .bigpage-view, .emails-view {
-            display: none;
-        }
-
-        .project-view.active, .mind-view.active, .bigpage-view.active, .emails-view.active {
-            display: block;
-        }
-
-        /* Project Items */
-        .project-item {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            padding: 16px;
-            margin-bottom: 12px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .project-item:hover {
-            border-color: var(--primary);
-            background: rgba(139, 92, 246, 0.04);
-        }
-
-        .project-title {
-            font-size: 14px;
-            font-weight: 600;
-            color: var(--text-primary);
-            margin-bottom: 4px;
-        }
-
-        .project-desc {
-            color: var(--text-secondary);
-            font-size: 12px;
-        }
-
-        /* Mind Textarea */
-        .mind-textarea {
-            width: 100%;
-            min-height: 120px;
-            background: transparent;
-            border: 1px solid var(--border);
-            border-radius: 4px;
-            padding: 16px;
-            color: var(--text-primary);
-            font-family: inherit;
-            font-size: 13px;
-            resize: vertical;
-            transition: border-color 0.2s ease;
-        }
-
-        .mind-textarea:focus {
-            outline: none;
-            border-color: var(--primary);
-        }
-
-        .mind-textarea::placeholder {
-            color: var(--text-secondary);
-            font-style: italic;
-        }
-
-        .mind-save-btn {
-            background: var(--primary);
-            border: none;
-            border-radius: 4px;
-            padding: 8px 16px;
-            color: white;
-            cursor: pointer;
-            font-size: 12px;
-            font-family: inherit;
-            font-weight: 500;
-            margin-top: 12px;
-            transition: all 0.2s ease;
-        }
-
-        .mind-save-btn:hover {
-            opacity: 0.9;
-        }
-
-        /* Big Page Input */
-        .big-page-input {
-            width: 100%;
-            min-height: 200px;
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            padding: 20px;
-            color: var(--text-primary);
-            font-family: inherit;
-            font-size: 13px;
-            resize: vertical;
-            transition: border-color 0.2s ease;
-        }
-
-        .big-page-input:focus {
-            outline: none;
-            border-color: var(--primary);
-        }
-
-        .big-page-input::placeholder {
-            color: var(--text-secondary);
-            font-style: italic;
-        }
-
-        .process-btn {
-            background: var(--primary);
-            border: none;
-            border-radius: 4px;
-            padding: 8px 16px;
-            color: white;
-            cursor: pointer;
-            font-size: 12px;
-            font-family: inherit;
-            font-weight: 500;
-            transition: all 0.2s ease;
-        }
-
-        .process-btn:hover {
-            opacity: 0.9;
-        }
-
-        .process-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        .processing-status {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            padding: 16px;
-        }
-
-        /* Email Controls */
-        .gmail-connect-btn, .refresh-emails-btn {
-            background: var(--primary);
-            border: none;
-            border-radius: 4px;
-            padding: 8px 16px;
-            color: white;
-            cursor: pointer;
-            font-size: 12px;
-            font-family: inherit;
-            font-weight: 500;
-            transition: all 0.2s ease;
-            margin-right: 8px;
-        }
-
-        .gmail-connect-btn:hover, .refresh-emails-btn:hover {
-            opacity: 0.9;
-        }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            .container {
-                padding: 20px 16px;
-            }
-            
-            .today-view {
-                grid-template-columns: 1fr;
-                gap: 32px;
-            }
-
-            .nav {
-                gap: 20px;
-                margin-bottom: 32px;
-            }
-
-            .header {
-                margin-bottom: 40px;
-            }
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Khizr Assistant</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&display=swap');
+
+:root {
+--primary: #8B5CF6;
+--secondary: #EF4444;
+--bg: #0A0A0B;
+--bg-card: #111115;
+--text-primary: #E4E4E7;
+--text-secondary: #71717A;
+--text-accent: #A855F7;
+--border: #27272A;
+--border-accent: #3F3F46;
+}
+
+.theme-red {
+--primary: #EF4444;
+--text-accent: #F87171;
+}
+
+.theme-purple {
+--primary: #8B5CF6;
+--text-accent: #A855F7;
+}
+
+* {
+margin: 0;
+padding: 0;
+box-sizing: border-box;
+}
+
+body {
+font-family: 'JetBrains Mono', monospace;
+background: var(--bg);
+color: var(--text-primary);
+line-height: 1.6;
+font-weight: 400;
+min-height: 100vh;
+font-size: 14px;
+}
+
+.container {
+max-width: 900px;
+margin: 0 auto;
+padding: 40px 20px;
+}
+
+/* Header */
+.header {
+display: flex;
+justify-content: flex-end;
+align-items: center;
+margin-bottom: 60px;
+padding-bottom: 20px;
+}
+
+.theme-toggle {
+display: flex;
+gap: 8px;
+align-items: center;
+}
+
+.theme-btn {
+width: 12px;
+height: 12px;
+border-radius: 2px;
+border: none;
+cursor: pointer;
+transition: all 0.2s ease;
+opacity: 0.6;
+}
+
+.theme-btn.purple { background: #8B5CF6; }
+.theme-btn.red { background: #EF4444; }
+
+.theme-btn:hover {
+opacity: 1;
+transform: scale(1.1);
+}
+
+.theme-btn.active {
+opacity: 1;
+}
+
+.logout-btn {
+background: none;
+border: none;
+color: var(--text-secondary);
+cursor: pointer;
+font-size: 16px;
+padding: 4px;
+border-radius: 4px;
+transition: all 0.2s ease;
+margin-left: 16px;
+}
+
+.logout-btn:hover {
+color: var(--primary);
+background: rgba(139, 92, 246, 0.1);
+}
+
+/* Navigation */
+.nav {
+display: flex;
+gap: 30px;
+margin-bottom: 40px;
+font-size: 13px;
+font-weight: 500;
+}
+
+.nav-btn {
+background: none;
+border: none;
+color: var(--text-secondary);
+cursor: pointer;
+transition: color 0.2s ease;
+position: relative;
+padding: 0;
+font-family: inherit;
+font-size: inherit;
+}
+
+.nav-btn:hover {
+color: var(--text-primary);
+}
+
+.nav-btn.active {
+color: var(--primary);
+}
+
+.nav-btn.active::after {
+content: '';
+position: absolute;
+bottom: -8px;
+left: 0;
+width: 100%;
+height: 1px;
+background: var(--primary);
+}
+
+/* Main Layout */
+.today-view {
+display: grid;
+grid-template-columns: 1.5fr 1fr;
+gap: 60px;
+}
+
+/* Cards */
+.code-card {
+padding: 0;
+margin-bottom: 48px;
+font-size: 13px;
+}
+
+.code-card.boxed {
+background: var(--bg-card);
+border: 1px solid var(--border);
+border-radius: 6px;
+padding: 24px;
+}
+
+.section-header {
+color: var(--text-accent);
+font-size: 12px;
+font-weight: 600;
+text-transform: uppercase;
+letter-spacing: 0.5px;
+margin-bottom: 20px;
+}
+
+/* Tasks */
+.task-list {
+list-style: none;
+}
+
+.task-item {
+display: flex;
+align-items: center;
+justify-content: space-between;
+padding: 8px 0;
+transition: all 0.2s ease;
+cursor: pointer;
+}
+
+.task-item:hover {
+color: var(--primary);
+padding-left: 12px;
+}
+
+.task-item.urgent {
+border-left: 2px solid var(--secondary);
+padding-left: 8px;
+}
+
+.task-item.urgent:hover {
+padding-left: 16px;
+}
+
+.task-title {
+font-weight: 400;
+flex: 1;
+}
+
+.task-priority {
+font-size: 10px;
+padding: 2px 6px;
+border-radius: 3px;
+margin-right: 8px;
+font-weight: 500;
+}
+
+.task-priority.urgent {
+background: var(--secondary);
+color: white;
+}
+
+.task-priority.research {
+background: var(--primary);
+color: white;
+}
+
+.task-actions {
+display: flex;
+gap: 4px;
+opacity: 0;
+transition: opacity 0.2s ease;
+}
+
+.task-item:hover .task-actions {
+opacity: 1;
+}
+
+.task-action-btn {
+background: none;
+border: none;
+color: var(--text-secondary);
+cursor: pointer;
+font-size: 12px;
+padding: 2px;
+border-radius: 2px;
+transition: all 0.2s ease;
+}
+
+.task-action-btn:hover {
+color: var(--primary);
+background: rgba(139, 92, 246, 0.1);
+}
+
+/* Date Display */
+.date-display {
+font-size: 16px;
+font-weight: 500;
+color: var(--text-primary);
+text-transform: capitalize;
+}
+
+/* Time Events */
+.time-list {
+list-style: none;
+}
+
+.time-item {
+display: flex;
+align-items: center;
+padding: 6px 0;
+font-family: inherit;
+}
+
+.time {
+color: var(--primary);
+font-weight: 500;
+min-width: 80px;
+font-size: 12px;
+}
+
+.time-separator {
+color: var(--text-secondary);
+margin: 0 16px;
+font-weight: 300;
+}
+
+.event-title {
+color: var(--text-primary);
+font-weight: 400;
+}
+
+/* AI Input */
+.ai-input-container {
+position: relative;
+}
+
+.ai-prompt {
+color: var(--text-accent);
+font-size: 12px;
+margin-bottom: 12px;
+font-weight: 500;
+}
+
+.ai-textarea {
+width: 100%;
+background: transparent;
+border: none;
+padding: 0;
+color: var(--text-primary);
+font-family: inherit;
+font-size: 13px;
+resize: none;
+height: 100px;
+transition: border-color 0.2s ease;
+}
+
+.ai-textarea:focus {
+outline: none;
+}
+
+.ai-textarea::placeholder {
+color: var(--text-secondary);
+font-style: italic;
+}
+
+.ai-send-btn {
+position: absolute;
+bottom: 0;
+right: 0;
+background: var(--primary);
+border: none;
+border-radius: 3px;
+padding: 6px 12px;
+color: white;
+cursor: pointer;
+font-size: 11px;
+font-family: inherit;
+font-weight: 500;
+transition: all 0.2s ease;
+}
+
+.ai-send-btn:hover {
+opacity: 0.9;
+transform: scale(0.98);
+}
+
+/* Mind Button */
+.mind-btn {
+background: transparent;
+border: none;
+padding: 0;
+color: var(--primary);
+cursor: pointer;
+font-size: 13px;
+font-family: inherit;
+font-weight: 500;
+width: 100%;
+transition: all 0.2s ease;
+text-align: left;
+}
+
+.mind-btn:hover {
+color: var(--text-primary);
+}
+
+/* Views */
+.project-view, .mind-view, .bigpage-view, .emails-view, .goals-view, .insights-view {
+display: none;
+}
+
+.project-view.active, .mind-view.active, .bigpage-view.active, .emails-view.active, .goals-view.active, .insights-view.active {
+display: block;
+}
+
+/* Project Items */
+.project-item {
+background: var(--bg-card);
+border: 1px solid var(--border);
+border-radius: 6px;
+padding: 16px;
+margin-bottom: 12px;
+cursor: pointer;
+transition: all 0.2s ease;
+}
+
+.project-item:hover {
+border-color: var(--primary);
+background: rgba(139, 92, 246, 0.04);
+}
+
+.project-title {
+font-size: 14px;
+font-weight: 600;
+color: var(--text-primary);
+margin-bottom: 4px;
+}
+
+.project-desc {
+color: var(--text-secondary);
+font-size: 12px;
+}
+
+/* Mind Textarea */
+.mind-textarea {
+width: 100%;
+min-height: 120px;
+background: transparent;
+border: 1px solid var(--border);
+border-radius: 4px;
+padding: 16px;
+color: var(--text-primary);
+font-family: inherit;
+font-size: 13px;
+resize: vertical;
+transition: border-color 0.2s ease;
+}
+
+.mind-textarea:focus {
+outline: none;
+border-color: var(--primary);
+}
+
+.mind-textarea::placeholder {
+color: var(--text-secondary);
+font-style: italic;
+}
+
+.mind-save-btn {
+background: var(--primary);
+border: none;
+border-radius: 4px;
+padding: 8px 16px;
+color: white;
+cursor: pointer;
+font-size: 12px;
+font-family: inherit;
+font-weight: 500;
+margin-top: 12px;
+transition: all 0.2s ease;
+}
+
+.mind-save-btn:hover {
+opacity: 0.9;
+}
+
+/* Big Page Input */
+.big-page-input {
+width: 100%;
+min-height: 300px;
+background: var(--bg-card);
+border: 1px solid var(--border);
+border-radius: 6px;
+padding: 20px;
+color: var(--text-primary);
+font-family: inherit;
+font-size: 13px;
+resize: vertical;
+transition: border-color 0.2s ease;
+}
+
+.big-page-input:focus {
+outline: none;
+border-color: var(--primary);
+}
+
+.big-page-input::placeholder {
+color: var(--text-secondary);
+font-style: italic;
+}
+
+.big-page-help {
+background: rgba(139, 92, 246, 0.1);
+border: 1px solid var(--primary);
+border-radius: 4px;
+padding: 12px;
+margin-bottom: 12px;
+font-size: 11px;
+color: var(--text-secondary);
+}
+
+.big-page-help strong {
+color: var(--primary);
+}
+
+.process-btn {
+background: var(--primary);
+border: none;
+border-radius: 4px;
+padding: 8px 16px;
+color: white;
+cursor: pointer;
+font-size: 12px;
+font-family: inherit;
+font-weight: 500;
+transition: all 0.2s ease;
+}
+
+.process-btn:hover {
+opacity: 0.9;
+}
+
+.process-btn:disabled {
+opacity: 0.5;
+cursor: not-allowed;
+}
+
+.processing-status {
+background: var(--bg-card);
+border: 1px solid var(--border);
+border-radius: 6px;
+padding: 16px;
+margin-top: 12px;
+}
+
+.processed-results {
+margin-top: 20px;
+}
+
+.result-category {
+background: var(--bg-card);
+border: 1px solid var(--border);
+border-radius: 6px;
+padding: 16px;
+margin-bottom: 16px;
+}
+
+.result-category h4 {
+color: var(--primary);
+font-size: 12px;
+font-weight: 600;
+text-transform: uppercase;
+margin-bottom: 12px;
+}
+
+.result-item {
+background: rgba(139, 92, 246, 0.05);
+border-left: 2px solid var(--primary);
+padding: 8px 12px;
+margin-bottom: 8px;
+font-size: 12px;
+}
+
+.result-item.urgent {
+border-left-color: var(--secondary);
+background: rgba(239, 68, 68, 0.05);
+}
+
+.result-item.research {
+border-left-color: #10B981;
+background: rgba(16, 185, 129, 0.05);
+}
+
+.result-item.preserved {
+border-left-color: #F59E0B;
+background: rgba(245, 158, 11, 0.05);
+}
+
+/* Research Items */
+.research-list {
+list-style: none;
+}
+
+.research-item {
+background: var(--bg-card);
+border: 1px solid var(--border);
+border-radius: 6px;
+padding: 16px;
+margin-bottom: 12px;
+}
+
+.research-question {
+color: var(--primary);
+font-weight: 500;
+margin-bottom: 8px;
+}
+
+.research-status {
+font-size: 11px;
+color: var(--text-secondary);
+}
+
+/* Email Controls */
+.gmail-connect-btn, .refresh-emails-btn {
+background: var(--primary);
+border: none;
+border-radius: 4px;
+padding: 8px 16px;
+color: white;
+cursor: pointer;
+font-size: 12px;
+font-family: inherit;
+font-weight: 500;
+transition: all 0.2s ease;
+margin-right: 8px;
+}
+
+.gmail-connect-btn:hover, .refresh-emails-btn:hover {
+opacity: 0.9;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+.container {
+padding: 20px 16px;
+}
+
+.today-view {
+grid-template-columns: 1fr;
+gap: 32px;
+}
+
+.nav {
+gap: 20px;
+margin-bottom: 32px;
+}
+
+.header {
+margin-bottom: 40px;
+}
+}
+</style>
 </head>
 <body class="theme-purple">
-    <div class="container">
-        <!-- Header -->
-        <header class="header">
-            <div class="theme-toggle">
-                <button class="theme-btn purple active" onclick="setTheme('purple')"></button>
-                <button class="theme-btn red" onclick="setTheme('red')"></button>
-            </div>
-            <button class="logout-btn" onclick="logout()" title="Logout">🚪</button>
-        </header>
 
-        <!-- Navigation -->
-        <nav class="nav">
-            <button class="nav-btn active" onclick="showView('today')">today</button>
-            <button class="nav-btn" onclick="showView('projects')">projects</button>
-            <button class="nav-btn" onclick="showView('goals')">goals</button>
-            <button class="nav-btn" onclick="showView('insights')">insights</button>
-            <button class="nav-btn" onclick="showView('bigpage')">big page</button>
-            <button class="nav-btn" onclick="showView('emails')">emails</button>
-        </nav>
+<div class="container">
+<!-- Header -->
+<header class="header">
+<div class="theme-toggle">
+<button class="theme-btn purple active" onclick="setTheme('purple')"></button>
+<button class="theme-btn red" onclick="setTheme('red')"></button>
+</div>
+<button class="logout-btn" onclick="logout()" title="Logout">🚪</button>
+</header>
 
-        <!-- Today View -->
-        <div id="today-view" class="today-view">
-            <div class="main-content">
-                <!-- Date Display -->
-                <div class="code-card">
-                    <div class="section-header">today</div>
-                    <div class="date-display" id="dateDisplay"></div>
-                </div>
+<!-- Navigation -->
+<nav class="nav">
+<button class="nav-btn active" onclick="showView('today')">today</button>
+<button class="nav-btn" onclick="showView('projects')">projects</button>
+<button class="nav-btn" onclick="showView('goals')">goals</button>
+<button class="nav-btn" onclick="showView('insights')">insights</button>
+<button class="nav-btn" onclick="showView('bigpage')">big page</button>
+<button class="nav-btn" onclick="showView('emails')">emails</button>
+</nav>
 
-                <!-- Top 3 Tasks -->
-                <div class="code-card">
-                    <div class="section-header">top3</div>
-                    <ul class="task-list">
-                        <li class="task-item">
-                            <span class="task-title">sell bidu</span>
-                            <div class="task-actions">
-                                <button class="task-action-btn" onclick="archiveTask(1)" title="Archive">📁</button>
-                                <button class="task-action-btn" onclick="addToCalendar(1)" title="Add to Calendar">📅</button>
-                                <button class="task-action-btn" onclick="deleteTask(1)" title="Delete">🗑️</button>
-                            </div>
-                        </li>
-                        <li class="task-item">
-                            <span class="task-title">review quarterly plan</span>
-                            <div class="task-actions">
-                                <button class="task-action-btn" onclick="archiveTask(2)" title="Archive">📁</button>
-                                <button class="task-action-btn" onclick="addToCalendar(2)" title="Add to Calendar">📅</button>
-                                <button class="task-action-btn" onclick="deleteTask(2)" title="Delete">🗑️</button>
-                            </div>
-                        </li>
-                        <li class="task-item">
-                            <span class="task-title">call mom</span>
-                            <div class="task-actions">
-                                <button class="task-action-btn" onclick="archiveTask(3)" title="Archive">📁</button>
-                                <button class="task-action-btn" onclick="addToCalendar(3)" title="Add to Calendar">📅</button>
-                                <button class="task-action-btn" onclick="deleteTask(3)" title="Delete">🗑️</button>
-                            </div>
-                        </li>
-                    </ul>
-                </div>
+<!-- Today View -->
+<div id="today-view" class="today-view">
+<div class="main-content">
+<!-- Date Display -->
+<div class="code-card">
+<div class="section-header">today</div>
+<div class="date-display" id="dateDisplay"></div>
+</div>
 
-                <!-- AI Input -->
-                <div class="code-card">
-                    <div class="section-header">process</div>
-                    <div class="ai-input-container">
-                        <div class="ai-prompt">tell me what's on your mind</div>
-                        <textarea 
-                            class="ai-textarea" 
-                            placeholder="need to prep for client meeting, also buy groceries..."
-                            id="aiNote"
-                        ></textarea>
-                        <button class="ai-send-btn" onclick="processAINote()">run</button>
-                    </div>
-                </div>
-            </div>
+<!-- Dynamic Tasks (populated from Big Page processing) -->
+<div class="code-card" id="tasksContainer">
+<div class="section-header">tasks</div>
+<ul class="task-list" id="tasksList">
+<li class="task-item">
+<span class="task-title">sell bidu</span>
+<div class="task-actions">
+<button class="task-action-btn" onclick="archiveTask(1)" title="Archive">📁</button>
+<button class="task-action-btn" onclick="addToCalendar(1)" title="Add to Calendar">📅</button>
+<button class="task-action-btn" onclick="deleteTask(1)" title="Delete">🗑️</button>
+</div>
+</li>
+<li class="task-item">
+<span class="task-title">review quarterly plan</span>
+<div class="task-actions">
+<button class="task-action-btn" onclick="archiveTask(2)" title="Archive">📁</button>
+<button class="task-action-btn" onclick="addToCalendar(2)" title="Add to Calendar">📅</button>
+<button class="task-action-btn" onclick="deleteTask(2)" title="Delete">🗑️</button>
+</div>
+</li>
+<li class="task-item">
+<span class="task-title">call mom</span>
+<div class="task-actions">
+<button class="task-action-btn" onclick="archiveTask(3)" title="Archive">📁</button>
+<button class="task-action-btn" onclick="addToCalendar(3)" title="Add to Calendar">📅</button>
+<button class="task-action-btn" onclick="deleteTask(3)" title="Delete">🗑️</button>
+</div>
+</li>
+</ul>
+</div>
 
-            <div class="sidebar">
-                <!-- Time-bound Events -->
-                <div class="code-card">
-                    <div class="section-header">timebound</div>
-                    <ul class="time-list">
-                        <li class="time-item">
-                            <span class="time">1:00 PM</span>
-                            <span class="time-separator">-</span>
-                            <span class="event-title">meeting with neil</span>
-                        </li>
-                        <li class="time-item">
-                            <span class="time">2:00 PM</span>
-                            <span class="time-separator">-</span>
-                            <span class="event-title">party</span>
-                        </li>
-                        <li class="time-item">
-                            <span class="time">6:00 PM</span>
-                            <span class="time-separator">-</span>
-                            <span class="event-title">gym session</span>
-                        </li>
-                    </ul>
-                </div>
+<!-- Research Queue -->
+<div class="code-card" id="researchContainer" style="display: none;">
+<div class="section-header">research queue</div>
+<ul class="research-list" id="researchList"></ul>
+</div>
 
-                <!-- On My Mind -->
-                <button class="mind-btn" onclick="showMindPage()">
-                    on my mind
-                </button>
-            </div>
-        </div>
+<!-- AI Input -->
+<div class="code-card">
+<div class="section-header">process</div>
+<div class="ai-input-container">
+<div class="ai-prompt">tell me what's on your mind</div>
+<textarea
+class="ai-textarea"
+placeholder="need to prep for client meeting, also buy groceries..."
+id="aiNote"
+></textarea>
+<button class="ai-send-btn" onclick="processAINote()">run</button>
+</div>
+</div>
+</div>
 
-        <!-- Other Views -->
-        <div id="project-view" class="project-view">
-            <div class="code-card boxed">
-                <div class="section-header">projects</div>
-                <div class="project-list">
-                    <div class="project-item" onclick="openProject('website-redesign')">
-                        <div class="project-title">website redesign</div>
-                        <div class="project-desc">3/5 tasks completed • Due next week</div>
-                    </div>
-                    <div class="project-item" onclick="openProject('health-goals')">
-                        <div class="project-title">health goals</div>
-                        <div class="project-desc">1/3 tasks completed • Ongoing</div>
-                    </div>
-                    <div class="project-item" onclick="openProject('learn-react')">
-                        <div class="project-title">learn react</div>
-                        <div class="project-desc">2/8 tasks completed • 2 months left</div>
-                    </div>
-                </div>
-            </div>
-        </div>
+<div class="sidebar">
+<!-- Time-bound Events -->
+<div class="code-card">
+<div class="section-header">timebound</div>
+<ul class="time-list">
+<li class="time-item">
+<span class="time">1:00 PM</span>
+<span class="time-separator">-</span>
+<span class="event-title">meeting with neil</span>
+</li>
+<li class="time-item">
+<span class="time">2:00 PM</span>
+<span class="time-separator">-</span>
+<span class="event-title">party</span>
+</li>
+<li class="time-item">
+<span class="time">6:00 PM</span>
+<span class="time-separator">-</span>
+<span class="event-title">gym session</span>
+</li>
+</ul>
+</div>
 
-        <div id="mind-view" class="mind-view">
-            <div class="code-card boxed">
-                <div class="section-header">on my mind</div>
-                <textarea 
-                    id="mindInput" 
-                    class="mind-textarea" 
-                    placeholder="Share your thoughts, ideas, concerns..."
-                ></textarea>
-                <button class="mind-save-btn" onclick="saveMindNote()">save thought</button>
-            </div>
-        </div>
+<!-- On My Mind -->
+<button class="mind-btn" onclick="showMindPage()">
+ on my mind
+</button>
+</div>
+</div>
 
-        <div id="bigpage-view" class="bigpage-view">
-            <div class="code-card boxed">
-                <div class="section-header">big page</div>
-                <textarea 
-                    id="bigPageInput" 
-                    class="big-page-input" 
-                    placeholder="Dump your thoughts here..."
-                ></textarea>
-                <div class="big-page-controls" style="margin-top:12px; display:flex; gap:8px; justify-content:flex-end">
-                    <button id="processBigPage" class="process-btn" onclick="processBigPage()">process & organize</button>
-                </div>
-                <div id="processingStatus" class="processing-status" style="display:none; margin-top:12px">
-                    <div id="statusMessage"></div>
-                </div>
-            </div>
-        </div>
+<!-- Other Views -->
+<div id="project-view" class="project-view">
+<div class="code-card boxed">
+<div class="section-header">projects</div>
+<div class="project-list">
+<div class="project-item" onclick="openProject('website-redesign')">
+<div class="project-title">website redesign</div>
+<div class="project-desc">3/5 tasks completed • Due next week</div>
+</div>
+<div class="project-item" onclick="openProject('health-goals')">
+<div class="project-title">health goals</div>
+<div class="project-desc">1/3 tasks completed • Ongoing</div>
+</div>
+<div class="project-item" onclick="openProject('learn-react')">
+<div class="project-title">learn react</div>
+<div class="project-desc">2/8 tasks completed • 2 months left</div>
+</div>
+</div>
+</div>
+</div>
 
-        <div id="emails-view" class="emails-view">
-            <div class="code-card boxed">
-                <div class="section-header">emails</div>
-                <div class="emails-controls" style="margin-bottom: 20px;">
-                    <button class="gmail-connect-btn" id="gmailConnectBtn" onclick="connectGmail()" style="display:none">
-                        Connect Gmail
-                    </button>
-                    <button class="refresh-emails-btn" onclick="refreshEmails()">
-                        Refresh
-                    </button>
-                </div>
-                <div class="emails-list" id="emailsList">
-                    <p>Email integration coming soon...</p>
-                </div>
-            </div>
-        </div>
-    </div>
+<div id="goals-view" class="goals-view">
+<div class="code-card boxed">
+<div class="section-header">goals</div>
+<p>Goals tracking coming soon...</p>
+</div>
+</div>
 
-    <script>
-        const API_URL = "https://khizr-assistant-api.onrender.com";
+<div id="insights-view" class="insights-view">
+<div class="code-card boxed">
+<div class="section-header">insights</div>
+<p>AI insights coming soon...</p>
+</div>
+</div>
 
-        // Theme switching
-        function setTheme(theme) {
-            document.body.className = `theme-${theme}`;
-            document.querySelectorAll('.theme-btn').forEach(btn => btn.classList.remove('active'));
-            const active = document.querySelector(`.theme-btn.${theme}`);
-            if (active) active.classList.add('active');
-            localStorage.setItem('theme', theme);
-        }
+<div id="mind-view" class="mind-view">
+<div class="code-card boxed">
+<div class="section-header">on my mind</div>
+<textarea
+id="mindInput"
+class="mind-textarea"
+placeholder="Share your thoughts, ideas, concerns..."
+></textarea>
+<button class="mind-save-btn" onclick="saveMindNote()">save thought</button>
+</div>
+</div>
 
-        // View switching
-        function showView(viewName) {
-            // Hide all views
-            document.querySelectorAll('[id$="-view"]').forEach(view => {
-                view.style.display = 'none';
-                view.classList.remove('active');
-            });
+<div id="bigpage-view" class="bigpage-view">
+<div class="code-card boxed">
+<div class="section-header">big page</div>
+<div class="big-page-help">
+<strong>Prefix System:</strong> 
+<strong>?</strong> research questions • 
+<strong>zz</strong> tasks • 
+<strong>og</strong> preserve notes • 
+<strong>!!</strong> urgent items • 
+<strong>no prefix</strong> general thoughts
+</div>
+<textarea
+id="bigPageInput"
+class="big-page-input"
+placeholder="? what are the best practices for React performance
+zz buy groceries milk bread eggs cheese
+og remember John's quote about customer feedback
+!! call mom about dinner this weekend
+thinking about switching project management systems"
+></textarea>
+<div class="big-page-controls" style="margin-top:12px; display:flex; gap:8px; justify-content:flex-end">
+<button id="processBigPage" class="process-btn" onclick="processBigPage()">process & organize</button>
+</div>
+<div id="processingStatus" class="processing-status" style="display:none">
+<div id="statusMessage"></div>
+</div>
+<div id="processedResults" class="processed-results" style="display:none"></div>
+</div>
+</div>
 
-            // Show selected view
-            if (viewName === 'today') {
-                document.getElementById('today-view').style.display = 'grid';
-            } else {
-                const viewElement = document.getElementById(`${viewName}-view`);
-                if (viewElement) {
-                    viewElement.style.display = 'block';
-                    viewElement.classList.add('active');
-                }
-            }
+<div id="emails-view" class="emails-view">
+<div class="code-card boxed">
+<div class="section-header">emails</div>
+<div class="emails-controls" style="margin-bottom: 20px;">
+<button class="gmail-connect-btn" id="gmailConnectBtn" onclick="connectGmail()" style="display:none">
+ Connect Gmail
+</button>
+<button class="refresh-emails-btn" onclick="refreshEmails()">
+ Refresh
+</button>
+</div>
+<div class="emails-list" id="emailsList">
+<p>Email integration coming soon...</p>
+</div>
+</div>
+</div>
 
-            // Update nav buttons
-            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
-            document.querySelectorAll('.nav-btn').forEach(btn => {
-                if (btn.textContent.toLowerCase() === String(viewName).toLowerCase()) {
-                    btn.classList.add('active');
-                }
-            });
-        }
+</div>
 
-        // AI Note processing
-        function processAINote() {
-            const note = document.getElementById('aiNote')?.value || '';
-            if (!note.trim()) return;
+<script>
+const API_URL = "https://khizr-assistant-api.onrender.com";
 
-            const btn = document.querySelector('.ai-send-btn');
-            if (!btn) return;
+// Global state for processed items
+let processedTasks = [];
+let processedResearch = [];
+let processedNotes = [];
+let processedUrgent = [];
 
-            const originalText = btn.textContent;
-            btn.textContent = 'processing...';
-            btn.disabled = true;
+// Theme switching
+function setTheme(theme) {
+document.body.className = `theme-${theme}`;
+document.querySelectorAll('.theme-btn').forEach(btn => btn.classList.remove('active'));
+const active = document.querySelector(`.theme-btn.${theme}`);
+if (active) active.classList.add('active');
+localStorage.setItem('theme', theme);
+}
 
-            setTimeout(() => {
-                btn.textContent = 'done';
-                setTimeout(() => {
-                    btn.textContent = originalText;
-                    btn.disabled = false;
-                    document.getElementById('aiNote').value = '';
-                }, 1000);
-            }, 1500);
-        }
+// View switching
+function showView(viewName) {
+// Hide all views
+document.querySelectorAll('[id$="-view"]').forEach(view => {
+view.style.display = 'none';
+view.classList.remove('active');
+});
 
-        // On My Mind page
-        function showMindPage() {
-            showView('mind');
-        }
+// Show selected view
+if (viewName === 'today') {
+document.getElementById('today-view').style.display = 'grid';
+} else {
+const viewElement = document.getElementById(`${viewName}-view`);
+if (viewElement) {
+viewElement.style.display = 'block';
+viewElement.classList.add('active');
+}
+}
 
-        // Task actions
-        function archiveTask(taskId) {
-            console.log('Archiving task:', taskId);
-        }
+// Update nav buttons
+document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+document.querySelectorAll('.nav-btn').forEach(btn => {
+if (btn.textContent.toLowerCase() === String(viewName).toLowerCase()) {
+btn.classList.add('active');
+}
+});
+}
 
-        function addToCalendar(taskId) {
-            console.log('Adding to calendar:', taskId);
-        }
+// Intelligent Big Page Processing
+function processBigPage() {
+const input = document.getElementById('bigPageInput');
+const content = input.value.trim();
+if (!content) return;
 
-        function deleteTask(taskId) {
-            console.log('Deleting task:', taskId);
-        }
+const processBtn = document.getElementById('processBigPage');
+const processingStatus = document.getElementById('processingStatus');
+const statusMessage = document.getElementById('statusMessage');
+const resultsDiv = document.getElementById('processedResults');
 
-        // Project management
-        function openProject(projectId) {
-            console.log('Opening project:', projectId);
-            // TODO: Implement project detail view
-        }
+// Show processing status
+processingStatus.style.display = 'block';
+resultsDiv.style.display = 'none';
+statusMessage.textContent = 'Analyzing your thoughts...';
+processBtn.disabled = true;
 
-        // Mind notes
-        function saveMindNote() {
-            const input = document.getElementById('mindInput');
-            const content = input.value.trim();
-            
-            if (!content) return;
-            
-            console.log('Saving mind note:', content);
-            
-            // Show success feedback
-            const btn = document.querySelector('.mind-save-btn');
-            const originalText = btn.textContent;
-            btn.textContent = 'saved!';
-            setTimeout(() => {
-                btn.textContent = originalText;
-                input.value = '';
-            }, 1000);
-        }
+// Process the content
+setTimeout(() => {
+statusMessage.textContent = 'Categorizing entries...';
 
-        // Big page processing
-        function processBigPage() {
-            const input = document.getElementById('bigPageInput');
-            const content = input.value.trim();
-            
-            if (!content) return;
+setTimeout(() => {
+statusMessage.textContent = 'Creating actionable items...';
 
-            const processBtn = document.getElementById('processBigPage');
-            const processingStatus = document.getElementById('processingStatus');
-            const statusMessage = document.getElementById('statusMessage');
+setTimeout(() => {
+const results = processContent(content);
+displayProcessedResults(results);
+statusMessage.textContent = 'Done! Your thoughts have been organized.';
 
-            // Show processing status
-            processingStatus.style.display = 'block';
-            statusMessage.textContent = 'Processing your thoughts...';
-            processBtn.disabled = true;
+// Re-enable button and clear input after delay
+setTimeout(() => {
+processBtn.disabled = false;
+input.value = '';
+processingStatus.style.display = 'none';
+resultsDiv.style.display = 'block';
+updateDashboard();
+}, 1000);
+}, 1000);
+}, 1000);
+}, 500);
+}
 
-            // Simulate processing
-            setTimeout(() => {
-                statusMessage.textContent = 'Organizing into categories...';
-                
-                setTimeout(() => {
-                    statusMessage.textContent = 'Creating structured entries...';
-                    
-                    setTimeout(() => {
-                        statusMessage.textContent = 'Done! Your thoughts have been organized.';
-                        
-                        // Re-enable button after a delay
-                        setTimeout(() => {
-                            processBtn.disabled = false;
-                            input.value = '';
-                            processingStatus.style.display = 'none';
-                        }, 2000);
-                    }, 1000);
-                }, 1000);
-            }, 1000);
-        }
+function processContent(content) {
+const lines = content.split('\n').filter(line => line.trim());
+const results = {
+tasks: [],
+research: [],
+urgent: [],
+preserved: [],
+general: []
+};
 
-        // Email functionality
-        function connectGmail() {
-            console.log('Connecting to Gmail...');
-            // TODO: Implement Gmail OAuth
-        }
+lines.forEach((line, index) => {
+const trimmed = line.trim();
+if (!trimmed) return;
 
-        function refreshEmails() {
-            console.log('Refreshing emails...');
-            // TODO: Implement email refresh
-        }
+// Research questions (?)
+if (trimmed.startsWith('?')) {
+results.research.push({
+id: `research_${Date.now()}_${index}`,
+question: trimmed.substring(1).trim(),
+status: 'queued',
+priority: 'medium'
+});
+}
+// Tasks (zz)
+else if (trimmed.toLowerCase().startsWith('zz')) {
+results.tasks.push({
+id: `task_${Date.now()}_${index}`,
+title: trimmed.substring(2).trim(),
+priority: 'normal',
+created: new Date()
+});
+}
+// Urgent items (!!)
+else if (trimmed.startsWith('!!')) {
+results.urgent.push({
+id: `urgent_${Date.now()}_${index}`,
+title: trimmed.substring(2).trim(),
+priority: 'urgent',
+created: new Date()
+});
+}
+// Preserve as-is (og)
+else if (trimmed.toLowerCase().startsWith('og')) {
+results.preserved.push({
+id: `preserved_${Date.now()}_${index}`,
+content: trimmed.substring(2).trim(),
+type: 'note'
+});
+}
+// General thoughts (no prefix)
+else {
+results.general.push({
+id: `general_${Date.now()}_${index}`,
+content: trimmed,
+category: categorizeThought(trimmed)
+});
+}
+});
 
-        // Initialize
-        function updateDateDisplay() {
-            const dateDisplay = document.getElementById('dateDisplay');
-            if (dateDisplay) {
-                const now = new Date();
-                const options = { 
-                    weekday: 'long', 
-                    year: 'numeric', 
-                    month: 'long', 
-                    day: 'numeric' 
-                };
-                dateDisplay.textContent = now.toLocaleDateString('en-US', options);
-            }
-        }
+// Store globally
+processedTasks = [...processedTasks, ...results.tasks, ...results.urgent];
+processedResearch = [...processedResearch, ...results.research];
+processedNotes = [...processedNotes, ...results.preserved, ...results.general];
 
-        function logout() {
-            localStorage.removeItem('khizr_assistant_gate');
-            localStorage.removeItem('khizr_assistant_auth');
-            window.location.href = 'index.html';
-        }
+return results;
+}
 
-        function checkAppAuth() {
-            const gateAuth = localStorage.getItem('khizr_assistant_gate');
-            if (!gateAuth) {
-                window.location.href = 'index.html';
-                return;
-            }
-            
-            try {
-                const authData = JSON.parse(gateAuth);
-                if (!authData.authenticated || Date.now() > authData.expires) {
-                    localStorage.removeItem('khizr_assistant_gate');
-                    window.location.href = 'index.html';
-                    return;
-                }
-            } catch (error) {
-                localStorage.removeItem('khizr_assistant_gate');
-                window.location.href = 'index.html';
-                return;
-            }
-        }
+function categorizeThought(thought) {
+const lower = thought.toLowerCase();
+if (lower.includes('project') || lower.includes('plan') || lower.includes('strategy')) return 'project';
+if (lower.includes('meeting') || lower.includes('call') || lower.includes('schedule')) return 'schedule';
+if (lower.includes('buy') || lower.includes('purchase') || lower.includes('order')) return 'shopping';
+if (lower.includes('follow up') || lower.includes('contact') || lower.includes('reach out')) return 'communication';
+return 'general';
+}
 
-        // Initialize on page load
-        document.addEventListener('DOMContentLoaded', function() {
-            updateDateDisplay();
-            checkAppAuth();
-            
-            // Load saved theme
-            const savedTheme = localStorage.getItem('theme') || 'purple';
-            setTheme(savedTheme);
-        });
-    </script>
+function displayProcessedResults(results) {
+const resultsDiv = document.getElementById('processedResults');
+let html = '';
+
+if (results.urgent.length > 0) {
+html += `
+<div class="result-category">
+<h4>🔥 Urgent Items</h4>
+${results.urgent.map(item => `<div class="result-item urgent">${item.title}</div>`).join('')}
+</div>`;
+}
+
+if (results.tasks.length > 0) {
+html += `
+<div class="result-category">
+<h4>✅ Tasks Created</h4>
+${results.tasks.map(task => `<div class="result-item">${task.title}</div>`).join('')}
+</div>`;
+}
+
+if (results.research.length > 0) {
+html += `
+<div class="result-category">
+<h4>🔍 Research Queue</h4>
+${results.research.map(r => `<div class="result-item research">${r.question}</div>`).join('')}
+</div>`;
+}
+
+if (results.preserved.length > 0) {
+html += `
+<div class="result-category">
+<h4>📝 Preserved Notes</h4>
+${results.preserved.map(note => `<div class="result-item preserved">${note.content}</div>`).join('')}
+</div>`;
+}
+
+if (results.general.length > 0) {
+html += `
+<div class="result-category">
+<h4>💭 General Thoughts</h4>
+${results.general.map(thought => `<div class="result-item">${thought.content} <small>(${thought.category})</small></div>`).join('')}
+</div>`;
+}
+
+resultsDiv.innerHTML = html;
+}
+
+function updateDashboard() {
+// Update tasks list on today view
+const tasksList = document.getElementById('tasksList');
+if (processedTasks.length > 0) {
+const tasksHTML = processedTasks.map(task => `
+<li class="task-item ${task.priority === 'urgent' ? 'urgent' : ''}">
+<span class="task-title">${task.title}</span>
+${task.priority === 'urgent' ? '<span class="task-priority urgent">URGENT</span>' : ''}
+<div class="task-actions">
+<button class="task-action-btn" onclick="archiveTask('${task.id}')" title="Archive">📁</button>
+<button class="task-action-btn" onclick="addToCalendar('${task.id}')" title="Add to Calendar">📅</button>
+<button class="task-action-btn" onclick="deleteTask('${task.id}')" title="Delete">🗑️</button>
+</div>
+</li>
+`).join('');
+
+// Replace existing tasks or add to them
+tasksList.innerHTML = tasksHTML;
+}
+
+// Update research queue
+const researchContainer = document.getElementById('researchContainer');
+const researchList = document.getElementById('researchList');
+if (processedResearch.length > 0) {
+researchContainer.style.display = 'block';
+const researchHTML = processedResearch.map(research => `
+<li class="research-item">
+<div class="research-question">${research.question}</div>
+<div class="research-status">Status: ${research.status} • Priority: ${research.priority}</div>
+</li>
+`).join('');
+researchList.innerHTML = researchHTML;
+}
+}
+
+// AI Note processing (quick processing for smaller inputs)
+function processAINote() {
+const note = document.getElementById('aiNote')?.value || '';
+if (!note.trim()) return;
+
+const btn = document.querySelector('.ai-send-btn');
+if (!btn) return;
+
+const originalText = btn.textContent;
+btn.textContent = 'processing...';
+btn.disabled = true;
+
+// Process the note using the same logic
+const results = processContent(note);
+
+setTimeout(() => {
+btn.textContent = 'done';
+updateDashboard();
+setTimeout(() => {
+btn.textContent = originalText;
+btn.disabled = false;
+document.getElementById('aiNote').value = '';
+}, 1000);
+}, 1500);
+}
+
+// On My Mind page
+function showMindPage() {
+showView('mind');
+}
+
+// Task actions
+function archiveTask(taskId) {
+console.log('Archiving task:', taskId);
+processedTasks = processedTasks.filter(task => task.id !== taskId);
+updateDashboard();
+}
+
+function addToCalendar(taskId) {
+console.log('Adding to calendar:', taskId);
+const task = processedTasks.find(t => t.id === taskId);
+if (task) {
+// In a real implementation, this would integrate with calendar API
+alert(`Task "${task.title}" would be added to calendar`);
+}
+}
+
+function deleteTask(taskId) {
+console.log('Deleting task:', taskId);
+processedTasks = processedTasks.filter(task => task.id !== taskId);
+updateDashboard();
+}
+
+// Project management
+function openProject(projectId) {
+console.log('Opening project:', projectId);
+// TODO: Implement project detail view
+}
+
+// Mind notes
+function saveMindNote() {
+const input = document.getElementById('mindInput');
+const content = input.value.trim();
+if (!content) return;
+
+console.log('Saving mind note:', content);
+// Store in processed notes
+processedNotes.push({
+id: `mind_${Date.now()}`,
+content: content,
+type: 'mind_note',
+created: new Date()
+});
+
+// Show success feedback
+const btn = document.querySelector('.mind-save-btn');
+const originalText = btn.textContent;
+btn.textContent = 'saved!';
+setTimeout(() => {
+btn.textContent = originalText;
+input.value = '';
+}, 1000);
+}
+
+// Email functionality
+function connectGmail() {
+console.log('Connecting to Gmail...');
+// TODO: Implement Gmail OAuth
+}
+
+function refreshEmails() {
+console.log('Refreshing emails...');
+// TODO: Implement email refresh
+}
+
+// Initialize
+function updateDateDisplay() {
+const dateDisplay = document.getElementById('dateDisplay');
+if (dateDisplay) {
+const now = new Date();
+const options = {
+weekday: 'long',
+
+year: 'numeric',
+month: 'long',
+day: 'numeric'
+};
+dateDisplay.textContent = now.toLocaleDateString('en-US', options);
+}
+}
+
+function logout() {
+localStorage.removeItem('khizr_assistant_gate');
+localStorage.removeItem('khizr_assistant_auth');
+window.location.href = 'index.html';
+}
+
+function checkAppAuth() {
+const gateAuth = localStorage.getItem('khizr_assistant_gate');
+if (!gateAuth) {
+window.location.href = 'index.html';
+return;
+}
+
+try {
+const authData = JSON.parse(gateAuth);
+if (!authData.authenticated || Date.now() > authData.expires) {
+localStorage.removeItem('khizr_assistant_gate');
+window.location.href = 'index.html';
+return;
+}
+} catch (error) {
+localStorage.removeItem('khizr_assistant_gate');
+window.location.href = 'index.html';
+return;
+}
+}
+
+// Load saved data from localStorage
+function loadSavedData() {
+const savedTasks = localStorage.getItem('khizr_processed_tasks');
+const savedResearch = localStorage.getItem('khizr_processed_research');
+const savedNotes = localStorage.getItem('khizr_processed_notes');
+
+if (savedTasks) {
+try {
+processedTasks = JSON.parse(savedTasks);
+} catch (e) {
+processedTasks = [];
+}
+}
+
+if (savedResearch) {
+try {
+processedResearch = JSON.parse(savedResearch);
+} catch (e) {
+processedResearch = [];
+}
+}
+
+if (savedNotes) {
+try {
+processedNotes = JSON.parse(savedNotes);
+} catch (e) {
+processedNotes = [];
+}
+}
+
+updateDashboard();
+}
+
+// Save data to localStorage
+function saveDataToStorage() {
+localStorage.setItem('khizr_processed_tasks', JSON.stringify(processedTasks));
+localStorage.setItem('khizr_processed_research', JSON.stringify(processedResearch));
+localStorage.setItem('khizr_processed_notes', JSON.stringify(processedNotes));
+}
+
+// Auto-save data when it changes
+function autoSave() {
+saveDataToStorage();
+}
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', function() {
+updateDateDisplay();
+checkAppAuth();
+loadSavedData();
+
+// Load saved theme
+const savedTheme = localStorage.getItem('theme') || 'purple';
+setTheme(savedTheme);
+
+// Auto-save every 30 seconds
+setInterval(autoSave, 30000);
+
+// Save before page unload
+window.addEventListener('beforeunload', autoSave);
+});
+
+</script>
+
 </body>
 </html>
