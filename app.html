@@ -173,6 +173,7 @@
         .task-item {
             display: flex;
             align-items: center;
+            justify-content: space-between;
             padding: 8px 0;
             transition: all 0.2s ease;
             cursor: pointer;
@@ -183,17 +184,44 @@
             padding-left: 12px;
         }
 
-        .task-number {
-            color: var(--text-secondary);
-            font-size: 11px;
-            margin-right: 16px;
-            min-width: 20px;
-            font-weight: 500;
-        }
-
         .task-title {
             font-weight: 400;
             flex: 1;
+        }
+
+        .task-actions {
+            display: flex;
+            gap: 4px;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        .task-item:hover .task-actions {
+            opacity: 1;
+        }
+
+        .task-action-btn {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 12px;
+            padding: 2px;
+            border-radius: 2px;
+            transition: all 0.2s ease;
+        }
+
+        .task-action-btn:hover {
+            color: var(--primary);
+            background: rgba(139, 92, 246, 0.1);
+        }
+
+        /* Date Display */
+        .date-display {
+            font-size: 16px;
+            font-weight: 500;
+            color: var(--text-primary);
+            text-transform: capitalize;
         }
 
         /* Time-bound Events - Terminal Style */
@@ -300,7 +328,7 @@
             color: var(--text-primary);
         }
 
-        /* Project View */
+        /* Project View - Neumorphism Style */
         .project-view {
             display: none;
         }
@@ -309,53 +337,6 @@
             display: block;
         }
 
-        .project-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 20px;
-        }
-
-        .project-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            padding: 20px;
-            transition: all 0.2s ease;
-            cursor: pointer;
-            position: relative;
-        }
-
-        .project-card:hover {
-            border-color: var(--primary);
-        }
-
-        .project-title {
-            font-weight: 600;
-            margin-bottom: 8px;
-            font-size: 14px;
-        }
-
-        .project-meta {
-            color: var(--text-secondary);
-            font-size: 12px;
-            margin-bottom: 16px;
-        }
-
-        .progress-bar-container {
-            background: var(--border);
-            height: 2px;
-            border-radius: 1px;
-            overflow: hidden;
-        }
-
-        .progress-bar {
-            background: var(--primary);
-            height: 100%;
-            border-radius: 1px;
-            transition: width 0.3s ease;
-        }
-
-        /* Project Landing - Side Projects on Hover */
         .project-landing {
             display: block;
         }
@@ -367,64 +348,362 @@
         .main-project {
             background: var(--bg-card);
             border: 1px solid var(--border);
-            border-radius: 6px;
-            padding: 24px;
-            margin-bottom: 24px;
+            border-radius: 8px;
+            padding: 16px 20px;
+            margin-bottom: 16px;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: all 0.3s ease;
             position: relative;
+            box-shadow: 
+                0 2px 4px rgba(0, 0, 0, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.05);
         }
 
         .main-project:hover {
             border-color: var(--primary);
+            box-shadow: 
+                0 4px 8px rgba(0, 0, 0, 0.2),
+                0 2px 4px rgba(139, 92, 246, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            transform: translateY(-1px);
         }
 
         .main-project-title {
-            font-size: 18px;
+            font-size: 16px;
             font-weight: 600;
-            margin-bottom: 8px;
+            margin-bottom: 4px;
             color: var(--text-primary);
         }
 
         .main-project-desc {
             color: var(--text-secondary);
-            font-size: 13px;
-            margin-bottom: 16px;
+            font-size: 12px;
+            margin-bottom: 12px;
         }
 
         .side-projects {
             position: absolute;
             left: 100%;
             top: 0;
-            margin-left: 20px;
+            margin-left: 16px;
             background: var(--bg-card);
             border: 1px solid var(--border);
             border-radius: 6px;
-            padding: 16px;
-            min-width: 200px;
+            padding: 12px;
+            min-width: 180px;
             opacity: 0;
             pointer-events: none;
-            transition: all 0.2s ease;
+            transition: all 0.3s ease;
             z-index: 10;
+            box-shadow: 
+                0 4px 12px rgba(0, 0, 0, 0.15),
+                inset 0 1px 0 rgba(255, 255, 255, 0.05);
         }
 
         .main-project:hover .side-projects {
             opacity: 1;
             pointer-events: all;
+            transform: translateX(4px);
         }
 
         .side-project-item {
-            padding: 8px 12px;
-            margin: 4px 0;
+            padding: 6px 10px;
+            margin: 2px 0;
             cursor: pointer;
             transition: all 0.2s ease;
             border-radius: 4px;
             font-size: 13px;
+            color: var(--text-secondary);
+            border: 1px solid transparent;
         }
 
         .side-project-item:hover {
             background: rgba(139, 92, 246, 0.1);
             color: var(--primary);
+            border-color: var(--primary);
+            box-shadow: 
+                0 2px 4px rgba(139, 92, 246, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        }
+
+        .side-project-item .sub-tasks {
+            margin-top: 8px;
+            padding-left: 12px;
+            border-left: 1px solid var(--border);
+            display: none;
+        }
+
+        .side-project-item:hover .sub-tasks {
+            display: block;
+        }
+
+        .sub-task-item {
+            padding: 4px 8px;
+            margin: 2px 0;
+            font-size: 11px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            border-radius: 3px;
+            transition: all 0.2s ease;
+        }
+
+        .sub-task-item:hover {
+            background: rgba(139, 92, 246, 0.05);
+            color: var(--text-primary);
+        }
+
+        /* Tasks View */
+        .tasks-view {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .tasks-header {
+            margin-bottom: 32px;
+        }
+
+        .tasks-summary {
+            color: var(--text-secondary);
+            font-size: 13px;
+            margin-top: 8px;
+        }
+
+        .tasks-list {
+            margin-bottom: 40px;
+        }
+
+        .task-item-detailed {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            margin-bottom: 8px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            transition: all 0.2s ease;
+            box-shadow: 
+                0 1px 3px rgba(0, 0, 0, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.05);
+        }
+
+        .task-item-detailed:hover {
+            border-color: var(--primary);
+            box-shadow: 
+                0 2px 6px rgba(0, 0, 0, 0.15),
+                0 1px 3px rgba(139, 92, 246, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        }
+
+        .task-content {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex: 1;
+        }
+
+        .task-checkbox {
+            width: 16px;
+            height: 16px;
+            border: 1px solid var(--border);
+            border-radius: 3px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .task-checkbox.checked {
+            background: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .task-title-detailed {
+            font-size: 14px;
+            color: var(--text-primary);
+        }
+
+        .task-title-detailed.completed {
+            text-decoration: line-through;
+            color: var(--text-secondary);
+        }
+
+        .task-actions-detailed {
+            display: flex;
+            gap: 8px;
+        }
+
+        .task-action-btn-detailed {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 12px;
+            padding: 4px;
+            border-radius: 3px;
+            transition: all 0.2s ease;
+        }
+
+        .task-action-btn-detailed:hover {
+            color: var(--primary);
+            background: rgba(139, 92, 246, 0.1);
+        }
+
+        .add-task-section {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 20px;
+            box-shadow: 
+                0 1px 3px rgba(0, 0, 0, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.05);
+        }
+
+        .add-task-form {
+            display: flex;
+            gap: 12px;
+            margin-top: 12px;
+        }
+
+        .task-input {
+            flex: 1;
+            background: transparent;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 8px 12px;
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 13px;
+            transition: border-color 0.2s ease;
+        }
+
+        .task-input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .task-input::placeholder {
+            color: var(--text-secondary);
+        }
+
+        .add-task-btn {
+            background: var(--primary);
+            border: none;
+            border-radius: 4px;
+            padding: 8px 16px;
+            color: white;
+            cursor: pointer;
+            font-size: 12px;
+            font-family: inherit;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .add-task-btn:hover {
+            opacity: 0.9;
+        }
+
+        /* Mind Page */
+        .mind-view {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .mind-content {
+            display: grid;
+            gap: 40px;
+        }
+
+        .mind-section {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 24px;
+            box-shadow: 
+                0 1px 3px rgba(0, 0, 0, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.05);
+        }
+
+        .mind-prompt {
+            color: var(--text-accent);
+            font-size: 12px;
+            margin-bottom: 12px;
+            font-weight: 500;
+        }
+
+        .mind-textarea {
+            width: 100%;
+            min-height: 120px;
+            background: transparent;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 16px;
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 13px;
+            resize: vertical;
+            transition: border-color 0.2s ease;
+        }
+
+        .mind-textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .mind-textarea::placeholder {
+            color: var(--text-secondary);
+            font-style: italic;
+        }
+
+        .mind-save-btn {
+            background: var(--primary);
+            border: none;
+            border-radius: 4px;
+            padding: 8px 16px;
+            color: white;
+            cursor: pointer;
+            font-size: 12px;
+            font-family: inherit;
+            font-weight: 500;
+            margin-top: 12px;
+            transition: all 0.2s ease;
+        }
+
+        .mind-save-btn:hover {
+            opacity: 0.9;
+        }
+
+        .mind-history {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 24px;
+            box-shadow: 
+                0 1px 3px rgba(0, 0, 0, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.05);
+        }
+
+        .mind-history-list {
+            margin-top: 16px;
+        }
+
+        .mind-note {
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .mind-note:last-child {
+            border-bottom: none;
+        }
+
+        .mind-note-content {
+            color: var(--text-primary);
+            font-size: 13px;
+            line-height: 1.5;
+            margin-bottom: 4px;
+        }
+
+        .mind-note-date {
+            color: var(--text-secondary);
+            font-size: 11px;
         }
 
         /* Individual Project Page */
@@ -692,21 +971,39 @@
         <!-- Today View -->
         <div id="today-view" class="today-view">
             <div class="main-content">
+                <!-- Date Display -->
+                <div class="code-card">
+                    <div class="section-header">today</div>
+                    <div class="date-display" id="dateDisplay"></div>
+                </div>
+
                 <!-- Top 3 Tasks -->
                 <div class="code-card">
                     <div class="section-header">top3</div>
                     <ul class="task-list">
                         <li class="task-item">
-                            <span class="task-number">1.</span>
                             <span class="task-title">sell bidu</span>
+                            <div class="task-actions">
+                                <button class="task-action-btn" onclick="archiveTask(1)" title="Archive">📁</button>
+                                <button class="task-action-btn" onclick="addToCalendar(1)" title="Add to Calendar">📅</button>
+                                <button class="task-action-btn" onclick="deleteTask(1)" title="Delete">🗑️</button>
+                            </div>
                         </li>
                         <li class="task-item">
-                            <span class="task-number">2.</span>
                             <span class="task-title">review quarterly plan</span>
+                            <div class="task-actions">
+                                <button class="task-action-btn" onclick="archiveTask(2)" title="Archive">📁</button>
+                                <button class="task-action-btn" onclick="addToCalendar(2)" title="Add to Calendar">📅</button>
+                                <button class="task-action-btn" onclick="deleteTask(2)" title="Delete">🗑️</button>
+                            </div>
                         </li>
                         <li class="task-item">
-                            <span class="task-number">3.</span>
                             <span class="task-title">call mom</span>
+                            <div class="task-actions">
+                                <button class="task-action-btn" onclick="archiveTask(3)" title="Archive">📁</button>
+                                <button class="task-action-btn" onclick="addToCalendar(3)" title="Add to Calendar">📅</button>
+                                <button class="task-action-btn" onclick="deleteTask(3)" title="Delete">🗑️</button>
+                            </div>
                         </li>
                     </ul>
                 </div>
@@ -767,20 +1064,30 @@
                     <div class="main-project" onclick="openProject('website-redesign')">
                         <div class="main-project-title">website redesign</div>
                         <div class="main-project-desc">3/5 tasks completed • Due next week</div>
-                        <div class="progress-bar-container">
-                            <div class="progress-bar" style="width: 60%"></div>
-                        </div>
                         
                         <!-- Side projects appear on hover -->
                         <div class="side-projects">
                             <div class="side-project-item" onclick="event.stopPropagation(); openProject('frontend-redesign')">
                                 frontend redesign
+                                <div class="sub-tasks">
+                                    <div class="sub-task-item" onclick="event.stopPropagation(); openTask('wireframes')">wireframes</div>
+                                    <div class="sub-task-item" onclick="event.stopPropagation(); openTask('components')">components</div>
+                                    <div class="sub-task-item" onclick="event.stopPropagation(); openTask('responsive')">responsive</div>
+                                </div>
                             </div>
                             <div class="side-project-item" onclick="event.stopPropagation(); openProject('backend-api')">
                                 backend api
+                                <div class="sub-tasks">
+                                    <div class="sub-task-item" onclick="event.stopPropagation(); openTask('auth')">authentication</div>
+                                    <div class="sub-task-item" onclick="event.stopPropagation(); openTask('endpoints')">endpoints</div>
+                                </div>
                             </div>
                             <div class="side-project-item" onclick="event.stopPropagation(); openProject('database-migration')">
                                 database migration
+                                <div class="sub-tasks">
+                                    <div class="sub-task-item" onclick="event.stopPropagation(); openTask('schema')">schema design</div>
+                                    <div class="sub-task-item" onclick="event.stopPropagation(); openTask('migration')">migration scripts</div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -952,6 +1259,59 @@
             </div>
         </div>
 
+        <!-- Tasks View -->
+        <div id="tasks-view" class="tasks-view" style="display:none">
+            <button class="back-btn" onclick="backToProject()">← back to project</button>
+            
+            <div class="tasks-header">
+                <div class="section-header" id="tasks-project-title">project tasks</div>
+                <div class="tasks-summary" id="tasks-summary">Loading tasks...</div>
+            </div>
+
+            <div class="tasks-list" id="tasks-list">
+                <!-- Tasks will be populated here -->
+            </div>
+
+            <div class="add-task-section">
+                <div class="section-header">add task</div>
+                <div class="add-task-form">
+                    <input type="text" id="newTaskInput" class="task-input" placeholder="Enter task title...">
+                    <button class="add-task-btn" onclick="addNewTask()">add</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mind Page View -->
+        <div id="mind-view" class="mind-view" style="display:none">
+            <div class="section-header">on my mind</div>
+            
+            <div class="mind-content">
+                <div class="mind-section">
+                    <div class="mind-prompt">What's currently on your mind?</div>
+                    <textarea 
+                        id="mindInput" 
+                        class="mind-textarea" 
+                        placeholder="Share your thoughts, ideas, concerns, or anything that's occupying your mental space..."
+                    ></textarea>
+                    <button class="mind-save-btn" onclick="saveMindNote()">save thought</button>
+                </div>
+                
+                <div class="mind-history">
+                    <div class="section-header">recent thoughts</div>
+                    <div id="mindHistory" class="mind-history-list">
+                        <div class="mind-note">
+                            <div class="mind-note-content">Need to figure out the best approach for the new project architecture</div>
+                            <div class="mind-note-date">2 hours ago</div>
+                        </div>
+                        <div class="mind-note">
+                            <div class="mind-note-content">Should I learn that new framework everyone's talking about?</div>
+                            <div class="mind-note-date">Yesterday</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Big Page View -->
         <div id="bigpage-view" class="bigpage-view" style="display:none">
           <div class="section-header">big page</div>
@@ -1095,7 +1455,39 @@ function processAINote() {
 
 // On My Mind page
 function showMindPage() {
-  console.log('Opening mind page...');
+    // Hide all views
+    document.querySelectorAll('[id$="-view"]').forEach(view => {
+        view.style.display = 'none';
+        view.classList.remove('active');
+    });
+
+    // Show mind view
+    document.getElementById('mind-view').style.display = 'block';
+    document.getElementById('mind-view').classList.add('active');
+
+    // Update nav buttons
+    document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+}
+
+function saveMindNote() {
+    const input = document.getElementById('mindInput');
+    const content = input.value.trim();
+    
+    if (!content) return;
+    
+    console.log('Saving mind note:', content);
+    // TODO: Implement with backend
+    
+    // Clear input
+    input.value = '';
+    
+    // Show success feedback
+    const btn = document.querySelector('.mind-save-btn');
+    const originalText = btn.textContent;
+    btn.textContent = 'saved!';
+    setTimeout(() => {
+        btn.textContent = originalText;
+    }, 1000);
 }
 
 // Project navigation
@@ -1334,6 +1726,336 @@ window.openProject = openProject;
 window.backToProjects = backToProjects;
 window.updateProjectDetail = updateProjectDetail;
 window.goToTasks = goToTasks;
+
+// New functionality
+let currentProjectId = null;
+let currentTasks = [];
+
+// Initialize date display
+function updateDateDisplay() {
+    const dateDisplay = document.getElementById('dateDisplay');
+    if (dateDisplay) {
+        const now = new Date();
+        const options = { 
+            weekday: 'long', 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric' 
+        };
+        dateDisplay.textContent = now.toLocaleDateString('en-US', options);
+    }
+}
+
+// API Integration
+async function apiCall(endpoint, options = {}) {
+    const token = localStorage.getItem('khizr_assistant_auth');
+    const headers = {
+        'Content-Type': 'application/json',
+        ...(token && { 'Authorization': `Bearer ${JSON.parse(token).token}` }),
+        ...options.headers
+    };
+
+    try {
+        const response = await fetch(`${API_URL}${endpoint}`, {
+            ...options,
+            headers
+        });
+
+        if (!response.ok) {
+            throw new Error(`API Error: ${response.status}`);
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error('API call failed:', error);
+        throw error;
+    }
+}
+
+// Enhanced task management functions
+async function archiveTask(taskId) {
+    try {
+        await apiCall(`/api/tasks/${taskId}`, {
+            method: 'PUT',
+            body: JSON.stringify({ status: 'archived' })
+        });
+        console.log('Task archived successfully');
+        // Refresh tasks if on tasks view
+        if (currentProjectId) {
+            loadProjectTasks(currentProjectId);
+        }
+    } catch (error) {
+        console.error('Failed to archive task:', error);
+    }
+}
+
+async function deleteTask(taskId) {
+    try {
+        await apiCall(`/api/tasks/${taskId}`, {
+            method: 'DELETE'
+        });
+        console.log('Task deleted successfully');
+        // Refresh tasks if on tasks view
+        if (currentProjectId) {
+            loadProjectTasks(currentProjectId);
+        }
+    } catch (error) {
+        console.error('Failed to delete task:', error);
+    }
+}
+
+async function addToCalendar(taskId) {
+    // This would integrate with calendar APIs (Google Calendar, etc.)
+    console.log('Adding task to calendar:', taskId);
+    // TODO: Implement calendar integration
+}
+
+// Enhanced project tasks loading
+async function loadProjectTasks(projectId) {
+    try {
+        const tasks = await apiCall(`/api/tasks?project_id=${projectId}`);
+        currentTasks = tasks;
+        renderTasks(tasks);
+        
+        const projectTitle = document.getElementById('project-detail-title')?.textContent || 'Project';
+        document.getElementById('tasks-project-title').textContent = `${projectTitle} tasks`;
+        
+        const completedCount = tasks.filter(t => t.status === 'completed').length;
+        const totalCount = tasks.length;
+        document.getElementById('tasks-summary').textContent = `${completedCount} of ${totalCount} tasks completed`;
+    } catch (error) {
+        console.error('Failed to load project tasks:', error);
+        // Fallback to mock data
+        const mockTasks = [
+            { id: 1, title: 'Create wireframes', status: 'completed' },
+            { id: 2, title: 'Design components', status: 'pending' },
+            { id: 3, title: 'Implement responsive design', status: 'pending' },
+            { id: 4, title: 'Test on mobile devices', status: 'pending' }
+        ];
+        currentTasks = mockTasks;
+        renderTasks(mockTasks);
+    }
+}
+
+// Enhanced task creation
+async function addNewTask() {
+    const input = document.getElementById('newTaskInput');
+    const title = input.value.trim();
+    
+    if (!title || !currentProjectId) return;
+    
+    try {
+        const newTask = await apiCall('/api/tasks', {
+            method: 'POST',
+            body: JSON.stringify({
+                title: title,
+                project_id: currentProjectId,
+                priority: 3,
+                status: 'pending'
+            })
+        });
+        
+        currentTasks.push(newTask);
+        renderTasks(currentTasks);
+        input.value = '';
+        console.log('Task created successfully');
+    } catch (error) {
+        console.error('Failed to create task:', error);
+        // Fallback to local creation
+        const fallbackTask = {
+            id: Date.now(),
+            title: title,
+            status: 'pending'
+        };
+        currentTasks.push(fallbackTask);
+        renderTasks(currentTasks);
+        input.value = '';
+    }
+}
+
+// Enhanced task toggle
+async function toggleTask(taskId) {
+    const task = currentTasks.find(t => t.id === taskId);
+    if (!task) return;
+    
+    const newStatus = task.status === 'completed' ? 'pending' : 'completed';
+    
+    try {
+        await apiCall(`/api/tasks/${taskId}`, {
+            method: 'PUT',
+            body: JSON.stringify({ status: newStatus })
+        });
+        
+        task.status = newStatus;
+        renderTasks(currentTasks);
+        console.log('Task status updated successfully');
+    } catch (error) {
+        console.error('Failed to update task status:', error);
+        // Revert the change
+        task.status = task.status === 'completed' ? 'pending' : 'completed';
+        renderTasks(currentTasks);
+    }
+}
+
+// Enhanced mind note saving
+async function saveMindNote() {
+    const input = document.getElementById('mindInput');
+    const content = input.value.trim();
+    
+    if (!content) return;
+    
+    try {
+        await apiCall('/api/ingest', {
+            method: 'POST',
+            body: JSON.stringify({
+                text: content,
+                user_id: 'current_user' // This should come from auth
+            })
+        });
+        
+        input.value = '';
+        console.log('Mind note saved successfully');
+        
+        // Show success feedback
+        const btn = document.querySelector('.mind-save-btn');
+        const originalText = btn.textContent;
+        btn.textContent = 'saved!';
+        setTimeout(() => {
+            btn.textContent = originalText;
+        }, 1000);
+    } catch (error) {
+        console.error('Failed to save mind note:', error);
+        // Show error feedback
+        const btn = document.querySelector('.mind-save-btn');
+        const originalText = btn.textContent;
+        btn.textContent = 'error!';
+        setTimeout(() => {
+            btn.textContent = originalText;
+        }, 1000);
+    }
+}
+
+// Project and task navigation
+function openTask(taskId) {
+    console.log('Opening task:', taskId);
+    // TODO: Implement task detail view
+}
+
+function goToTasks() {
+    if (!currentProjectId) return;
+    
+    // Hide all views
+    document.querySelectorAll('[id$="-view"]').forEach(view => {
+        view.style.display = 'none';
+        view.classList.remove('active');
+    });
+
+    // Show tasks view
+    document.getElementById('tasks-view').style.display = 'block';
+    document.getElementById('tasks-view').classList.add('active');
+
+    // Load tasks for current project
+    loadProjectTasks(currentProjectId);
+}
+
+function backToProject() {
+    // Hide tasks view
+    document.getElementById('tasks-view').style.display = 'none';
+    document.getElementById('tasks-view').classList.remove('active');
+    
+    // Show project detail view
+    document.getElementById('project-detail').style.display = 'block';
+    document.getElementById('project-detail').classList.add('active');
+}
+
+function loadProjectTasks(projectId) {
+    const projectTitle = document.getElementById('project-detail-title')?.textContent || 'Project';
+    document.getElementById('tasks-project-title').textContent = `${projectTitle} tasks`;
+    
+    // Mock tasks data - replace with actual API call
+    const mockTasks = [
+        { id: 1, title: 'Create wireframes', completed: true },
+        { id: 2, title: 'Design components', completed: false },
+        { id: 3, title: 'Implement responsive design', completed: false },
+        { id: 4, title: 'Test on mobile devices', completed: false }
+    ];
+    
+    currentTasks = mockTasks;
+    renderTasks(mockTasks);
+}
+
+function renderTasks(tasks) {
+    const tasksList = document.getElementById('tasks-list');
+    const tasksSummary = document.getElementById('tasks-summary');
+    
+    const completedCount = tasks.filter(t => t.status === 'completed').length;
+    const totalCount = tasks.length;
+    
+    tasksSummary.textContent = `${completedCount} of ${totalCount} tasks completed`;
+    
+    tasksList.innerHTML = tasks.map(task => `
+        <div class="task-item-detailed">
+            <div class="task-content">
+                <div class="task-checkbox ${task.status === 'completed' ? 'checked' : ''}" 
+                     onclick="toggleTask(${task.id})"></div>
+                <div class="task-title-detailed ${task.status === 'completed' ? 'completed' : ''}">${task.title}</div>
+            </div>
+            <div class="task-actions-detailed">
+                <button class="task-action-btn-detailed" onclick="archiveTask(${task.id})" title="Archive">📁</button>
+                <button class="task-action-btn-detailed" onclick="addToCalendar(${task.id})" title="Add to Calendar">📅</button>
+                <button class="task-action-btn-detailed" onclick="deleteTask(${task.id})" title="Delete">🗑️</button>
+            </div>
+        </div>
+    `).join('');
+}
+
+function toggleTask(taskId) {
+    const task = currentTasks.find(t => t.id === taskId);
+    if (task) {
+        task.completed = !task.completed;
+        renderTasks(currentTasks);
+    }
+}
+
+function addNewTask() {
+    const input = document.getElementById('newTaskInput');
+    const title = input.value.trim();
+    
+    if (!title) return;
+    
+    const newTask = {
+        id: Date.now(),
+        title: title,
+        completed: false
+    };
+    
+    currentTasks.push(newTask);
+    renderTasks(currentTasks);
+    input.value = '';
+}
+
+// Update openProject to store current project ID
+function openProject(projectId) {
+    currentProjectId = projectId;
+    document.getElementById('project-landing')?.classList.add('hidden');
+    document.getElementById('project-detail')?.classList.add('active');
+    updateProjectDetail(projectId);
+}
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', function() {
+    updateDateDisplay();
+    
+    // Add Enter key support for new task input
+    const newTaskInput = document.getElementById('newTaskInput');
+    if (newTaskInput) {
+        newTaskInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                addNewTask();
+            }
+        });
+    }
+});
 
 </script>
 </body>
