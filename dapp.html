@@ -1114,6 +1114,9 @@
                     <div class="main-project" onclick="openProject('health-goals')">
                         <div class="main-project-title">health goals</div>
                         <div class="main-project-desc">1/3 tasks completed • Ongoing</div>
+                        <div class="progress-bar-container">
+                            <div class="progress-bar" style="width: 33%"></div>
+                        </div>
                         
                         <div class="side-projects">
                             <div class="side-project-item" onclick="event.stopPropagation(); openProject('gym-routine')">
@@ -1132,6 +1135,9 @@
                     <div class="main-project" onclick="openProject('learn-react')">
                         <div class="main-project-title">learn react</div>
                         <div class="main-project-desc">2/8 tasks completed • 2 months left</div>
+                        <div class="progress-bar-container">
+                            <div class="progress-bar" style="width: 25%"></div>
+                        </div>
                         
                         <div class="side-projects">
                             <div class="side-project-item" onclick="event.stopPropagation(); openProject('react-basics')">
@@ -1153,6 +1159,9 @@
                     <div class="main-project" onclick="openProject('personal-finance')">
                         <div class="main-project-title">personal finance</div>
                         <div class="main-project-desc">5/7 tasks completed • On track</div>
+                        <div class="progress-bar-container">
+                            <div class="progress-bar" style="width: 71%"></div>
+                        </div>
                         
                         <div class="side-projects">
                             <div class="side-project-item" onclick="event.stopPropagation(); openProject('budget-tracking')">
@@ -1171,6 +1180,9 @@
                     <div class="main-project" onclick="openProject('side-business')">
                         <div class="main-project-title">side business</div>
                         <div class="main-project-desc">0/12 tasks completed • Just started</div>
+                        <div class="progress-bar-container">
+                            <div class="progress-bar" style="width: 5%"></div>
+                        </div>
                         
                         <div class="side-projects">
                             <div class="side-project-item" onclick="event.stopPropagation(); openProject('market-research')">
@@ -1195,6 +1207,9 @@
                     <div class="main-project" onclick="openProject('home-improvement')">
                         <div class="main-project-title">home improvement</div>
                         <div class="main-project-desc">3/6 tasks completed • Summer project</div>
+                        <div class="progress-bar-container">
+                            <div class="progress-bar" style="width: 50%"></div>
+                        </div>
                         
                         <div class="side-projects">
                             <div class="side-project-item" onclick="event.stopPropagation(); openProject('kitchen-renovation')">
@@ -1337,8 +1352,47 @@
         </div>
     </div>
 
-    <script>
-// ========= WORKING APP LOGIC =========
+    <script type="module">
+/* ========= Supabase Auth: init + token sync ========= */
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+const SUPABASE_URL = "https://tugoaqoadsqbvgckkoqf.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR1Z29hcW9hZHNxYnZnY2trb3FmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY2NzkyMTAsImV4cCI6MjA3MjI1NTIxMH0.WU3b_pnTungZgPDcBhEVEzVugJYdIvMu_cE-zhGjvP4";
+
+export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+async function saveTokenFromSession() {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (session?.access_token) {
+    localStorage.setItem("khizr_assistant_auth", JSON.stringify({ token: session.access_token }));
+    console.log("🔑 access_token saved");
+  }
+}
+
+// run once on load + keep in sync on changes
+await saveTokenFromSession();
+supabase.auth.onAuthStateChange((_event, session) => {
+  if (session?.access_token) {
+    localStorage.setItem("khizr_assistant_auth", JSON.stringify({ token: session.access_token }));
+    console.log("🔑 access_token updated");
+  } else {
+    localStorage.removeItem("khizr_assistant_auth");
+    console.log("🚪 logged out");
+  }
+});
+
+// (optional) quick helpers you can call from console or buttons
+window.supabaseSignIn = async (email, password) => {
+  const { error } = await supabase.auth.signInWithPassword({ email, password });
+  if (error) alert(error.message);
+  else await saveTokenFromSession();
+};
+window.supabaseSignOut = async () => {
+  await supabase.auth.signOut();
+};
+
+
+/* ========= Your app logic (preserved) ========= */
 const API_URL = "https://khizr-assistant-api.onrender.com";
 
 // Theme switching
@@ -2054,6 +2108,7 @@ function checkAppAuth() {
 
 // Run auth check on page load
 checkAppAuth();
+
 </script>
 </body>
 </html>

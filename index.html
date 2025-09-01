@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Access Required</title>
+  <title>Khizr Assistant - Login</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&display=swap');
     :root { --primary:#8B5CF6; --bg:#0A0A0B; --bg-card:#111115; --text-primary:#E4E4E7; --text-secondary:#71717A; --border:#27272A; }
     * { margin:0; padding:0; box-sizing:border-box; }
-    body { font-family:'JetBrains Mono',monospace; background:var(--bg); color:var(--text-primary); min-height:100vh; display:flex; align-items:center; justify-content:center; font-size:14px; }
+    body { font-family:'JetBrains+Mono',monospace; background:var(--bg); color:var(--text-primary); min-height:100vh; display:flex; align-items:center; justify-content:center; font-size:14px; }
     .auth-container { background:var(--bg-card); border:1px solid var(--border); border-radius:6px; padding:40px; width:100%; max-width:400px; text-align:center; }
     .logo { font-size:18px; font-weight:600; color:var(--primary); margin-bottom:8px; }
     .subtitle { color:var(--text-secondary); font-size:12px; margin-bottom:32px; }
@@ -32,16 +32,27 @@
 <body>
   <div class="auth-container">
     <div class="logo">khizr.assistant</div>
-    <div class="subtitle">secure access required</div>
+    <div class="subtitle">secure login</div>
 
     <form id="loginForm" autocomplete="off">
+      <div class="input-group">
+        <label class="input-label" for="email">email</label>
+        <input
+          type="email"
+          id="email"
+          class="input-field"
+          placeholder="enter your email"
+          required
+        />
+      </div>
+
       <div class="input-group pw-row">
-        <label class="input-label" for="password">access code</label>
+        <label class="input-label" for="password">password</label>
         <input
           type="password"
           id="password"
           class="input-field"
-          placeholder="enter your access code"
+          placeholder="enter your password"
           required
         />
         <span id="togglePw" class="toggle">show</span>
@@ -49,26 +60,28 @@
 
       <button type="submit" class="login-btn" id="loginBtn">
         <div class="btn-content">
-          <span id="btnText">access system</span>
+          <span id="btnText">sign in</span>
           <div class="loading" id="loading"></div>
         </div>
       </button>
 
-      <div class="error-msg" id="errorMsg">invalid access code</div>
+      <div class="error-msg" id="errorMsg">invalid credentials</div>
     </form>
 
     <div class="footer">authorized personnel only</div>
     <div class="footer" style="margin-top: 8px; font-size: 9px; opacity: 0.6;">
-      Access Code: starwars2
+      Test: admin@khizr.com / admin123
     </div>
   </div>
 
   <script>
-    // Do NOT reuse the Supabase token key. Keep this gate separate.
+    // Simple authentication for now - will integrate with backend later
     const CONFIG = {
-      PASSWORD: 'starwars2',             // 👈 change if needed
-      GATE_KEY: 'khizr_assistant_gate',  // gate session key (separate from Supabase token)
-      DURATION_MS: 24 * 60 * 60 * 1000   // 24h
+      USERS: [
+        { email: 'admin@khizr.com', password: 'admin123', name: 'Khizr Admin' }
+      ],
+      GATE_KEY: 'khizr_assistant_gate',
+      DURATION_MS: 24 * 60 * 60 * 1000
     };
 
     function safeParse(json) {
@@ -109,29 +122,43 @@
     // Form handler
     document.getElementById('loginForm').addEventListener('submit', async (e) => {
       e.preventDefault();
+      const email = document.getElementById('email').value;
       const password = document.getElementById('password').value;
       const loginBtn = document.getElementById('loginBtn');
       const btnText = document.getElementById('btnText');
-      const loading  = document.getElementById('loading');
+      const loading = document.getElementById('loading');
       const errorMsg = document.getElementById('errorMsg');
 
-      loginBtn.disabled = true; btnText.style.display = 'none'; loading.style.display = 'block'; errorMsg.style.display = 'none';
+      loginBtn.disabled = true; 
+      btnText.style.display = 'none'; 
+      loading.style.display = 'block'; 
+      errorMsg.style.display = 'none';
 
       await new Promise(r => setTimeout(r, 300)); // small UX delay
 
-      if (password === CONFIG.PASSWORD) {
-        const session = { authenticated: true, expires: Date.now() + CONFIG.DURATION_MS, ts: Date.now() };
+      // Check credentials
+      const user = CONFIG.USERS.find(u => u.email === email && u.password === password);
+      
+      if (user) {
+        const session = { 
+          authenticated: true, 
+          expires: Date.now() + CONFIG.DURATION_MS, 
+          ts: Date.now(),
+          user: { email: user.email, name: user.name }
+        };
         localStorage.setItem(CONFIG.GATE_KEY, JSON.stringify(session));
         window.location.href = 'app.html';
       } else {
+        errorMsg.textContent = 'Invalid email or password';
         errorMsg.style.display = 'block';
-        loginBtn.disabled = false; btnText.style.display = 'block'; loading.style.display = 'none';
-        const pw = document.getElementById('password'); pw.value = ''; pw.focus();
+        loginBtn.disabled = false; 
+        btnText.style.display = 'block'; 
+        loading.style.display = 'none';
       }
     });
 
     // Autofocus
-    document.getElementById('password').focus();
+    document.getElementById('email').focus();
   </script>
 </body>
 </html>
