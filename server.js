@@ -9,6 +9,7 @@ const taskRoutes = require('./routes/tasks');
 const projectRoutes = require('./routes/projects');
 const goalRoutes = require('./routes/goals');
 const aiRoutes = require('./routes/ai');
+const ingestRoutes = require('./routes/ingest');
 
 const { logger } = require('./utils/logger');
 
@@ -46,7 +47,7 @@ app.use('/api/tasks', taskRoutes);
 app.use('/api/projects', projectRoutes);
 app.use('/api/goals', goalRoutes);
 app.use('/api/ai', aiRoutes);
-
+app.use('/api/ingest', ingestRoutes);
 // Health check endpoint
 app.get('/', (req, res) => {
     res.json({ 
