@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const { query } = require('../database/connection');
+const { supabase } = require('../database/connection');
 const { logger } = require('../utils/logger');
 
 const authenticateToken = async (req, res, next) => {
@@ -14,13 +14,17 @@ const authenticateToken = async (req, res, next) => {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
         
         // Verify user still exists
-        const result = await query('SELECT id, email, name FROM users WHERE id = $1', [decoded.userId]);
+        const { data: user, error } = await supabase
+            .from('users')
+            .select('id, email, name')
+            .eq('id', decoded.userId)
+            .single();
         
-        if (result.rows.length === 0) {
+        if (error || !user) {
             return res.status(401).json({ error: 'Invalid token' });
         }
 
-        req.user = result.rows[0];
+        req.user = user;
         next();
     } catch (error) {
         logger.error('Token verification failed:', error);

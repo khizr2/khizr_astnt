@@ -1,7 +1,7 @@
 const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const { query } = require('../database/connection');
+const { supabase } = require('../database/connection');
 const { logger } = require('../utils/logger');
 
 const router = express.Router();
@@ -16,8 +16,13 @@ router.post('/register', async (req, res) => {
         }
 
         // Check if user exists
-        const existingUser = await query('SELECT id FROM users WHERE email = $1', [email]);
-        if (existingUser.rows.length > 0) {
+        const { data: existingUser, error: checkError } = await supabase
+            .from('users')
+            .select('id')
+            .eq('email', email)
+            .single();
+
+        if (existingUser) {
             return res.status(409).json({ error: 'User already exists' });
         }
 
@@ -26,12 +31,21 @@ router.post('/register', async (req, res) => {
         const passwordHash = await bcrypt.hash(password, saltRounds);
 
         // Create user
-        const result = await query(
-            'INSERT INTO users (email, password_hash, name, phone, timezone) VALUES ($1, $2, $3, $4, $5) RETURNING id, email, name',
-            [email, passwordHash, name, phone || null, timezone || 'UTC']
-        );
+        const { data: user, error: createError } = await supabase
+            .from('users')
+            .insert([{
+                email,
+                password_hash: passwordHash,
+                name,
+                phone: phone || null,
+                timezone: timezone || 'UTC'
+            }])
+            .select('id, email, name')
+            .single();
 
-        const user = result.rows[0];
+        if (createError) {
+            throw createError;
+        }
 
         // Generate JWT
         const token = jwt.sign(
@@ -62,16 +76,15 @@ router.post('/login', async (req, res) => {
         }
 
         // Find user
-        const result = await query(
-            'SELECT id, email, name, password_hash FROM users WHERE email = $1',
-            [email]
-        );
+        const { data: user, error: findError } = await supabase
+            .from('users')
+            .select('id, email, name, password_hash')
+            .eq('email', email)
+            .single();
 
-        if (result.rows.length === 0) {
+        if (findError || !user) {
             return res.status(401).json({ error: 'Invalid credentials' });
         }
-
-        const user = result.rows[0];
 
         // Verify password
         const isValidPassword = await bcrypt.compare(password, user.password_hash);
