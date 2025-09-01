@@ -36,12 +36,16 @@ router.get('/db-test', async (req, res) => {
 
 // Check environment variables
 router.get('/env-check', (req, res) => {
+    const dbUrl = process.env.DATABASE_URL;
+    const maskedDbUrl = dbUrl ? dbUrl.replace(/:[^:@]*@/, ':****@') : 'NOT_SET';
+    
     res.json({
         status: 'success',
         env: {
             NODE_ENV: process.env.NODE_ENV,
             PORT: process.env.PORT,
-            DATABASE_URL: process.env.DATABASE_URL ? 'SET' : 'NOT_SET',
+            DATABASE_URL: maskedDbUrl,
+            DATABASE_URL_LENGTH: dbUrl ? dbUrl.length : 0,
             JWT_SECRET: process.env.JWT_SECRET ? 'SET' : 'NOT_SET',
             OPENAI_API_KEY: process.env.OPENAI_API_KEY ? 'SET' : 'NOT_SET',
             GMAIL_CLIENT_ID: process.env.GMAIL_CLIENT_ID ? 'SET' : 'NOT_SET',
