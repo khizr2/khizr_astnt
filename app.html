@@ -564,6 +564,72 @@
             color: #EF4444;
         }
 
+        /* Big Page View */
+        .bigpage-view {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .big-page-input {
+            width: 100%;
+            min-height: 200px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 20px;
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 13px;
+            resize: vertical;
+            transition: border-color 0.2s ease;
+        }
+
+        .big-page-input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .big-page-input::placeholder {
+            color: var(--text-secondary);
+            font-style: italic;
+        }
+
+        .process-btn {
+            background: var(--primary);
+            border: none;
+            border-radius: 4px;
+            padding: 8px 16px;
+            color: white;
+            cursor: pointer;
+            font-size: 12px;
+            font-family: inherit;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .process-btn:hover {
+            opacity: 0.9;
+        }
+
+        .process-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .processing-status {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 16px;
+        }
+
+        .recent-entries {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 20px;
+        }
+
         /* Responsive */
         @media (max-width: 768px) {
             .container {
@@ -620,6 +686,7 @@
             <button class="nav-btn" onclick="showView('projects')">projects</button>
             <button class="nav-btn" onclick="showView('goals')">goals</button>
             <button class="nav-btn" onclick="showView('insights')">insights</button>
+            <button class="nav-btn" onclick="showView('bigpage')">big page</button>
         </nav>
 
         <!-- Today View -->
@@ -884,303 +951,390 @@
                 </div>
             </div>
         </div>
+
+        <!-- Big Page View -->
+        <div id="bigpage-view" class="bigpage-view" style="display:none">
+          <div class="section-header">big page</div>
+
+          <textarea id="bigPageInput" class="big-page-input" placeholder="Dump your thoughts here..."></textarea>
+
+          <div class="big-page-controls" style="margin-top:12px; display:flex; gap:8px; justify-content:flex-end">
+            <button id="processBigPage" class="process-btn" onclick="window.processBigPage?.()">process & organize</button>
+          </div>
+
+          <div id="processingStatus" class="processing-status" style="display:none; margin-top:12px">
+            <div id="statusMessage"></div>
+            <div id="entryPreviews" style="margin-top:8px"></div>
+          </div>
+
+          <div class="recent-entries" style="margin-top:24px">
+            <div class="section-header">recent entries</div>
+            <div id="recentEntries">Loading recent entries...</div>
+          </div>
+        </div>
     </div>
 
-    <script>
-        const API_URL = "https://khizr-assistant-api.onrender.com";
-        // Theme switching
-        function setTheme(theme) {
-            document.body.className = `theme-${theme}`;
-            
-            // Update active theme button
-            document.querySelectorAll('.theme-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            document.querySelector(`.theme-btn.${theme}`).classList.add('active');
-            
-            localStorage.setItem('theme', theme);
-        }
+    <script type="module">
+/* ========= Supabase Auth: init + token sync ========= */
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-        // Load saved theme
-        const savedTheme = localStorage.getItem('theme') || 'purple';
-        setTheme(savedTheme);
+const SUPABASE_URL = "https://tugoaqoadsqbvgckkoqf.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR1Z29hcW9hZHNxYnZnY2trb3FmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY2NzkyMTAsImV4cCI6MjA3MjI1NTIxMH0.WU3b_pnTungZgPDcBhEVEzVugJYdIvMu_cE-zhGjvP4";
 
-        // View switching
-        function showView(viewName) {
-            // Hide all views
-            document.querySelectorAll('[id$="-view"]').forEach(view => {
-                view.style.display = 'none';
-                view.classList.remove('active');
-            });
+export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-            // Show selected view
-            if (viewName === 'today') {
-                document.getElementById('today-view').style.display = 'grid';
-            } else if (viewName === 'projects') {
-                document.getElementById('project-view').style.display = 'block';
-                document.getElementById('project-view').classList.add('active');
-                // Make sure we show the landing page, not detail page
-                document.getElementById('project-landing').classList.remove('hidden');
-                document.getElementById('project-detail').classList.remove('active');
-            } else {
-                const viewElement = document.getElementById(`${viewName}-view`);
-                if (viewElement) {
-                    viewElement.style.display = 'block';
-                    viewElement.classList.add('active');
-                }
-            }
+async function saveTokenFromSession() {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (session?.access_token) {
+    localStorage.setItem("khizr_assistant_auth", JSON.stringify({ token: session.access_token }));
+    console.log("🔑 access_token saved");
+  }
+}
 
-            // Update nav buttons
-            document.querySelectorAll('.nav-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            
-            // Find the clicked nav button and make it active
-            document.querySelectorAll('.nav-btn').forEach(btn => {
-                if (btn.textContent.toLowerCase() === viewName.toLowerCase()) {
-                    btn.classList.add('active');
-                }
-            });
-        }
+// run once on load + keep in sync on changes
+await saveTokenFromSession();
+supabase.auth.onAuthStateChange((_event, session) => {
+  if (session?.access_token) {
+    localStorage.setItem("khizr_assistant_auth", JSON.stringify({ token: session.access_token }));
+    console.log("🔑 access_token updated");
+  } else {
+    localStorage.removeItem("khizr_assistant_auth");
+    console.log("🚪 logged out");
+  }
+});
 
-        // AI Note processing
-        function processAINote() {
-            const note = document.getElementById('aiNote').value;
-            if (!note.trim()) return;
+// (optional) quick helpers you can call from console or buttons
+window.supabaseSignIn = async (email, password) => {
+  const { error } = await supabase.auth.signInWithPassword({ email, password });
+  if (error) alert(error.message);
+  else await saveTokenFromSession();
+};
+window.supabaseSignOut = async () => {
+  await supabase.auth.signOut();
+};
 
-            console.log('Processing note:', note);
-            
-            const btn = document.querySelector('.ai-send-btn');
-            const originalText = btn.textContent;
-            btn.textContent = 'processing...';
-            btn.disabled = true;
 
-            setTimeout(() => {
-                btn.textContent = 'done';
-                setTimeout(() => {
-                    btn.textContent = originalText;
-                    btn.disabled = false;
-                    document.getElementById('aiNote').value = '';
-                }, 1000);
-            }, 1500);
-        }
+/* ========= Your app logic (preserved) ========= */
+const API_URL = "https://khizr-assistant-api.onrender.com";
 
-        // On My Mind page
-        function showMindPage() {
-            console.log('Opening mind page...');
-        }
+// Theme switching
+function setTheme(theme) {
+  document.body.className = `theme-${theme}`;
+  document.querySelectorAll('.theme-btn').forEach(btn => btn.classList.remove('active'));
+  const active = document.querySelector(`.theme-btn.${theme}`);
+  if (active) active.classList.add('active');
+  localStorage.setItem('theme', theme);
+}
 
-        // Project navigation
-        function openProject(projectId) {
-            // Hide landing page
-            document.getElementById('project-landing').classList.add('hidden');
-            
-            // Show detail page
-            document.getElementById('project-detail').classList.add('active');
-            
-            // Update content based on project
-            updateProjectDetail(projectId);
-        }
+// Load saved theme
+const savedTheme = localStorage.getItem('theme') || 'purple';
+setTheme(savedTheme);
 
-        function backToProjects() {
-            // Hide detail page
-            document.getElementById('project-detail').classList.remove('active');
-            
-            // Show landing page
-            document.getElementById('project-landing').classList.remove('hidden');
-        }
+// View switching
+function showView(viewName) {
+  // Hide all views
+  document.querySelectorAll('[id$="-view"]').forEach(view => {
+    view.style.display = 'none';
+    view.classList.remove('active');
+  });
 
-        function updateProjectDetail(projectId) {
-            const projects = {
-                // Website Redesign Projects
-                'website-redesign': {
-                    title: 'website redesign',
-                    mostRecent: 'completed wireframes for homepage and about page',
-                    nextStep: 'start development of new landing page',
-                    details: 'Redesigning the company website to improve user experience and conversion rates. Focus on modern design principles, faster load times, and mobile responsiveness.\n\nKey goals:\n• Reduce bounce rate by 30%\n• Improve page load speed to under 2s\n• Implement responsive design for all devices\n• Update brand visual identity'
-                },
-                'frontend-redesign': {
-                    title: 'frontend redesign',
-                    mostRecent: 'completed wireframes for homepage and about page',
-                    nextStep: 'start development of new landing page',
-                    details: 'Frontend component of the website redesign. Focus on React components, responsive design, and performance optimization.\n\nScope:\n• Homepage redesign\n• Product pages\n• Contact forms\n• Mobile optimization'
-                },
-                'backend-api': {
-                    title: 'backend api',
-                    mostRecent: 'set up express server and database connection',
-                    nextStep: 'implement user authentication endpoints',
-                    details: 'Building the backend API to support the new website. Includes user management, content management, and analytics tracking.\n\nFeatures:\n• REST API endpoints\n• User authentication\n• Database integration\n• Analytics tracking'
-                },
-                'database-migration': {
-                    title: 'database migration',
-                    mostRecent: 'exported current database schema',
-                    nextStep: 'create migration scripts for new structure',
-                    details: 'Migrating from old database structure to new optimized schema. Focus on data integrity and minimal downtime.\n\nTasks:\n• Schema optimization\n• Data migration scripts\n• Backup procedures\n• Testing protocols'
-                },
+  // Show selected view
+  if (viewName === 'today') {
+    const el = document.getElementById('today-view');
+    if (el) el.style.display = 'grid';
+  } else if (viewName === 'projects') {
+    const pv = document.getElementById('project-view');
+    if (pv) {
+      pv.style.display = 'block';
+      pv.classList.add('active');
+    }
+    const landing = document.getElementById('project-landing');
+    const detail = document.getElementById('project-detail');
+    if (landing) landing.classList.remove('hidden');
+    if (detail) detail.classList.remove('active');
+  } else {
+    const viewElement = document.getElementById(`${viewName}-view`);
+    if (viewElement) {
+      viewElement.style.display = 'block';
+      viewElement.classList.add('active');
+    }
+  }
 
-                // Health Goals Projects
-                'health-goals': {
-                    title: 'health goals',
-                    mostRecent: 'completed week 1 of gym routine',
-                    nextStep: 'meal prep for next week',
-                    details: 'Personal health and fitness goals for 2024. Focus on consistent exercise, better nutrition, and improved sleep schedule.\n\nTargets:\n• Exercise 4x per week\n• Lose 15 pounds\n• Improve sleep quality\n• Meal prep consistently'
-                },
-                'gym-routine': {
-                    title: 'gym routine',
-                    mostRecent: 'completed week 1 of gym routine',
-                    nextStep: 'increase weights for next session',
-                    details: '3x per week strength training program. Focus on compound movements and progressive overload.\n\nSchedule:\n• Monday: Upper body\n• Wednesday: Lower body\n• Friday: Full body\n• Track progress weekly'
-                },
-                'nutrition-plan': {
-                    title: 'nutrition plan',
-                    mostRecent: 'calculated daily calorie targets',
-                    nextStep: 'meal prep for next week',
-                    details: 'Structured nutrition plan to support fitness goals. Focus on whole foods, adequate protein, and meal timing.\n\nPlan:\n• 2000 calories daily\n• 150g protein target\n• Meal prep Sundays\n• Track macros'
-                },
-                'sleep-schedule': {
-                    title: 'sleep schedule',
-                    mostRecent: 'established bedtime routine',
-                    nextStep: 'track sleep quality for one week',
-                    details: 'Improving sleep quality and consistency. Target 7-8 hours per night with consistent schedule.\n\nRoutine:\n• 10:30 PM bedtime\n• 6:30 AM wake up\n• No screens 1hr before bed\n• Sleep tracking'
-                },
+  // Update nav buttons
+  document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(btn => {
+    if (btn.textContent.toLowerCase() === String(viewName).toLowerCase()) {
+      btn.classList.add('active');
+    }
+  });
+}
 
-                // Learn React Projects
-                'learn-react': {
-                    title: 'learn react',
-                    mostRecent: 'completed react fundamentals course',
-                    nextStep: 'build first practice project',
-                    details: 'Learning React development to advance frontend skills. Includes hooks, state management, and modern best practices.\n\nCurriculum:\n• React fundamentals\n• Hooks and state\n• Component patterns\n• Testing strategies'
-                },
-                'react-basics': {
-                    title: 'react basics',
-                    mostRecent: 'completed react fundamentals course',
-                    nextStep: 'practice with hooks and state',
-                    details: 'Foundational React concepts including components, props, state, and lifecycle methods.\n\nTopics covered:\n• JSX syntax\n• Component structure\n• Props and state\n• Event handling'
-                },
-                'state-management': {
-                    title: 'state management',
-                    mostRecent: 'read about Redux and Context API',
-                    nextStep: 'build project using useContext',
-                    details: 'Learning different approaches to state management in React applications.\n\nApproaches:\n• useState and useReducer\n• Context API\n• Redux Toolkit\n• Zustand'
-                },
-                'react-router': {
-                    title: 'react router',
-                    mostRecent: 'watched tutorial videos',
-                    nextStep: 'implement routing in practice project',
-                    details: 'Learning client-side routing in React applications using React Router.\n\nConcepts:\n• Route configuration\n• Navigation\n• URL parameters\n• Nested routing'
-                },
-                'testing-react': {
-                    title: 'testing react',
-                    mostRecent: 'set up testing environment',
-                    nextStep: 'write first component tests',
-                    details: 'Learning to test React components and applications effectively.\n\nTools:\n• Jest framework\n• React Testing Library\n• Component testing\n• Integration testing'
-                },
+// AI Note processing
+function processAINote() {
+  const note = document.getElementById('aiNote')?.value || '';
+  if (!note.trim()) return;
 
-                // Personal Finance Projects
-                'personal-finance': {
-                    title: 'personal finance',
-                    mostRecent: 'reviewed investment portfolio performance',
-                    nextStep: 'set up automatic savings transfers',
-                    details: 'Managing and optimizing personal finances. Focus on budgeting, investing, and building wealth.\n\nGoals:\n• Emergency fund: 6 months expenses\n• Investment: 20% of income\n• Budget tracking\n• Debt reduction'
-                },
-                'budget-tracking': {
-                    title: 'budget tracking',
-                    mostRecent: 'set up budget categories in app',
-                    nextStep: 'review monthly spending patterns',
-                    details: 'Tracking monthly income and expenses to optimize spending habits.\n\nCategories:\n• Fixed expenses\n• Variable expenses\n• Savings goals\n• Investment contributions'
-                },
-                'investment-portfolio': {
-                    title: 'investment portfolio',
-                    mostRecent: 'reviewed portfolio allocation',
-                    nextStep: 'rebalance asset allocation',
-                    details: 'Building and managing investment portfolio for long-term wealth building.\n\nStrategy:\n• 70% stocks, 30% bonds\n• Diversified index funds\n• Regular contributions\n• Quarterly reviews'
-                },
-                'emergency-fund': {
-                    title: 'emergency fund',
-                    mostRecent: 'opened high-yield savings account',
-                    nextStep: 'set up automatic monthly transfers',
-                    details: 'Building emergency fund to cover 6 months of expenses.\n\nTarget: $15,000\n\nProgress:\n• Current: $8,500\n• Monthly contribution: $500\n• Estimated completion: 13 months'
-                },
+  console.log('Processing note:', note);
+  const btn = document.querySelector('.ai-send-btn');
+  if (!btn) return;
 
-                // Side Business Projects
-                'side-business': {
-                    title: 'side business',
-                    mostRecent: 'brainstormed business ideas',
-                    nextStep: 'conduct market research on top 3 ideas',
-                    details: 'Starting a side business to generate additional income. Focus on scalable, location-independent opportunities.\n\nIdeas being considered:\n• SaaS product\n• Consulting services\n• Digital products\n• E-commerce'
-                },
-                'market-research': {
-                    title: 'market research',
-                    mostRecent: 'identified target market segments',
-                    nextStep: 'survey potential customers',
-                    details: 'Researching market opportunities and validating business ideas.\n\nResearch areas:\n• Market size analysis\n• Competitor analysis\n• Customer pain points\n• Pricing strategies'
-                },
-                'business-plan': {
-                    title: 'business plan',
-                    mostRecent: 'outlined business model canvas',
-                    nextStep: 'write executive summary',
-                    details: 'Creating comprehensive business plan for potential investors and personal clarity.\n\nSections:\n• Executive summary\n• Market analysis\n• Financial projections\n• Marketing strategy'
-                },
-                'mvp-development': {
-                    title: 'mvp development',
-                    mostRecent: 'defined core features for MVP',
-                    nextStep: 'create wireframes and user flow',
-                    details: 'Building minimum viable product to test market assumptions.\n\nMVP scope:\n• Core feature set\n• Simple UI/UX\n• Basic analytics\n• User feedback system'
-                },
-                'legal-setup': {
-                    title: 'legal setup',
-                    mostRecent: 'researched business entity types',
-                    nextStep: 'consult with business attorney',
-                    details: 'Setting up proper legal structure for the business.\n\nConsiderations:\n• Business entity type (LLC vs Corp)\n• Tax implications\n• Liability protection\n• Licensing requirements'
-                },
-                'branding': {
-                    title: 'branding',
-                    mostRecent: 'collected visual inspiration',
-                    nextStep: 'design logo concepts',
-                    details: 'Developing brand identity and marketing materials.\n\nBrand elements:\n• Logo design\n• Color palette\n• Typography\n• Brand voice and messaging'
-                },
+  const originalText = btn.textContent;
+  btn.textContent = 'processing...';
+  btn.disabled = true;
 
-                // Home Improvement Projects
-                'home-improvement': {
-                    title: 'home improvement',
-                    mostRecent: 'got quotes from contractors',
-                    nextStep: 'select contractor for kitchen renovation',
-                    details: 'Summer home improvement projects to increase property value and livability.\n\nPlanned improvements:\n• Kitchen renovation\n• Backyard landscaping\n• Smart home upgrades\n• Energy efficiency improvements'
-                },
-                'kitchen-renovation': {
-                    title: 'kitchen renovation',
-                    mostRecent: 'finalized cabinet and countertop selections',
-                    nextStep: 'schedule contractor start date',
-                    details: 'Complete kitchen remodel including cabinets, countertops, appliances, and flooring.\n\nScope:\n• New cabinets and hardware\n• Quartz countertops\n• Stainless steel appliances\n• Luxury vinyl flooring'
-                },
-                'backyard-landscaping': {
-                    title: 'backyard landscaping',
-                    mostRecent: 'designed landscape layout',
-                    nextStep: 'order plants and materials',
-                    details: 'Transforming backyard into functional outdoor living space.\n\nPlans:\n• Patio installation\n• Garden beds\n• Irrigation system\n• Outdoor lighting'
-                },
-                'smart-home-setup': {
-                    title: 'smart home setup',
-                    mostRecent: 'installed smart thermostat',
-                    nextStep: 'set up smart lighting system',
-                    details: 'Upgrading home with smart technology for convenience and energy savings.\n\nDevices:\n• Smart thermostat\n• Smart lighting\n• Security cameras\n• Smart locks'
-                }
-            };
+  setTimeout(() => {
+    btn.textContent = 'done';
+    setTimeout(() => {
+      btn.textContent = originalText;
+      btn.disabled = false;
+      const el = document.getElementById('aiNote');
+      if (el) el.value = '';
+    }, 1000);
+  }, 1500);
+}
 
-            const project = projects[projectId];
-            if (project) {
-                document.getElementById('project-detail-title').textContent = project.title;
-                document.getElementById('most-recent').textContent = project.mostRecent;
-                document.getElementById('next-step').textContent = project.nextStep;
-                document.getElementById('project-details').innerHTML = project.details.replace(/\n/g, '<br>');
-            }
-        }
+// On My Mind page
+function showMindPage() {
+  console.log('Opening mind page...');
+}
 
-        function goToTasks() {
-            // Switch to today view and show tasks
-            showView('today');
-            console.log('Showing tasks for this project...');
-        }
-    </script>
+// Project navigation
+function openProject(projectId) {
+  document.getElementById('project-landing')?.classList.add('hidden');
+  document.getElementById('project-detail')?.classList.add('active');
+  updateProjectDetail(projectId);
+}
+
+function backToProjects() {
+  document.getElementById('project-detail')?.classList.remove('active');
+  document.getElementById('project-landing')?.classList.remove('hidden');
+}
+
+function updateProjectDetail(projectId) {
+  const projects = {
+    'website-redesign': {
+      title: 'website redesign',
+      mostRecent: 'completed wireframes for homepage and about page',
+      nextStep: 'start development of new landing page',
+      details: 'Redesigning the company website to improve user experience and conversion rates. Focus on modern design principles, faster load times, and mobile responsiveness.\n\nKey goals:\n• Reduce bounce rate by 30%\n• Improve page load speed to under 2s\n• Implement responsive design for all devices\n• Update brand visual identity'
+    },
+    'frontend-redesign': {
+      title: 'frontend redesign',
+      mostRecent: 'completed wireframes for homepage and about page',
+      nextStep: 'start development of new landing page',
+      details: 'Frontend component of the website redesign. Focus on React components, responsive design, and performance optimization.\n\nScope:\n• Homepage redesign\n• Product pages\n• Contact forms\n• Mobile optimization'
+    },
+    'backend-api': {
+      title: 'backend api',
+      mostRecent: 'set up express server and database connection',
+      nextStep: 'implement user authentication endpoints',
+      details: 'Building the backend API to support the new website. Includes user management, content management, and analytics tracking.\n\nFeatures:\n• REST API endpoints\n• User authentication\n• Database integration\n• Analytics tracking'
+    },
+    'database-migration': {
+      title: 'database migration',
+      mostRecent: 'exported current database schema',
+      nextStep: 'create migration scripts for new structure',
+      details: 'Migrating from old database structure to new optimized schema. Focus on data integrity and minimal downtime.\n\nTasks:\n• Schema optimization\n• Data migration scripts\n• Backup procedures\n• Testing protocols'
+    },
+    'health-goals': {
+      title: 'health goals',
+      mostRecent: 'completed week 1 of gym routine',
+      nextStep: 'meal prep for next week',
+      details: 'Personal health and fitness goals for 2024. Focus on consistent exercise, better nutrition, and improved sleep schedule.\n\nTargets:\n• Exercise 4x per week\n• Lose 15 pounds\n• Improve sleep quality\n• Meal prep consistently'
+    },
+    'gym-routine': {
+      title: 'gym routine',
+      mostRecent: 'completed week 1 of gym routine',
+      nextStep: 'increase weights for next session',
+      details: '3x per week strength training program. Focus on compound movements and progressive overload.\n\nSchedule:\n• Monday: Upper body\n• Wednesday: Lower body\n• Friday: Full body\n• Track progress weekly'
+    },
+    'nutrition-plan': {
+      title: 'nutrition plan',
+      mostRecent: 'calculated daily calorie targets',
+      nextStep: 'meal prep for next week',
+      details: 'Structured nutrition plan to support fitness goals. Focus on whole foods, adequate protein, and meal timing.\n\nPlan:\n• 2000 calories daily\n• 150g protein target\n• Meal prep Sundays\n• Track macros'
+    },
+    'sleep-schedule': {
+      title: 'sleep schedule',
+      mostRecent: 'established bedtime routine',
+      nextStep: 'track sleep quality for one week',
+      details: 'Improving sleep quality and consistency. Target 7-8 hours per night with consistent schedule.\n\nRoutine:\n• 10:30 PM bedtime\n• 6:30 AM wake up\n• No screens 1hr before bed\n• Sleep tracking'
+    },
+    'learn-react': {
+      title: 'learn react',
+      mostRecent: 'completed react fundamentals course',
+      nextStep: 'build first practice project',
+      details: 'Learning React development to advance frontend skills. Includes hooks, state management, and modern best practices.\n\nCurriculum:\n• React fundamentals\n• Hooks and state\n• Component patterns\n• Testing strategies'
+    },
+    'react-basics': {
+      title: 'react basics',
+      mostRecent: 'completed react fundamentals course',
+      nextStep: 'practice with hooks and state',
+      details: 'Foundational React concepts including components, props, state, and lifecycle methods.\n\nTopics covered:\n• JSX syntax\n• Component structure\n• Props and state\n• Event handling'
+    },
+    'state-management': {
+      title: 'state management',
+      mostRecent: 'read about Redux and Context API',
+      nextStep: 'build project using useContext',
+      details: 'Learning different approaches to state management in React applications.\n\nApproaches:\n• useState and useReducer\n• Context API\n• Redux Toolkit\n• Zustand'
+    },
+    'react-router': {
+      title: 'react router',
+      mostRecent: 'watched tutorial videos',
+      nextStep: 'implement routing in practice project',
+      details: 'Learning client-side routing in React applications using React Router.\n\nConcepts:\n• Route configuration\n• Navigation\n• URL parameters\n• Nested routing'
+    },
+    'testing-react': {
+      title: 'testing react',
+      mostRecent: 'set up testing environment',
+      nextStep: 'write first component tests',
+      details: 'Learning to test React components and applications effectively.\n\nTools:\n• Jest framework\n• React Testing Library\n• Component testing\n• Integration testing'
+    },
+    'personal-finance': {
+      title: 'personal finance',
+      mostRecent: 'reviewed investment portfolio performance',
+      nextStep: 'set up automatic savings transfers',
+      details: 'Managing and optimizing personal finances. Focus on budgeting, investing, and building wealth.\n\nGoals:\n• Emergency fund: 6 months expenses\n• Investment: 20% of income\n• Budget tracking\n• Debt reduction'
+    },
+    'budget-tracking': {
+      title: 'budget tracking',
+      mostRecent: 'set up budget categories in app',
+      nextStep: 'review monthly spending patterns',
+      details: 'Tracking monthly income and expenses to optimize spending habits.\n\nCategories:\n• Fixed expenses\n• Variable expenses\n• Savings goals\n• Investment contributions'
+    },
+    'investment-portfolio': {
+      title: 'investment portfolio',
+      mostRecent: 'reviewed portfolio allocation',
+      nextStep: 'rebalance asset allocation',
+      details: 'Building and managing investment portfolio for long-term wealth building.\n\nStrategy:\n• 70% stocks, 30% bonds\n• Diversified index funds\n• Regular contributions\n• Quarterly reviews'
+    },
+    'emergency-fund': {
+      title: 'emergency fund',
+      mostRecent: 'opened high-yield savings account',
+      nextStep: 'set up automatic monthly transfers',
+      details: 'Building emergency fund to cover 6 months of expenses.\n\nTarget: $15,000\n\nProgress:\n• Current: $8,500\n• Monthly contribution: $500\n• Estimated completion: 13 months'
+    },
+    'side-business': {
+      title: 'side business',
+      mostRecent: 'brainstormed business ideas',
+      nextStep: 'conduct market research on top 3 ideas',
+      details: 'Starting a side business to generate additional income. Focus on scalable, location-independent opportunities.\n\nIdeas being considered:\n• SaaS product\n• Consulting services\n• Digital products\n• E-commerce'
+    },
+    'market-research': {
+      title: 'market research',
+      mostRecent: 'identified target market segments',
+      nextStep: 'survey potential customers',
+      details: 'Researching market opportunities and validating business ideas.\n\nResearch areas:\n• Market size analysis\n• Competitor analysis\n• Customer pain points\n• Pricing strategies'
+    },
+    'business-plan': {
+      title: 'business plan',
+      mostRecent: 'outlined business model canvas',
+      nextStep: 'write executive summary',
+      details: 'Creating comprehensive business plan for potential investors and personal clarity.\n\nSections:\n• Executive summary\n• Market analysis\n• Financial projections\n• Marketing strategy'
+    },
+    'mvp-development': {
+      title: 'mvp development',
+      mostRecent: 'defined core features for MVP',
+      nextStep: 'create wireframes and user flow',
+      details: 'Building minimum viable product to test market assumptions.\n\nMVP scope:\n• Core feature set\n• Simple UI/UX\n• Basic analytics\n• User feedback system'
+    },
+    'legal-setup': {
+      title: 'legal setup',
+      mostRecent: 'researched business entity types',
+      nextStep: 'consult with business attorney',
+      details: 'Setting up proper legal structure for the business.\n\nConsiderations:\n• Business entity type (LLC vs Corp)\n• Tax implications\n• Liability protection\n• Licensing requirements'
+    },
+    'branding': {
+      title: 'branding',
+      mostRecent: 'collected visual inspiration',
+      nextStep: 'design logo concepts',
+      details: 'Developing brand identity and marketing materials.\n\nBrand elements:\n• Logo design\n• Color palette\n• Typography\n• Brand voice and messaging'
+    },
+    'home-improvement': {
+      title: 'home improvement',
+      mostRecent: 'got quotes from contractors',
+      nextStep: 'select contractor for kitchen renovation',
+      details: 'Summer home improvement projects to increase property value and livability.\n\nPlanned improvements:\n• Kitchen renovation\n• Backyard landscaping\n• Smart home upgrades\n• Energy efficiency improvements'
+    },
+    'kitchen-renovation': {
+      title: 'kitchen renovation',
+      mostRecent: 'finalized cabinet and countertop selections',
+      nextStep: 'schedule contractor start date',
+      details: 'Complete kitchen remodel including cabinets, countertops, appliances, and flooring.\n\nScope:\n• New cabinets and hardware\n• Quartz countertops\n• Stainless steel appliances\n• Luxury vinyl flooring'
+    },
+    'backyard-landscaping': {
+      title: 'backyard landscaping',
+      mostRecent: 'designed landscape layout',
+      nextStep: 'order plants and materials',
+      details: 'Transforming backyard into functional outdoor living space.\n\nPlans:\n• Patio installation\n• Garden beds\n• Irrigation system\n• Outdoor lighting'
+    },
+    'smart-home-setup': {
+      title: 'smart home setup',
+      mostRecent: 'installed smart thermostat',
+      nextStep: 'set up smart lighting system',
+      details: 'Upgrading home with smart technology for convenience and energy savings.\n\nDevices:\n• Smart thermostat\n• Smart lighting\n• Security cameras\n• Smart locks'
+    }
+  };
+
+  const project = projects[projectId];
+  if (project) {
+    document.getElementById('project-detail-title').textContent = project.title;
+    document.getElementById('most-recent').textContent = project.mostRecent;
+    document.getElementById('next-step').textContent = project.nextStep;
+    document.getElementById('project-details').innerHTML = project.details.replace(/\n/g, '<br>');
+  }
+}
+
+function goToTasks() {
+  showView('today');
+  console.log('Showing tasks for this project...');
+}
+
+// Big Page processing
+window.processBigPage = function() {
+  const input = document.getElementById('bigPageInput').value;
+  if (!input.trim()) return;
+
+  const processBtn = document.getElementById('processBigPage');
+  const processingStatus = document.getElementById('processingStatus');
+  const statusMessage = document.getElementById('statusMessage');
+  const entryPreviews = document.getElementById('entryPreviews');
+
+  // Show processing status
+  processingStatus.style.display = 'block';
+  statusMessage.textContent = 'Processing your thoughts...';
+  processBtn.disabled = true;
+
+  // Simulate processing
+  setTimeout(() => {
+    statusMessage.textContent = 'Organizing into categories...';
+    
+    setTimeout(() => {
+      statusMessage.textContent = 'Creating structured entries...';
+      
+      setTimeout(() => {
+        statusMessage.textContent = 'Done! Your thoughts have been organized.';
+        entryPreviews.innerHTML = '<div style="color: var(--text-secondary); font-size: 12px;">Preview of organized entries will appear here...</div>';
+        
+        // Re-enable button after a delay
+        setTimeout(() => {
+          processBtn.disabled = false;
+          document.getElementById('bigPageInput').value = '';
+        }, 2000);
+      }, 1000);
+    }, 1000);
+  }, 1000);
+};
+
+// Expose a couple of functions if other scripts need them
+window.setTheme = setTheme;
+window.showView = showView;
+window.processAINote = processAINote;
+window.openProject = openProject;
+window.backToProjects = backToProjects;
+window.updateProjectDetail = updateProjectDetail;
+window.goToTasks = goToTasks;
+
+</script>
 </body>
 </html>
