@@ -1,265 +1,134 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Access Required</title>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&display=swap');
-        
-        :root {
-            --primary: #8B5CF6;
-            --bg: #0A0A0B;
-            --bg-card: #111115;
-            --text-primary: #E4E4E7;
-            --text-secondary: #71717A;
-            --border: #27272A;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'JetBrains Mono', monospace;
-            background: var(--bg);
-            color: var(--text-primary);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 14px;
-        }
-
-        .auth-container {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            padding: 40px;
-            width: 100%;
-            max-width: 400px;
-            text-align: center;
-        }
-
-        .logo {
-            font-size: 18px;
-            font-weight: 600;
-            color: var(--primary);
-            margin-bottom: 8px;
-        }
-
-        .subtitle {
-            color: var(--text-secondary);
-            font-size: 12px;
-            margin-bottom: 32px;
-        }
-
-        .input-group {
-            margin-bottom: 24px;
-            text-align: left;
-        }
-
-        .input-label {
-            color: var(--text-secondary);
-            font-size: 11px;
-            margin-bottom: 8px;
-            display: block;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .input-field {
-            width: 100%;
-            background: transparent;
-            border: 1px solid var(--border);
-            border-radius: 4px;
-            padding: 12px;
-            color: var(--text-primary);
-            font-family: inherit;
-            font-size: 13px;
-            transition: border-color 0.2s ease;
-        }
-
-        .input-field:focus {
-            outline: none;
-            border-color: var(--primary);
-        }
-
-        .input-field::placeholder {
-            color: var(--text-secondary);
-        }
-
-        .login-btn {
-            width: 100%;
-            background: var(--primary);
-            border: none;
-            border-radius: 4px;
-            padding: 12px;
-            color: white;
-            font-family: inherit;
-            font-size: 13px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: opacity 0.2s ease;
-        }
-
-        .login-btn:hover {
-            opacity: 0.9;
-        }
-
-        .login-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        .error-msg {
-            color: #EF4444;
-            font-size: 11px;
-            margin-top: 12px;
-            display: none;
-        }
-
-        .footer {
-            margin-top: 32px;
-            color: var(--text-secondary);
-            font-size: 10px;
-        }
-
-        .loading {
-            width: 16px;
-            height: 16px;
-            border: 2px solid transparent;
-            border-top: 2px solid white;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            display: none;
-            margin: 0 auto;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        .btn-content {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Access Required</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&display=swap');
+    :root { --primary:#8B5CF6; --bg:#0A0A0B; --bg-card:#111115; --text-primary:#E4E4E7; --text-secondary:#71717A; --border:#27272A; }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family:'JetBrains Mono',monospace; background:var(--bg); color:var(--text-primary); min-height:100vh; display:flex; align-items:center; justify-content:center; font-size:14px; }
+    .auth-container { background:var(--bg-card); border:1px solid var(--border); border-radius:6px; padding:40px; width:100%; max-width:400px; text-align:center; }
+    .logo { font-size:18px; font-weight:600; color:var(--primary); margin-bottom:8px; }
+    .subtitle { color:var(--text-secondary); font-size:12px; margin-bottom:32px; }
+    .input-group { margin-bottom:24px; text-align:left; }
+    .input-label { color:var(--text-secondary); font-size:11px; margin-bottom:8px; display:block; text-transform:uppercase; letter-spacing:.5px; }
+    .input-field { width:100%; background:transparent; border:1px solid var(--border); border-radius:4px; padding:12px; color:var(--text-primary); font-family:inherit; font-size:13px; transition:border-color .2s ease; }
+    .input-field:focus { outline:none; border-color:var(--primary); }
+    .input-field::placeholder { color:var(--text-secondary); }
+    .login-btn { width:100%; background:var(--primary); border:none; border-radius:4px; padding:12px; color:#fff; font-family:inherit; font-size:13px; font-weight:500; cursor:pointer; transition:opacity .2s ease; }
+    .login-btn:hover { opacity:.9; }
+    .login-btn:disabled { opacity:.5; cursor:not-allowed; }
+    .error-msg { color:#EF4444; font-size:11px; margin-top:12px; display:none; }
+    .footer { margin-top:32px; color:var(--text-secondary); font-size:10px; }
+    .loading { width:16px; height:16px; border:2px solid transparent; border-top:2px solid #fff; border-radius:50%; animation:spin 1s linear infinite; display:none; margin:0 auto; }
+    @keyframes spin { 0%{transform:rotate(0)} 100%{transform:rotate(360deg)} }
+    .btn-content { display:flex; align-items:center; justify-content:center; gap:8px; }
+    .pw-row { position:relative; }
+    .toggle { position:absolute; right:8px; top:50%; transform:translateY(-50%); font-size:11px; color:var(--text-secondary); cursor:pointer; user-select:none; }
+  </style>
 </head>
 <body>
-    <div class="auth-container">
-        <div class="logo">khizr.assistant</div>
-        <div class="subtitle">secure access required</div>
-        
-        <form id="loginForm">
-            <div class="input-group">
-                <label class="input-label" for="password">access code</label>
-                <input 
-                    type="password" 
-                    id="password" 
-                    class="input-field" 
-                    placeholder="enter your access code"
-                    required
-                >
-            </div>
-            
-            <button type="submit" class="login-btn" id="loginBtn">
-                <div class="btn-content">
-                    <span id="btnText">access system</span>
-                    <div class="loading" id="loading"></div>
-                </div>
-            </button>
-            
-            <div class="error-msg" id="errorMsg">invalid access code</div>
-        </form>
-        
-        <div class="footer">
-            authorized personnel only
+  <div class="auth-container">
+    <div class="logo">khizr.assistant</div>
+    <div class="subtitle">secure access required</div>
+
+    <form id="loginForm" autocomplete="off">
+      <div class="input-group pw-row">
+        <label class="input-label" for="password">access code</label>
+        <input
+          type="password"
+          id="password"
+          class="input-field"
+          placeholder="enter your access code"
+          required
+        />
+        <span id="togglePw" class="toggle">show</span>
+      </div>
+
+      <button type="submit" class="login-btn" id="loginBtn">
+        <div class="btn-content">
+          <span id="btnText">access system</span>
+          <div class="loading" id="loading"></div>
         </div>
-    </div>
+      </button>
 
-    <script>
-        // Configuration - CHANGE YOUR PASSWORD HERE
-        const CONFIG = {
-            PASSWORD: 'starwars2',  // 👈 CHANGE THIS TO YOUR DESIRED PASSWORD
-            SESSION_KEY: 'khizr_assistant_auth',
-            SESSION_DURATION: 24 * 60 * 60 * 1000 // 24 hours
-        };
+      <div class="error-msg" id="errorMsg">invalid access code</div>
+    </form>
 
-        // Check if already authenticated
-        function isAuthenticated() {
-            const session = localStorage.getItem(CONFIG.SESSION_KEY);
-            if (!session) return false;
-            
-            const sessionData = JSON.parse(session);
-            const now = Date.now();
-            
-            if (now > sessionData.expires) {
-                localStorage.removeItem(CONFIG.SESSION_KEY);
-                return false;
-            }
-            
-            return true;
-        }
+    <div class="footer">authorized personnel only</div>
+  </div>
 
-        // Redirect to main app if already authenticated
-        if (isAuthenticated()) {
-            window.location.href = 'app.html';
-        }
+  <script>
+    // Do NOT reuse the Supabase token key. Keep this gate separate.
+    const CONFIG = {
+      PASSWORD: 'starwars2',             // 👈 change if needed
+      GATE_KEY: 'khizr_assistant_gate',  // gate session key (separate from Supabase token)
+      DURATION_MS: 24 * 60 * 60 * 1000   // 24h
+    };
 
-        // Login form handler
-        document.getElementById('loginForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            const password = document.getElementById('password').value;
-            const loginBtn = document.getElementById('loginBtn');
-            const btnText = document.getElementById('btnText');
-            const loading = document.getElementById('loading');
-            const errorMsg = document.getElementById('errorMsg');
-            
-            // Show loading state
-            loginBtn.disabled = true;
-            btnText.style.display = 'none';
-            loading.style.display = 'block';
-            errorMsg.style.display = 'none';
-            
-            // Simulate checking delay
-            await new Promise(resolve => setTimeout(resolve, 800));
-            
-            if (password === CONFIG.PASSWORD) {
-                // Create session
-                const sessionData = {
-                    authenticated: true,
-                    expires: Date.now() + CONFIG.SESSION_DURATION,
-                    timestamp: Date.now()
-                };
-                
-                localStorage.setItem(CONFIG.SESSION_KEY, JSON.stringify(sessionData));
-                
-                // Redirect to main app
-                window.location.href = 'app.html';
-            } else {
-                // Show error
-                errorMsg.style.display = 'block';
-                
-                // Reset form
-                loginBtn.disabled = false;
-                btnText.style.display = 'block';
-                loading.style.display = 'none';
-                
-                // Clear password field
-                document.getElementById('password').value = '';
-                document.getElementById('password').focus();
-            }
-        });
+    function safeParse(json) {
+      try { return JSON.parse(json); } catch { return null; }
+    }
 
-        // Focus password field on load
-        document.getElementById('password').focus();
-    </script>
+    function isGateAuthenticated() {
+      const raw = localStorage.getItem(CONFIG.GATE_KEY);
+      if (!raw) return false;
+      const data = safeParse(raw);
+      if (!data || typeof data !== 'object') return false;
+      if (typeof data.expires !== 'number') return false;
+      if (Date.now() > data.expires) {
+        localStorage.removeItem(CONFIG.GATE_KEY);
+        return false;
+      }
+      return !!data.authenticated;
+    }
+
+    // Redirect if gate already passed
+    if (isGateAuthenticated()) {
+      window.location.href = 'app.html';
+    }
+
+    // Show/hide password toggle
+    (function setupToggle() {
+      const pw = document.getElementById('password');
+      const t = document.getElementById('togglePw');
+      if (!pw || !t) return;
+      t.addEventListener('click', () => {
+        const isPw = pw.type === 'password';
+        pw.type = isPw ? 'text' : 'password';
+        t.textContent = isPw ? 'hide' : 'show';
+        pw.focus();
+      });
+    })();
+
+    // Form handler
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const password = document.getElementById('password').value;
+      const loginBtn = document.getElementById('loginBtn');
+      const btnText = document.getElementById('btnText');
+      const loading  = document.getElementById('loading');
+      const errorMsg = document.getElementById('errorMsg');
+
+      loginBtn.disabled = true; btnText.style.display = 'none'; loading.style.display = 'block'; errorMsg.style.display = 'none';
+
+      await new Promise(r => setTimeout(r, 300)); // small UX delay
+
+      if (password === CONFIG.PASSWORD) {
+        const session = { authenticated: true, expires: Date.now() + CONFIG.DURATION_MS, ts: Date.now() };
+        localStorage.setItem(CONFIG.GATE_KEY, JSON.stringify(session));
+        window.location.href = 'app.html';
+      } else {
+        errorMsg.style.display = 'block';
+        loginBtn.disabled = false; btnText.style.display = 'block'; loading.style.display = 'none';
+        const pw = document.getElementById('password'); pw.value = ''; pw.focus();
+      }
+    });
+
+    // Autofocus
+    document.getElementById('password').focus();
+  </script>
 </body>
 </html>
