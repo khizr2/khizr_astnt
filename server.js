@@ -97,6 +97,16 @@ app.get('/', (req, res) => {
     res.sendFile(__dirname + '/app.html');
 });
 
+// Serve login page
+app.get('/index.html', (req, res) => {
+    res.sendFile(__dirname + '/index.html');
+});
+
+// Serve main app page
+app.get('/app.html', (req, res) => {
+    res.sendFile(__dirname + '/app.html');
+});
+
 // API health check endpoint
 app.get('/api', (req, res) => {
     res.json({
