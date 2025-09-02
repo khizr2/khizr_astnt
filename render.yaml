@@ -25,8 +25,8 @@ services:
       - key: GMAIL_CLIENT_SECRET
         sync: false
       - key: GMAIL_REDIRECT_URI
-        value: https://khizrkazmi.com/api/gmail/callback
+        value: https://khizr-assistant-api.onrender.com/api/gmail/callback
       - key: FRONTEND_URL
-        value: https://khizrkazmi.com
+        value: https://euphonious-puppy-a1c1c7.netlify.app
       - key: LOG_LEVEL
         value: info

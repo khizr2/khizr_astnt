@@ -998,7 +998,7 @@ console.error('Failed to initialize app:', error);
 // Load agent status
 async function loadAgentStatus() {
 try {
-const response = await fetch(`${API_URL}/agents`, {
+const response = await fetch(`${API_URL}/api/agents`, {
 headers: getAuthHeaders()
 });
 const data = await response.json();
@@ -1039,7 +1039,7 @@ agentCards.innerHTML = cardsHTML;
 // Load tasks
 async function loadTasks() {
 try {
-const response = await fetch(`${API_URL}/tasks?limit=10`, {
+const response = await fetch(`${API_URL}/api/tasks?limit=10`, {
 headers: getAuthHeaders()
 });
 const data = await response.json();
@@ -1079,7 +1079,7 @@ tasksList.innerHTML = tasksHTML;
 // Load projects
 async function loadProjects() {
 try {
-const response = await fetch(`${API_URL}/projects`, {
+const response = await fetch(`${API_URL}/api/projects`, {
 headers: getAuthHeaders()
 });
 const data = await response.json();
@@ -1114,7 +1114,7 @@ projectList.innerHTML = projectsHTML;
 // Load pending approvals
 async function loadApprovals() {
 try {
-const response = await fetch(`${API_URL}/approvals/pending`, {
+const response = await fetch(`${API_URL}/api/approvals/pending`, {
 headers: getAuthHeaders()
 });
 const data = await response.json();
@@ -1165,7 +1165,7 @@ badge.setAttribute('data-count', count);
 // Chat functionality
 async function loadChatHistory() {
 try {
-const response = await fetch(`${API_URL}/chat/history`, {
+const response = await fetch(`${API_URL}/api/chat/history`, {
 headers: getAuthHeaders()
 });
 const data = await response.json();
@@ -1204,7 +1204,7 @@ processChatMessage(message);
 
 async function processChatMessage(message) {
 try {
-const response = await fetch(`${API_URL}/chat/process`, {
+const response = await fetch(`${API_URL}/api/chat/process`, {
 method: 'POST',
 headers: getAuthHeaders(),
 body: JSON.stringify({ message })
@@ -1267,7 +1267,7 @@ const description = document.getElementById('taskDescription').value.trim();
 if (!title) return;
 
 try {
-const response = await fetch(`${API_URL}/tasks`, {
+const response = await fetch(`${API_URL}/api/tasks`, {
 method: 'POST',
 headers: getAuthHeaders(),
 body: JSON.stringify({
@@ -1298,7 +1298,7 @@ console.error('Failed to create task:', error);
 
 async function completeTask(taskId) {
 try {
-const response = await fetch(`${API_URL}/tasks/${taskId}/status`, {
+const response = await fetch(`${API_URL}/api/tasks/${taskId}/status`, {
 method: 'PATCH',
 headers: getAuthHeaders(),
 body: JSON.stringify({ status: 'completed' })
@@ -1327,7 +1327,7 @@ const due_date = document.getElementById('projectDueDate').value;
 if (!name) return;
 
 try {
-const response = await fetch(`${API_URL}/projects`, {
+const response = await fetch(`${API_URL}/api/projects`, {
 method: 'POST',
 headers: getAuthHeaders(),
 body: JSON.stringify({ name, description, due_date })
@@ -1352,7 +1352,7 @@ console.error('Failed to create project:', error);
 // Approval handling
 async function handleApproval(approvalId, status) {
 try {
-const response = await fetch(`${API_URL}/approvals/${approvalId}`, {
+const response = await fetch(`${API_URL}/api/approvals/${approvalId}`, {
 method: 'PATCH',
 headers: getAuthHeaders(),
 body: JSON.stringify({ status })
@@ -1490,7 +1490,7 @@ connectBtn.textContent = 'Connecting...';
 status.textContent = 'Authenticating with Gmail...';
 
 try {
-const response = await fetch(`${API_URL}/gmail/connect`, {
+const response = await fetch(`${API_URL}/api/gmail/connect`, {
 method: 'POST',
 headers: getAuthHeaders()
 });
@@ -1515,7 +1515,7 @@ const status = document.getElementById('emailStatus');
 status.textContent = 'Loading emails...';
 
 try {
-const response = await fetch(`${API_URL}/gmail/messages`, {
+const response = await fetch(`${API_URL}/api/gmail/messages`, {
 headers: getAuthHeaders()
 });
 
