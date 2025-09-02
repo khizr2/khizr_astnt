@@ -355,3 +355,9 @@ entrypoint = "./functions/bigpage-analyze/index.ts"
 # Specifies static files to be bundled with the function. Supports glob patterns.
 # For example, if you want to serve static HTML pages in your function:
 # static_files = [ "./functions/bigpage-analyze/*.html" ]
+
+[functions.migrate-agent-tables]
+enabled = true
+verify_jwt = true
+import_map = "./functions/migrate-agent-tables/deno.json"
+entrypoint = "./functions/migrate-agent-tables/index.ts"

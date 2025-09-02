@@ -13,6 +13,7 @@ const ingestRoutes = require('./routes/ingest');
 const gmailRoutes = require('./routes/gmail');
 const notificationRoutes = require('./routes/notifications');
 const debugRoutes = require('./routes/debug');
+const agentRoutes = require('./routes/agents');
 
 const { logger } = require('./utils/logger');
 
@@ -54,6 +55,7 @@ app.use('/api/ingest', ingestRoutes);
 app.use('/api/gmail', gmailRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/debug', debugRoutes);
+app.use('/api/agents', agentRoutes);
 // Health check endpoint
 app.get('/', (req, res) => {
     res.json({ 
@@ -87,7 +89,7 @@ app.use('*', (req, res) => {
 });
 
 // Start server
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
     logger.info(`🚀 Khizr Assistant API running on port ${PORT}`);
     logger.info(`🌍 Environment: ${process.env.NODE_ENV}`);
 });

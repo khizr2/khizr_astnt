@@ -72,17 +72,63 @@ router.get('/users-test', async (req, res) => {
         const { count, error } = await supabase
             .from('users')
             .select('*', { count: 'exact', head: true });
-        
+
         if (error) {
             throw error;
         }
-        
+
         res.json({
             status: 'success',
             user_count: count || 0
         });
     } catch (error) {
         logger.error('Users test error:', error);
+        res.status(500).json({
+            status: 'error',
+            error: error.message
+        });
+    }
+});
+
+// Check database tables existence (including agent tables)
+router.get('/database-tables', async (req, res) => {
+    try {
+        const tables = [
+            'users', 'projects', 'tasks', 'goals', 'emails', 'notifications',
+            'tags', 'agents', 'agent_profiles', 'agent_tasks', 'agent_status',
+            'agent_conversations', 'agent_tools', 'agent_permissions',
+            'agent_logs', 'agent_analytics', 'approvals_queue',
+            'approval_history', 'agent_metrics'
+        ];
+
+        const tableStatus = {};
+
+        for (const table of tables) {
+            try {
+                const { count, error } = await supabase
+                    .from(table)
+                    .select('*', { count: 'exact', head: true });
+
+                tableStatus[table] = error ? 'MISSING' : 'EXISTS';
+            } catch (err) {
+                tableStatus[table] = 'MISSING';
+            }
+        }
+
+        const agentTables = Object.entries(tableStatus).filter(([table]) =>
+            table.startsWith('agent_') || table.startsWith('approval')
+        );
+
+        res.json({
+            status: 'success',
+            total_tables_checked: tables.length,
+            agent_tables_found: agentTables.filter(([, status]) => status === 'EXISTS').length,
+            expected_agent_tables: 11,
+            table_status: tableStatus
+        });
+
+    } catch (error) {
+        logger.error('Database tables check error:', error);
         res.status(500).json({
             status: 'error',
             error: error.message

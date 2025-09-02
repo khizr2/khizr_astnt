@@ -83,11 +83,6 @@ background: var(--warning);
 background: var(--text-secondary);
 }
 
-.header-controls {
-display: flex;
-align-items: center;
-}
-
 .theme-toggle {
 display: flex;
 gap: 8px;
@@ -248,14 +243,6 @@ transition: all 0.2s ease;
 opacity: 0.9;
 }
 
-/* Date Display */
-.date-display {
-font-size: 16px;
-font-weight: 500;
-color: var(--text-primary);
-text-transform: capitalize;
-}
-
 /* Tasks */
 .task-list {
 list-style: none;
@@ -364,61 +351,6 @@ font-size: 10px;
 color: var(--text-secondary);
 }
 
-/* AI Input */
-.ai-input-container {
-position: relative;
-}
-
-.ai-prompt {
-color: var(--text-accent);
-font-size: 12px;
-margin-bottom: 12px;
-font-weight: 500;
-}
-
-.ai-textarea {
-width: 100%;
-background: transparent;
-border: none;
-padding: 0;
-color: var(--text-primary);
-font-family: inherit;
-font-size: 13px;
-resize: none;
-height: 100px;
-transition: border-color 0.2s ease;
-}
-
-.ai-textarea:focus {
-outline: none;
-}
-
-.ai-textarea::placeholder {
-color: var(--text-secondary);
-font-style: italic;
-}
-
-.ai-send-btn {
-position: absolute;
-bottom: 0;
-right: 0;
-background: var(--primary);
-border: none;
-border-radius: 3px;
-padding: 6px 12px;
-color: white;
-cursor: pointer;
-font-size: 11px;
-font-family: inherit;
-font-weight: 500;
-transition: all 0.2s ease;
-}
-
-.ai-send-btn:hover {
-opacity: 0.9;
-transform: scale(0.98);
-}
-
 /* Chat Interface */
 .chat-container {
 display: flex;
@@ -521,135 +453,6 @@ opacity: 0.5;
 cursor: not-allowed;
 }
 
-/* Mind Button */
-.mind-btn {
-background: transparent;
-border: none;
-padding: 0;
-color: var(--primary);
-cursor: pointer;
-font-size: 13px;
-font-family: inherit;
-font-weight: 500;
-width: 100%;
-transition: all 0.2s ease;
-text-align: left;
-}
-
-.mind-btn:hover {
-color: var(--text-primary);
-}
-
-/* Mind Textarea */
-.mind-textarea {
-width: 100%;
-min-height: 120px;
-background: transparent;
-border: 1px solid var(--border);
-border-radius: 4px;
-padding: 16px;
-color: var(--text-primary);
-font-family: inherit;
-font-size: 13px;
-resize: vertical;
-transition: border-color 0.2s ease;
-}
-
-.mind-textarea:focus {
-outline: none;
-border-color: var(--primary);
-}
-
-.mind-textarea::placeholder {
-color: var(--text-secondary);
-font-style: italic;
-}
-
-.mind-save-btn {
-background: var(--primary);
-border: none;
-border-radius: 4px;
-padding: 8px 16px;
-color: white;
-cursor: pointer;
-font-size: 12px;
-font-family: inherit;
-font-weight: 500;
-margin-top: 12px;
-transition: all 0.2s ease;
-}
-
-.mind-save-btn:hover {
-opacity: 0.9;
-}
-
-/* Time Events */
-.time-list {
-list-style: none;
-}
-
-.time-item {
-display: flex;
-align-items: center;
-padding: 6px 0;
-font-family: inherit;
-}
-
-.time {
-color: var(--primary);
-font-weight: 500;
-min-width: 80px;
-font-size: 12px;
-}
-
-.time-separator {
-color: var(--text-secondary);
-margin: 0 16px;
-font-weight: 300;
-}
-
-.event-title {
-color: var(--text-primary);
-font-weight: 400;
-}
-
-/* Views */
-.project-view, .mind-view, .chat-view, .emails-view, .goals-view, .insights-view, .approvals-view {
-display: none;
-}
-
-.project-view.active, .mind-view.active, .chat-view.active, .emails-view.active, .goals-view.active, .insights-view.active, .approvals-view.active {
-display: block;
-}
-
-/* Project Items */
-.project-item {
-background: var(--bg-card);
-border: 1px solid var(--border);
-border-radius: 6px;
-padding: 16px;
-margin-bottom: 12px;
-cursor: pointer;
-transition: all 0.2s ease;
-}
-
-.project-item:hover {
-border-color: var(--primary);
-background: rgba(139, 92, 246, 0.04);
-}
-
-.project-title {
-font-size: 14px;
-font-weight: 600;
-color: var(--text-primary);
-margin-bottom: 4px;
-}
-
-.project-desc {
-color: var(--text-secondary);
-font-size: 12px;
-}
-
 /* Approval Cards */
 .approval-item {
 background: rgba(245, 158, 11, 0.1);
@@ -661,7 +464,7 @@ margin-bottom: 12px;
 
 .approval-header {
 display: flex;
-justify-content: space-between;
+justify-content: between;
 align-items: flex-start;
 margin-bottom: 8px;
 }
@@ -719,7 +522,44 @@ transition: all 0.2s ease;
 opacity: 0.9;
 }
 
-/* Modal styles */
+/* Views */
+.project-view, .mind-view, .chat-view, .emails-view, .goals-view, .insights-view, .approvals-view {
+display: none;
+}
+
+.project-view.active, .mind-view.active, .chat-view.active, .emails-view.active, .goals-view.active, .insights-view.active, .approvals-view.active {
+display: block;
+}
+
+/* Rest of your existing CSS... */
+.project-item {
+background: var(--bg-card);
+border: 1px solid var(--border);
+border-radius: 6px;
+padding: 16px;
+margin-bottom: 12px;
+cursor: pointer;
+transition: all 0.2s ease;
+}
+
+.project-item:hover {
+border-color: var(--primary);
+background: rgba(139, 92, 246, 0.04);
+}
+
+.project-title {
+font-size: 14px;
+font-weight: 600;
+color: var(--text-primary);
+margin-bottom: 4px;
+}
+
+.project-desc {
+color: var(--text-secondary);
+font-size: 12px;
+}
+
+/* Modal styles and other existing CSS from previous version... */
 .modal-overlay {
 position: fixed;
 top: 0;
@@ -845,72 +685,6 @@ transition: all 0.2s ease;
 opacity: 0.9;
 }
 
-/* Email styles */
-.email-item {
-background: var(--bg-card);
-border: 1px solid var(--border);
-border-radius: 4px;
-padding: 12px;
-margin-bottom: 8px;
-cursor: pointer;
-transition: all 0.2s ease;
-}
-
-.email-item:hover {
-border-color: var(--primary);
-background: rgba(139, 92, 246, 0.04);
-}
-
-.email-item.unread {
-border-left: 3px solid var(--primary);
-}
-
-.email-header {
-display: flex;
-justify-content: space-between;
-align-items: flex-start;
-margin-bottom: 4px;
-}
-
-.email-from {
-font-weight: 500;
-color: var(--text-primary);
-font-size: 12px;
-}
-
-.email-date {
-font-size: 10px;
-color: var(--text-secondary);
-}
-
-.email-subject {
-font-size: 13px;
-color: var(--text-primary);
-margin-bottom: 4px;
-}
-
-.email-snippet {
-font-size: 11px;
-color: var(--text-secondary);
-line-height: 1.4;
-}
-
-/* Loading states */
-.loading {
-opacity: 0.6;
-pointer-events: none;
-}
-
-.error-message {
-color: var(--secondary);
-font-size: 12px;
-padding: 8px;
-background: rgba(239, 68, 68, 0.1);
-border: 1px solid var(--secondary);
-border-radius: 4px;
-margin-bottom: 16px;
-}
-
 /* Responsive */
 @media (max-width: 768px) {
 .container {
@@ -979,7 +753,7 @@ padding: 20px;
 <!-- Date Display -->
 <div class="code-card">
 <div class="section-header">today</div>
-<div class="date-display" id="dateDisplay">Loading...</div>
+<div class="date-display" id="dateDisplay"></div>
 </div>
 
 <!-- Dynamic Tasks -->
@@ -989,7 +763,7 @@ tasks
 <button class="add-btn" onclick="showAddTaskModal()">+ add</button>
 </div>
 <ul class="task-list" id="tasksList">
-<li style="color: var(--text-secondary); font-style: italic;">Loading tasks...</li>
+<!-- Tasks will be loaded dynamically -->
 </ul>
 </div>
 
@@ -1007,14 +781,13 @@ id="aiNote"
 </div>
 </div>
 </div>
-</div>
 
 <div class="sidebar">
 <!-- Agent Status -->
 <div class="code-card">
 <div class="section-header">agents</div>
 <div id="agentCards">
-<p style="color: var(--text-secondary); font-size: 11px;">Loading agent status...</p>
+<!-- Agent status cards will be loaded here -->
 </div>
 </div>
 
@@ -1022,21 +795,7 @@ id="aiNote"
 <div class="code-card">
 <div class="section-header">timebound</div>
 <ul class="time-list" id="timeEvents">
-<li class="time-item">
-<span class="time">1:00 PM</span>
-<span class="time-separator">-</span>
-<span class="event-title">meeting with neil</span>
-</li>
-<li class="time-item">
-<span class="time">2:00 PM</span>
-<span class="time-separator">-</span>
-<span class="event-title">party</span>
-</li>
-<li class="time-item">
-<span class="time">6:00 PM</span>
-<span class="time-separator">-</span>
-<span class="event-title">gym session</span>
-</li>
+<!-- Calendar events will be loaded here -->
 </ul>
 </div>
 
@@ -1055,7 +814,7 @@ projects
 <button class="add-btn" onclick="showAddProjectModal()">+ add</button>
 </div>
 <div class="project-list" id="projectList">
-<p style="color: var(--text-secondary); font-style: italic;">Loading projects...</p>
+<!-- Projects will be loaded dynamically -->
 </div>
 </div>
 </div>
@@ -1065,7 +824,7 @@ projects
 <div class="code-card boxed">
 <div class="section-header">approvals needed</div>
 <div id="approvalsList">
-<p style="color: var(--text-secondary);">Loading approvals...</p>
+<!-- Pending approvals will be loaded here -->
 </div>
 </div>
 </div>
@@ -1095,16 +854,7 @@ placeholder="Share your thoughts, ideas, concerns..."
 <div class="section-header">ai chat</div>
 <div class="chat-container">
 <div class="chat-messages" id="chatMessages">
-<div class="chat-message assistant">
-<div class="message-content">
-Hey! I'm your AI assistant. You can ask me anything or use our prefix system:
-<br><br>
-<strong>?</strong> research questions • <strong>zz</strong> tasks • <strong>og</strong> preserve notes • <strong>!!</strong> urgent items
-<br><br>
-What's on your mind?
-</div>
-<div class="message-time">Just now</div>
-</div>
+<!-- Chat history will be loaded here -->
 </div>
 <div class="chat-input-container">
 <input 
@@ -1219,1047 +969,667 @@ let agents = [];
 let currentUser = null;
 let notifications = 0;
 let pendingApprovals = [];
-let isInitialized = false;
-
-// Safe element finder
-function safeGetElement(id) {
-    const element = document.getElementById(id);
-    if (!element) {
-        console.warn(`Element with id '${id}' not found`);
-    }
-    return element;
-}
-
-// Safe HTML setter
-function safeSetHTML(elementId, html) {
-    const element = safeGetElement(elementId);
-    if (element) {
-        element.innerHTML = html;
-    }
-}
-
-// Safe attribute setter
-function safeSetAttribute(elementId, attribute, value) {
-    const element = safeGetElement(elementId);
-    if (element) {
-        element.setAttribute(attribute, value);
-    }
-}
 
 // Authentication helper
 function getAuthHeaders() {
-    const token = localStorage.getItem('khizr_assistant_auth') || 'mock-token';
-    return {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
-    };
-}
-
-// Error handling helper
-function handleError(error, context = '') {
-    console.error(`Error in ${context}:`, error);
-    // Show user-friendly error message
-    showErrorMessage(`Something went wrong${context ? ' with ' + context : ''}. Please try again.`);
-}
-
-function showErrorMessage(message) {
-    // Create or update error display
-    let errorDiv = document.getElementById('globalError');
-    if (!errorDiv) {
-        errorDiv = document.createElement('div');
-        errorDiv.id = 'globalError';
-        errorDiv.className = 'error-message';
-        errorDiv.style.position = 'fixed';
-        errorDiv.style.top = '20px';
-        errorDiv.style.right = '20px';
-        errorDiv.style.zIndex = '9999';
-        document.body.appendChild(errorDiv);
-    }
-    
-    errorDiv.textContent = message;
-    errorDiv.style.display = 'block';
-    
-    // Auto-hide after 5 seconds
-    setTimeout(() => {
-        if (errorDiv) {
-            errorDiv.style.display = 'none';
-        }
-    }, 5000);
+const token = localStorage.getItem('khizr_assistant_auth');
+return {
+'Authorization': `Bearer ${token}`,
+'Content-Type': 'application/json'
+};
 }
 
 // Initialize application
 async function initializeApp() {
-    try {
-        if (isInitialized) return;
-        
-        console.log('Initializing Khizr Assistant...');
-        
-        // Set loading states
-        safeSetHTML('dateDisplay', 'Loading...');
-        safeSetHTML('tasksList', '<li style="color: var(--text-secondary); font-style: italic;">Loading tasks...</li>');
-        safeSetHTML('agentCards', '<p style="color: var(--text-secondary); font-size: 11px;">Loading agent status...</p>');
-        
-        updateDateDisplay();
-        
-        // Try to load data, but don't fail if APIs are not ready
-        await Promise.allSettled([
-            loadAgentStatus(),
-            loadTasks(),
-            loadProjects(),
-            loadApprovals(),
-            loadChatHistory()
-        ]);
-        
-        // Set up periodic updates only if initialization succeeds
-        setInterval(() => {
-            if (isInitialized) {
-                loadAgentStatus().catch(err => console.warn('Agent status update failed:', err));
-            }
-        }, 30000);
-        
-        setInterval(() => {
-            if (isInitialized) {
-                loadApprovals().catch(err => console.warn('Approvals update failed:', err));
-            }
-        }, 60000);
-        
-        isInitialized = true;
-        console.log('Khizr Assistant initialized successfully');
-        
-    } catch (error) {
-        handleError(error, 'initialization');
-    }
+try {
+await loadAgentStatus();
+await loadTasks();
+await loadProjects();
+await loadApprovals();
+await loadChatHistory();
+updateDateDisplay();
+setInterval(loadAgentStatus, 30000); // Update agent status every 30 seconds
+setInterval(loadApprovals, 60000); // Check for approvals every minute
+} catch (error) {
+console.error('Failed to initialize app:', error);
+}
 }
 
-// Load agent status with fallback
+// Load agent status
 async function loadAgentStatus() {
-    try {
-        // Mock data for when API is not available
-        const mockAgents = [
-            { name: 'browser_agent', display_name: 'Browser Agent', status: 'available' },
-            { name: 'coder_agent', display_name: 'Coder Agent', status: 'available' },
-            { name: 'pm_agent', display_name: 'PM Agent', status: 'available' },
-            { name: 'researcher_agent', display_name: 'Research Agent', status: 'available' }
-        ];
-        
-        try {
-            const response = await fetch(`${API_URL}/agents`, {
-                headers: getAuthHeaders()
-            });
-            
-            if (response.ok) {
-                const data = await response.json();
-                if (data.success && data.agents) {
-                    agents = data.agents;
-                } else {
-                    agents = mockAgents;
-                }
-            } else {
-                agents = mockAgents;
-            }
-        } catch (fetchError) {
-            console.warn('Using mock agent data:', fetchError.message);
-            agents = mockAgents;
-        }
-        
-        updateAgentIndicators();
-        updateAgentCards();
-        
-    } catch (error) {
-        console.warn('Failed to load agent status:', error);
-        // Set default offline state
-        agents = [
-            { name: 'browser_agent', display_name: 'Browser Agent', status: 'offline' },
-            { name: 'coder_agent', display_name: 'Coder Agent', status: 'offline' },
-            { name: 'pm_agent', display_name: 'PM Agent', status: 'offline' },
-            { name: 'researcher_agent', display_name: 'Research Agent', status: 'offline' }
-        ];
-        updateAgentIndicators();
-        updateAgentCards();
-    }
+try {
+const response = await fetch(`${API_URL}/agents`, {
+headers: getAuthHeaders()
+});
+const data = await response.json();
+
+if (data.success) {
+agents = data.agents;
+updateAgentIndicators();
+updateAgentCards();
+}
+} catch (error) {
+console.error('Failed to load agent status:', error);
+}
 }
 
 function updateAgentIndicators() {
-    agents.forEach(agent => {
-        const indicatorName = agent.name.replace('_agent', 'Agent');
-        const indicator = safeGetElement(indicatorName);
-        if (indicator) {
-            indicator.className = `agent-indicator ${agent.status}`;
-        }
-    });
+agents.forEach(agent => {
+const indicator = document.getElementById(agent.name.replace('_', '') + 'Agent');
+if (indicator) {
+indicator.className = `agent-indicator ${agent.status}`;
+}
+});
 }
 
 function updateAgentCards() {
-    if (agents.length === 0) {
-        safeSetHTML('agentCards', '<p style="color: var(--text-secondary); font-size: 11px;">No agent data available</p>');
-        return;
-    }
+const agentCards = document.getElementById('agentCards');
+if (!agentCards) return;
 
-    const cardsHTML = agents.map(agent => `
-        <div class="agent-card ${agent.status}">
-            <div class="agent-name">${agent.display_name}</div>
-            <div class="agent-task">${agent.status === 'busy' ? 'Working on task...' : agent.status}</div>
-        </div>
-    `).join('');
+const cardsHTML = agents.map(agent => `
+<div class="agent-card ${agent.status}">
+<div class="agent-name">${agent.display_name}</div>
+<div class="agent-task">${agent.status === 'busy' ? 'Working on task...' : agent.status}</div>
+</div>
+`).join('');
 
-    safeSetHTML('agentCards', cardsHTML);
+agentCards.innerHTML = cardsHTML;
 }
 
-// Load tasks with fallback
+// Load tasks
 async function loadTasks() {
-    try {
-        let tasks = [];
-        
-        try {
-            const response = await fetch(`${API_URL}/tasks?limit=10`, {
-                headers: getAuthHeaders()
-            });
-            
-            if (response.ok) {
-                const data = await response.json();
-                if (data.success && data.tasks) {
-                    tasks = data.tasks;
-                }
-            }
-        } catch (fetchError) {
-            console.warn('Tasks API not available:', fetchError.message);
-            // Load from localStorage as fallback
-            const savedTasks = localStorage.getItem('khizr_processed_tasks');
-            if (savedTasks) {
-                try {
-                    tasks = JSON.parse(savedTasks);
-                } catch (parseError) {
-                    console.warn('Failed to parse saved tasks');
-                    tasks = [];
-                }
-            }
-        }
-        
-        displayTasks(tasks);
-        
-    } catch (error) {
-        console.warn('Failed to load tasks:', error);
-        safeSetHTML('tasksList', '<li style="color: var(--text-secondary); font-style: italic;">Unable to load tasks. Please try again later.</li>');
-    }
+try {
+const response = await fetch(`${API_URL}/tasks?limit=10`, {
+headers: getAuthHeaders()
+});
+const data = await response.json();
+
+if (data.success) {
+displayTasks(data.tasks);
+}
+} catch (error) {
+console.error('Failed to load tasks:', error);
+}
 }
 
 function displayTasks(tasks) {
-    const tasksList = safeGetElement('tasksList');
-    if (!tasksList) return;
+const tasksList = document.getElementById('tasksList');
+if (!tasksList) return;
 
-    if (!tasks || tasks.length === 0) {
-        tasksList.innerHTML = '<li style="color: var(--text-secondary); font-style: italic;">No tasks yet. Create one above!</li>';
-        return;
-    }
-
-    const tasksHTML = tasks.map(task => `
-        <li class="task-item ${task.priority === 'urgent' ? 'urgent' : ''}">
-            <span class="task-title">${escapeHtml(task.title || 'Untitled Task')}</span>
-            ${task.priority === 'urgent' ? '<span class="task-priority urgent">URGENT</span>' : ''}
-            ${task.task_type === 'agent' ? '<span class="task-priority research">AGENT</span>' : ''}
-            <div class="task-actions">
-                <button class="task-action-btn" onclick="completeTask('${task.id}')" title="Complete">✓</button>
-                <button class="task-action-btn" onclick="deleteTask('${task.id}')" title="Delete">🗑️</button>
-            </div>
-        </li>
-    `).join('');
-
-    tasksList.innerHTML = tasksHTML;
+if (tasks.length === 0) {
+tasksList.innerHTML = '<li style="color: var(--text-secondary); font-style: italic;">No tasks yet. Create one above!</li>';
+return;
 }
 
-// Load projects with fallback
+const tasksHTML = tasks.map(task => `
+<li class="task-item ${task.priority === 'urgent' ? 'urgent' : ''}">
+<span class="task-title">${task.title}</span>
+${task.priority === 'urgent' ? '<span class="task-priority urgent">URGENT</span>' : ''}
+${task.task_type === 'agent' ? '<span class="task-priority research">AGENT</span>' : ''}
+<div class="task-actions">
+<button class="task-action-btn" onclick="completeTask('${task.id}')" title="Complete">✓</button>
+<button class="task-action-btn" onclick="deleteTask('${task.id}')" title="Delete">🗑️</button>
+</div>
+</li>
+`).join('');
+
+tasksList.innerHTML = tasksHTML;
+}
+
+// Load projects
 async function loadProjects() {
-    try {
-        let projects = [];
-        
-        try {
-            const response = await fetch(`${API_URL}/projects`, {
-                headers: getAuthHeaders()
-            });
-            
-            if (response.ok) {
-                const data = await response.json();
-                if (data.success && data.projects) {
-                    projects = data.projects;
-                }
-            }
-        } catch (fetchError) {
-            console.warn('Projects API not available:', fetchError.message);
-            // Load from localStorage as fallback
-            const savedProjects = localStorage.getItem('khizr_processed_projects');
-            if (savedProjects) {
-                try {
-                    projects = JSON.parse(savedProjects);
-                } catch (parseError) {
-                    console.warn('Failed to parse saved projects');
-                    projects = [];
-                }
-            }
-        }
-        
-        displayProjects(projects);
-        
-    } catch (error) {
-        console.warn('Failed to load projects:', error);
-        safeSetHTML('projectList', '<p style="color: var(--text-secondary); font-style: italic;">Unable to load projects. Please try again later.</p>');
-    }
+try {
+const response = await fetch(`${API_URL}/projects`, {
+headers: getAuthHeaders()
+});
+const data = await response.json();
+
+if (data.success) {
+displayProjects(data.projects);
+}
+} catch (error) {
+console.error('Failed to load projects:', error);
+}
 }
 
 function displayProjects(projects) {
-    if (!projects || projects.length === 0) {
-        safeSetHTML('projectList', '<p style="color: var(--text-secondary); font-style: italic;">No projects yet. Create one above!</p>');
-        return;
-    }
+const projectList = document.getElementById('projectList');
+if (!projectList) return;
 
-    const projectsHTML = projects.map(project => `
-        <div class="project-item" onclick="openProject('${project.id}')">
-            <div class="project-title">${escapeHtml(project.name || 'Untitled Project')}</div>
-            <div class="project-desc">${escapeHtml(project.description || 'No description')}</div>
-        </div>
-    `).join('');
-
-    safeSetHTML('projectList', projectsHTML);
+if (projects.length === 0) {
+projectList.innerHTML = '<p style="color: var(--text-secondary); font-style: italic;">No projects yet. Create one above!</p>';
+return;
 }
 
-// Load pending approvals with fallback
+const projectsHTML = projects.map(project => `
+<div class="project-item" onclick="openProject('${project.id}')">
+<div class="project-title">${project.name}</div>
+<div class="project-desc">${project.description || 'No description'}</div>
+</div>
+`).join('');
+
+projectList.innerHTML = projectsHTML;
+}
+
+// Load pending approvals
 async function loadApprovals() {
-    try {
-        let approvals = [];
-        
-        try {
-            const response = await fetch(`${API_URL}/approvals/pending`, {
-                headers: getAuthHeaders()
-            });
-            
-            if (response.ok) {
-                const data = await response.json();
-                if (data.success && data.approvals) {
-                    approvals = data.approvals;
-                }
-            }
-        } catch (fetchError) {
-            console.warn('Approvals API not available:', fetchError.message);
-            approvals = []; // No fallback for approvals
-        }
-        
-        pendingApprovals = approvals;
-        displayApprovals(approvals);
-        updateApprovalsBadge(approvals.length);
-        
-    } catch (error) {
-        console.warn('Failed to load approvals:', error);
-        safeSetHTML('approvalsList', '<p style="color: var(--text-secondary);">Unable to load approvals. Please try again later.</p>');
-    }
+try {
+const response = await fetch(`${API_URL}/approvals/pending`, {
+headers: getAuthHeaders()
+});
+const data = await response.json();
+
+if (data.success) {
+pendingApprovals = data.approvals;
+displayApprovals(data.approvals);
+updateApprovalsBadge(data.approvals.length);
+}
+} catch (error) {
+console.error('Failed to load approvals:', error);
+}
 }
 
 function displayApprovals(approvals) {
-    if (!approvals || approvals.length === 0) {
-        safeSetHTML('approvalsList', '<p style="color: var(--text-secondary);">No approvals needed right now.</p>');
-        return;
-    }
+const approvalsList = document.getElementById('approvalsList');
+if (!approvalsList) return;
 
-    const approvalsHTML = approvals.map(approval => `
-        <div class="approval-item">
-            <div class="approval-header">
-                <div class="approval-title">${escapeHtml(approval.title || 'Approval Required')}</div>
-                ${approval.estimated_cost ? `<div class="approval-cost">${approval.estimated_cost}</div>` : ''}
-            </div>
-            <div class="approval-description">${escapeHtml(approval.description || 'No description available')}</div>
-            <div class="approval-actions">
-                <button class="approve-btn" onclick="handleApproval('${approval.id}', 'approved')">Approve</button>
-                <button class="reject-btn" onclick="handleApproval('${approval.id}', 'rejected')">Reject</button>
-            </div>
-        </div>
-    `).join('');
+if (approvals.length === 0) {
+approvalsList.innerHTML = '<p style="color: var(--text-secondary);">No approvals needed right now.</p>';
+return;
+}
 
-    safeSetHTML('approvalsList', approvalsHTML);
+const approvalsHTML = approvals.map(approval => `
+<div class="approval-item">
+<div class="approval-header">
+<div class="approval-title">${approval.title}</div>
+${approval.estimated_cost ? `<div class="approval-cost">${approval.estimated_cost}</div>` : ''}
+</div>
+<div class="approval-description">${approval.description}</div>
+<div class="approval-actions">
+<button class="approve-btn" onclick="handleApproval('${approval.id}', 'approved')">Approve</button>
+<button class="reject-btn" onclick="handleApproval('${approval.id}', 'rejected')">Reject</button>
+</div>
+</div>
+`).join('');
+
+approvalsList.innerHTML = approvalsHTML;
 }
 
 function updateApprovalsBadge(count) {
-    safeSetAttribute('approvalsNavBtn', 'data-count', count);
+const badge = document.getElementById('approvalsNavBtn');
+if (badge) {
+badge.setAttribute('data-count', count);
+}
 }
 
-// Chat functionality with offline support
+// Chat functionality
+async function loadChatHistory() {
+try {
+const response = await fetch(`${API_URL}/chat/history`, {
+headers: getAuthHeaders()
+});
+const data = await response.json();
+
+if (data.success && data.chat_history.length > 0) {
+const messagesContainer = document.getElementById('chatMessages');
+messagesContainer.innerHTML = ''; // Clear existing messages
+data.chat_history.forEach(msg => {
+addChatMessage('user', msg.description);
+// Add a simple response for historical messages
+addChatMessage('assistant', 'Message processed and stored in your knowledge base.');
+});
+} else {
+// Add welcome message if no history
+addChatMessage('assistant', 'Hey! I\'m your AI assistant. You can ask me anything or use our prefix system: <strong>?</strong> for research, <strong>zz</strong> for tasks, <strong>!!</strong> for urgent items.');
+}
+} catch (error) {
+console.error('Failed to load chat history:', error);
+}
+}
+
 function sendChatMessage() {
-    const input = safeGetElement('chatInput');
-    if (!input) return;
-    
-    const message = input.value.trim();
-    if (!message) return;
+const input = document.getElementById('chatInput');
+const message = input.value.trim();
+if (!message) return;
 
-    addChatMessage('user', message);
-    input.value = '';
+addChatMessage('user', message);
+input.value = '';
 
-    const sendBtn = safeGetElement('chatSendBtn');
-    if (sendBtn) {
-        sendBtn.disabled = true;
-        sendBtn.textContent = 'Thinking...';
-    }
+const sendBtn = document.getElementById('chatSendBtn');
+sendBtn.disabled = true;
+sendBtn.textContent = 'Thinking...';
 
-    processChatMessage(message);
+processChatMessage(message);
 }
 
 async function processChatMessage(message) {
-    try {
-        let responseMessage = '';
-        let shouldRefreshTasks = false;
-        
-        try {
-            const response = await fetch(`${API_URL}/chat/process`, {
-                method: 'POST',
-                headers: getAuthHeaders(),
-                body: JSON.stringify({ message })
-            });
+try {
+const response = await fetch(`${API_URL}/chat/process`, {
+method: 'POST',
+headers: getAuthHeaders(),
+body: JSON.stringify({ message })
+});
 
-            if (response.ok) {
-                const data = await response.json();
-                if (data.success) {
-                    responseMessage = data.message;
-                    shouldRefreshTasks = ['task_created', 'urgent_created', 'research_created'].includes(data.type);
-                } else {
-                    responseMessage = 'Sorry, I encountered an error processing your message.';
-                }
-            } else {
-                throw new Error('API request failed');
-            }
-        } catch (fetchError) {
-            console.warn('Chat API not available, using offline processing:', fetchError.message);
-            // Offline chat processing
-            responseMessage = processMessageOffline(message);
-            shouldRefreshTasks = message.startsWith('zz') || message.startsWith('!!') || message.startsWith('?');
-        }
-        
-        addChatMessage('assistant', responseMessage);
-        
-        if (shouldRefreshTasks) {
-            await loadTasks();
-        }
-        
-    } catch (error) {
-        console.warn('Chat processing error:', error);
-        addChatMessage('assistant', 'Connection error. Your message has been saved locally.');
-    } finally {
-        const sendBtn = safeGetElement('chatSendBtn');
-        if (sendBtn) {
-            sendBtn.disabled = false;
-            sendBtn.textContent = 'Send';
-        }
-    }
+const data = await response.json();
+
+if (data.success) {
+addChatMessage('assistant', data.message);
+
+// Refresh tasks if new ones were created
+if (data.type === 'task_created' || data.type === 'urgent_created' || data.type === 'research_created') {
+await loadTasks();
 }
-
-function processMessageOffline(message) {
-    const trimmed = message.trim();
-    
-    if (trimmed.startsWith('?')) {
-        const question = trimmed.substring(1).trim();
-        // Save to localStorage
-        saveTaskToLocal({
-            id: `research_${Date.now()}`,
-            title: `Research: ${question}`,
-            priority: 'medium',
-            task_type: 'agent',
-            created: new Date()
-        });
-        return `I've added "${question}" to your research queue. (Offline mode - will sync when connected)`;
-    }
-    
-    if (trimmed.toLowerCase().startsWith('zz')) {
-        const taskTitle = trimmed.substring(2).trim();
-        saveTaskToLocal({
-            id: `task_${Date.now()}`,
-            title: taskTitle,
-            priority: 'normal',
-            task_type: 'manual',
-            created: new Date()
-        });
-        return `Task created: "${taskTitle}". (Offline mode - will sync when connected)`;
-    }
-    
-    if (trimmed.startsWith('!!')) {
-        const urgentTask = trimmed.substring(2).trim();
-        saveTaskToLocal({
-            id: `urgent_${Date.now()}`,
-            title: urgentTask,
-            priority: 'urgent',
-            task_type: 'manual',
-            created: new Date()
-        });
-        return `🔥 Urgent task created: "${urgentTask}". (Offline mode - will sync when connected)`;
-    }
-    
-    const responses = [
-        `I understand you're thinking about: "${trimmed}". (Offline mode - limited processing available)`,
-        `Got it: "${trimmed}". Use prefixes like "zz" for tasks or "?" for research questions.`,
-        `Thanks for sharing. "${trimmed}" has been noted. (Offline mode)`
-    ];
-    
-    return responses[Math.floor(Math.random() * responses.length)];
+} else {
+addChatMessage('assistant', 'Sorry, I encountered an error processing your message.');
 }
-
-function saveTaskToLocal(task) {
-    try {
-        const saved = localStorage.getItem('khizr_processed_tasks');
-        let tasks = saved ? JSON.parse(saved) : [];
-        tasks.push(task);
-        localStorage.setItem('khizr_processed_tasks', JSON.stringify(tasks));
-        loadTasks(); // Refresh display
-    } catch (error) {
-        console.warn('Failed to save task locally:', error);
-    }
+} catch (error) {
+addChatMessage('assistant', 'Connection error. Please try again.');
+console.error('Chat processing error:', error);
+} finally {
+const sendBtn = document.getElementById('chatSendBtn');
+sendBtn.disabled = false;
+sendBtn.textContent = 'Send';
+}
 }
 
 function addChatMessage(sender, content) {
-    const messagesContainer = safeGetElement('chatMessages');
-    if (!messagesContainer) return;
-    
-    const messageDiv = document.createElement('div');
-    messageDiv.className = `chat-message ${sender}`;
+const messagesContainer = document.getElementById('chatMessages');
+const messageDiv = document.createElement('div');
+messageDiv.className = `chat-message ${sender}`;
 
-    const now = new Date();
-    const timeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+const now = new Date();
+const timeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-    messageDiv.innerHTML = `
-        <div class="message-content">${escapeHtml(content)}</div>
-        <div class="message-time">${timeString}</div>
-    `;
-    
-    messagesContainer.appendChild(messageDiv);
-    messagesContainer.scrollTop = messagesContainer.scrollHeight;
-}
+messageDiv.innerHTML = `
+<div class="message-content">${content}</div>
+<div class="message-time">${timeString}</div>
+`;
 
-// Load chat history with fallback
-async function loadChatHistory() {
-    try {
-        const response = await fetch(`${API_URL}/chat/history`, {
-            headers: getAuthHeaders()
-        });
-        const data = await response.json();
-
-        if (data.success && data.chat_history.length > 0) {
-            const messagesContainer = safeGetElement('chatMessages');
-            if (messagesContainer) {
-                messagesContainer.innerHTML = ''; // Clear existing messages
-                data.chat_history.forEach(msg => {
-                    addChatMessage('user', msg.description);
-                    // Add a simple response for historical messages
-                    addChatMessage('assistant', 'Message processed and stored in your knowledge base.');
-                });
-            }
-        } else {
-            // Welcome message is already in HTML, no need to add another
-        }
-    } catch (error) {
-        console.warn('Failed to load chat history:', error);
-        // Keep the default welcome message in HTML
-    }
+messagesContainer.appendChild(messageDiv);
+messagesContainer.scrollTop = messagesContainer.scrollHeight;
 }
 
 function handleChatKeyPress(event) {
-    if (event.key === 'Enter' && !event.shiftKey) {
-        event.preventDefault();
-        sendChatMessage();
-    }
+if (event.key === 'Enter' && !event.shiftKey) {
+event.preventDefault();
+sendChatMessage();
+}
 }
 
 // Task management
 async function submitTask(event) {
-    event.preventDefault();
-    
-    const titleElement = safeGetElement('taskTitle');
-    const priorityElement = safeGetElement('taskPriority');
-    const assignToElement = safeGetElement('taskAssignTo');
-    const descriptionElement = safeGetElement('taskDescription');
-    
-    if (!titleElement) return;
-    
-    const title = titleElement.value.trim();
-    const priority = priorityElement?.value || 'normal';
-    const assigned_to = assignToElement?.value || 'human';
-    const description = descriptionElement?.value.trim() || '';
+event.preventDefault();
+const title = document.getElementById('taskTitle').value.trim();
+const priority = document.getElementById('taskPriority').value;
+const assigned_to = document.getElementById('taskAssignTo').value;
+const description = document.getElementById('taskDescription').value.trim();
 
-    if (!title) return;
+if (!title) return;
 
-    try {
-        const taskData = {
-            title,
-            priority,
-            assigned_to: assigned_to === 'human' ? null : assigned_to,
-            task_type: assigned_to === 'human' ? 'manual' : 'agent',
-            description,
-            id: `task_${Date.now()}`,
-            created: new Date()
-        };
-        
-        try {
-            const response = await fetch(`${API_URL}/tasks`, {
-                method: 'POST',
-                headers: getAuthHeaders(),
-                body: JSON.stringify(taskData)
-            });
+try {
+const response = await fetch(`${API_URL}/tasks`, {
+method: 'POST',
+headers: getAuthHeaders(),
+body: JSON.stringify({
+title,
+priority,
+assigned_to: assigned_to === 'human' ? null : assigned_to,
+task_type: assigned_to === 'human' ? 'manual' : 'agent',
+description
+})
+});
 
-            if (response.ok) {
-                const data = await response.json();
-                if (data.success) {
-                    closeModal('addTaskModal');
-                    await loadTasks();
-                    resetTaskForm();
-                    return;
-                }
-            }
-            throw new Error('API request failed');
-        } catch (fetchError) {
-            console.warn('Task API not available, saving locally:', fetchError.message);
-            // Save locally
-            saveTaskToLocal(taskData);
-            closeModal('addTaskModal');
-            resetTaskForm();
-            showErrorMessage('Task saved locally. Will sync when connected to server.');
-        }
-        
-    } catch (error) {
-        handleError(error, 'creating task');
-    }
+const data = await response.json();
+
+if (data.success) {
+closeModal('addTaskModal');
+await loadTasks();
+
+// Reset form
+document.getElementById('taskTitle').value = '';
+document.getElementById('taskDescription').value = '';
+document.getElementById('taskPriority').value = 'normal';
+document.getElementById('taskAssignTo').value = 'human';
 }
-
-function resetTaskForm() {
-    const elements = ['taskTitle', 'taskDescription'];
-    elements.forEach(id => {
-        const element = safeGetElement(id);
-        if (element) element.value = '';
-    });
-    
-    const priorityElement = safeGetElement('taskPriority');
-    const assignElement = safeGetElement('taskAssignTo');
-    
-    if (priorityElement) priorityElement.value = 'normal';
-    if (assignElement) assignElement.value = 'human';
+} catch (error) {
+console.error('Failed to create task:', error);
+}
 }
 
 async function completeTask(taskId) {
-    try {
-        const response = await fetch(`${API_URL}/tasks/${taskId}/status`, {
-            method: 'PATCH',
-            headers: getAuthHeaders(),
-            body: JSON.stringify({ status: 'completed' })
-        });
+try {
+const response = await fetch(`${API_URL}/tasks/${taskId}/status`, {
+method: 'PATCH',
+headers: getAuthHeaders(),
+body: JSON.stringify({ status: 'completed' })
+});
 
-        if (response.ok) {
-            await loadTasks();
-        } else {
-            // Remove from local storage as fallback
-            removeTaskFromLocal(taskId);
-        }
-    } catch (error) {
-        console.warn('Complete task API error, removing locally:', error);
-        removeTaskFromLocal(taskId);
-    }
+if (response.ok) {
+await loadTasks();
+}
+} catch (error) {
+console.error('Failed to complete task:', error);
+}
 }
 
 async function deleteTask(taskId) {
-    await completeTask(taskId);
-}
-
-function removeTaskFromLocal(taskId) {
-    try {
-        const saved = localStorage.getItem('khizr_processed_tasks');
-        if (saved) {
-            let tasks = JSON.parse(saved);
-            tasks = tasks.filter(task => task.id !== taskId);
-            localStorage.setItem('khizr_processed_tasks', JSON.stringify(tasks));
-            loadTasks();
-        }
-    } catch (error) {
-        console.warn('Failed to remove task locally:', error);
-    }
+// For now, we'll mark as cancelled instead of deleting
+await completeTask(taskId);
 }
 
 // Project management
 async function submitProject(event) {
-    event.preventDefault();
-    
-    const nameElement = safeGetElement('projectName');
-    const descriptionElement = safeGetElement('projectDescription');
-    const dueDateElement = safeGetElement('projectDueDate');
-    
-    if (!nameElement) return;
-    
-    const name = nameElement.value.trim();
-    const description = descriptionElement?.value.trim() || '';
-    const due_date = dueDateElement?.value || '';
+event.preventDefault();
+const name = document.getElementById('projectName').value.trim();
+const description = document.getElementById('projectDescription').value.trim();
+const due_date = document.getElementById('projectDueDate').value;
 
-    if (!name) return;
+if (!name) return;
 
-    try {
-        const projectData = { name, description, due_date, id: `project_${Date.now()}` };
-        
-        try {
-            const response = await fetch(`${API_URL}/projects`, {
-                method: 'POST',
-                headers: getAuthHeaders(),
-                body: JSON.stringify(projectData)
-            });
+try {
+const response = await fetch(`${API_URL}/projects`, {
+method: 'POST',
+headers: getAuthHeaders(),
+body: JSON.stringify({ name, description, due_date })
+});
 
-            if (response.ok) {
-                const data = await response.json();
-                if (data.success) {
-                    closeModal('addProjectModal');
-                    await loadProjects();
-                    resetProjectForm();
-                    return;
-                }
-            }
-            throw new Error('API request failed');
-        } catch (fetchError) {
-            console.warn('Project API not available, saving locally:', fetchError.message);
-            saveProjectToLocal(projectData);
-            closeModal('addProjectModal');
-            resetProjectForm();
-            showErrorMessage('Project saved locally. Will sync when connected to server.');
-        }
-        
-    } catch (error) {
-        handleError(error, 'creating project');
-    }
+const data = await response.json();
+
+if (data.success) {
+closeModal('addProjectModal');
+await loadProjects();
+
+// Reset form
+document.getElementById('projectName').value = '';
+document.getElementById('projectDescription').value = '';
+document.getElementById('projectDueDate').value = '';
 }
-
-function saveProjectToLocal(project) {
-    try {
-        const saved = localStorage.getItem('khizr_processed_projects');
-        let projects = saved ? JSON.parse(saved) : [];
-        projects.push(project);
-        localStorage.setItem('khizr_processed_projects', JSON.stringify(projects));
-        loadProjects();
-    } catch (error) {
-        console.warn('Failed to save project locally:', error);
-    }
+} catch (error) {
+console.error('Failed to create project:', error);
 }
-
-function resetProjectForm() {
-    const elements = ['projectName', 'projectDescription', 'projectDueDate'];
-    elements.forEach(id => {
-        const element = safeGetElement(id);
-        if (element) element.value = '';
-    });
 }
 
 // Approval handling
 async function handleApproval(approvalId, status) {
-    try {
-        const response = await fetch(`${API_URL}/approvals/${approvalId}`, {
-            method: 'PATCH',
-            headers: getAuthHeaders(),
-            body: JSON.stringify({ status })
-        });
+try {
+const response = await fetch(`${API_URL}/approvals/${approvalId}`, {
+method: 'PATCH',
+headers: getAuthHeaders(),
+body: JSON.stringify({ status })
+});
 
-        if (response.ok) {
-            await loadApprovals();
-        } else {
-            showErrorMessage(`Failed to ${status} approval. Please try again.`);
-        }
-    } catch (error) {
-        handleError(error, 'handling approval');
-    }
+if (response.ok) {
+await loadApprovals();
+}
+} catch (error) {
+console.error('Failed to handle approval:', error);
+}
 }
 
-// AI Note processing
+// AI Note processing (quick processing)
 async function processAINote() {
-    const noteElement = safeGetElement('aiNote');
-    if (!noteElement) return;
-    
-    const note = noteElement.value.trim();
-    if (!note) return;
+const note = document.getElementById('aiNote')?.value || '';
+if (!note.trim()) return;
 
-    const btn = document.querySelector('.ai-send-btn');
-    if (!btn) return;
+const btn = document.querySelector('.ai-send-btn');
+if (!btn) return;
 
-    const originalText = btn.textContent;
-    btn.textContent = 'processing...';
-    btn.disabled = true;
+const originalText = btn.textContent;
+btn.textContent = 'processing...';
+btn.disabled = true;
 
-    try {
-        await processChatMessage(note);
-        noteElement.value = '';
-        await loadTasks();
-    } catch (error) {
-        console.warn('Failed to process AI note:', error);
-    } finally {
-        setTimeout(() => {
-            btn.textContent = originalText;
-            btn.disabled = false;
-        }, 1000);
-    }
+try {
+await processChatMessage(note);
+document.getElementById('aiNote').value = '';
+await loadTasks(); // Refresh tasks in case new ones were created
+} catch (error) {
+console.error('Failed to process AI note:', error);
+} finally {
+setTimeout(() => {
+btn.textContent = originalText;
+btn.disabled = false;
+}, 1000);
+}
 }
 
-// Utility functions
-function escapeHtml(text) {
-    if (typeof text !== 'string') return '';
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
-}
-
+// UI Helper functions
 function showView(viewName) {
-    // Hide all views
-    const viewIds = ['today-view', 'project-view', 'mind-view', 'chat-view', 'emails-view', 'goals-view', 'approvals-view'];
-    viewIds.forEach(id => {
-        const element = safeGetElement(id);
-        if (element) {
-            element.style.display = 'none';
-            element.classList.remove('active');
-        }
-    });
+document.querySelectorAll('[id$="-view"]').forEach(view => {
+view.style.display = 'none';
+view.classList.remove('active');
+});
 
-    // Show selected view
-    if (viewName === 'today') {
-        const todayView = safeGetElement('today-view');
-        if (todayView) todayView.style.display = 'grid';
-    } else {
-        const viewElement = safeGetElement(`${viewName}-view`);
-        if (viewElement) {
-            viewElement.style.display = 'block';
-            viewElement.classList.add('active');
-        }
-    }
+if (viewName === 'today') {
+document.getElementById('today-view').style.display = 'grid';
+} else {
+const viewElement = document.getElementById(`${viewName}-view`);
+if (viewElement) {
+viewElement.style.display = 'block';
+viewElement.classList.add('active');
+}
+}
 
-    // Update navigation
-    document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
-    document.querySelectorAll('.nav-btn').forEach(btn => {
-        const btnText = btn.textContent.toLowerCase();
-        if (btnText.includes(viewName.toLowerCase()) || 
-            (viewName === 'chat' && btnText.includes('chat'))) {
-            btn.classList.add('active');
-        }
-    });
+document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+document.querySelectorAll('.nav-btn').forEach(btn => {
+if (btn.textContent.toLowerCase().includes(viewName.toLowerCase()) || 
+    (viewName === 'chat' && btn.textContent.toLowerCase().includes('chat'))) {
+btn.classList.add('active');
+}
+});
 }
 
 function setTheme(theme) {
-    document.body.className = `theme-${theme}`;
-    document.querySelectorAll('.theme-btn').forEach(btn => btn.classList.remove('active'));
-    const active = document.querySelector(`.theme-btn.${theme}`);
-    if (active) active.classList.add('active');
-    localStorage.setItem('theme', theme);
+document.body.className = `theme-${theme}`;
+document.querySelectorAll('.theme-btn').forEach(btn => btn.classList.remove('active'));
+const active = document.querySelector(`.theme-btn.${theme}`);
+if (active) active.classList.add('active');
+localStorage.setItem('theme', theme);
 }
 
 function showAddTaskModal() {
-    const modal = safeGetElement('addTaskModal');
-    if (modal) {
-        modal.style.display = 'flex';
-        const titleInput = safeGetElement('taskTitle');
-        if (titleInput) titleInput.focus();
-    }
+document.getElementById('addTaskModal').style.display = 'flex';
+document.getElementById('taskTitle').focus();
 }
 
 function showAddProjectModal() {
-    const modal = safeGetElement('addProjectModal');
-    if (modal) {
-        modal.style.display = 'flex';
-        const nameInput = safeGetElement('projectName');
-        if (nameInput) nameInput.focus();
-    }
+document.getElementById('addProjectModal').style.display = 'flex';
+document.getElementById('projectName').focus();
 }
 
 function closeModal(modalId) {
-    const modal = safeGetElement(modalId);
-    if (modal) modal.style.display = 'none';
+document.getElementById(modalId).style.display = 'none';
 }
 
 function showMindPage() {
-    showView('mind');
+showView('mind');
 }
 
 function saveMindNote() {
-    const input = safeGetElement('mindInput');
-    if (!input) return;
-    
-    const content = input.value.trim();
-    if (!content) return;
+const input = document.getElementById('mindInput');
+const content = input.value.trim();
+if (!content) return;
 
-    console.log('Saving mind note:', content);
+console.log('Saving mind note:', content);
 
-    const btn = document.querySelector('.mind-save-btn');
-    if (btn) {
-        const originalText = btn.textContent;
-        btn.textContent = 'saved!';
-        setTimeout(() => {
-            btn.textContent = originalText;
-            input.value = '';
-        }, 1000);
-    }
+const btn = document.querySelector('.mind-save-btn');
+const originalText = btn.textContent;
+btn.textContent = 'saved!';
+setTimeout(() => {
+btn.textContent = originalText;
+input.value = '';
+}, 1000);
 }
 
 function openProject(projectId) {
-    console.log('Opening project:', projectId);
-    // TODO: Implement project detail view
+console.log('Opening project:', projectId);
+// TODO: Implement project detail view
 }
 
 function updateDateDisplay() {
-    const now = new Date();
-    const options = {
-        weekday: 'long',
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-    };
-    safeSetHTML('dateDisplay', now.toLocaleDateString('en-US', options));
+const dateDisplay = document.getElementById('dateDisplay');
+if (dateDisplay) {
+const now = new Date();
+const options = {
+weekday: 'long',
+year: 'numeric',
+month: 'long',
+day: 'numeric'
+};
+dateDisplay.textContent = now.toLocaleDateString('en-US', options);
+}
 }
 
-// Gmail functionality (simplified)
+// Gmail functionality (existing)
 async function connectGmail() {
-    const connectBtn = safeGetElement('gmailConnectBtn');
-    const refreshBtn = safeGetElement('refreshEmailsBtn');
-    const status = safeGetElement('emailStatus');
+const connectBtn = document.getElementById('gmailConnectBtn');
+const refreshBtn = document.getElementById('refreshEmailsBtn');
+const status = document.getElementById('emailStatus');
 
-    if (connectBtn) {
-        connectBtn.disabled = true;
-        connectBtn.textContent = 'Connecting...';
-    }
-    if (status) {
-        status.textContent = 'Authenticating with Gmail...';
-    }
+connectBtn.disabled = true;
+connectBtn.textContent = 'Connecting...';
+status.textContent = 'Authenticating with Gmail...';
 
-    try {
-        const response = await fetch(`${API_URL}/gmail/connect`, {
-            method: 'POST',
-            headers: getAuthHeaders()
-        });
+try {
+const response = await fetch(`${API_URL}/gmail/connect`, {
+method: 'POST',
+headers: getAuthHeaders()
+});
 
-        if (response.ok) {
-            if (connectBtn) connectBtn.style.display = 'none';
-            if (refreshBtn) refreshBtn.style.display = 'inline-block';
-            if (status) status.textContent = 'Connected to Gmail ✓';
-            await loadEmails();
-        } else {
-            throw new Error('Failed to connect');
-        }
-    } catch (error) {
-        if (status) status.textContent = 'Connection failed. Please try again.';
-        if (connectBtn) {
-            connectBtn.disabled = false;
-            connectBtn.textContent = 'Connect Gmail';
-        }
-    }
+if (response.ok) {
+connectBtn.style.display = 'none';
+refreshBtn.style.display = 'inline-block';
+status.textContent = 'Connected to Gmail ✓';
+await loadEmails();
+} else {
+throw new Error('Failed to connect');
+}
+} catch (error) {
+status.textContent = 'Connection failed. Please try again.';
+connectBtn.disabled = false;
+connectBtn.textContent = 'Connect Gmail';
+}
 }
 
 async function loadEmails() {
-    const status = safeGetElement('emailStatus');
-    if (status) status.textContent = 'Loading emails...';
+const status = document.getElementById('emailStatus');
+status.textContent = 'Loading emails...';
 
-    try {
-        const response = await fetch(`${API_URL}/gmail/messages`, {
-            headers: getAuthHeaders()
-        });
+try {
+const response = await fetch(`${API_URL}/gmail/messages`, {
+headers: getAuthHeaders()
+});
 
-        if (response.ok) {
-            const data = await response.json();
-            displayEmails(data.messages || []);
-            if (status) status.textContent = `Loaded ${data.messages?.length || 0} emails`;
-        } else {
-            throw new Error('Failed to load emails');
-        }
-    } catch (error) {
-        if (status) status.textContent = 'Failed to load emails';
-        console.error('Email loading error:', error);
-    }
+if (response.ok) {
+const data = await response.json();
+displayEmails(data.messages || []);
+status.textContent = `Loaded ${data.messages?.length || 0} emails`;
+} else {
+throw new Error('Failed to load emails');
+}
+} catch (error) {
+status.textContent = 'Failed to load emails';
+console.error('Email loading error:', error);
+}
 }
 
 async function refreshEmails() {
-    await loadEmails();
+await loadEmails();
 }
 
 function displayEmails(emails) {
-    const emailsList = safeGetElement('emailsList');
-    if (!emailsList) return;
+const emailsList = document.getElementById('emailsList');
 
-    if (emails.length === 0) {
-        emailsList.innerHTML = '<p>No emails found.</p>';
-        return;
-    }
+if (emails.length === 0) {
+emailsList.innerHTML = '<p>No emails found.</p>';
+return;
+}
 
-    const emailsHTML = emails.map(email => `
-        <div class="email-item ${email.unread ? 'unread' : ''}" onclick="openEmail('${email.id}')">
-            <div class="email-header">
-                <div class="email-from">${escapeHtml(email.from || 'Unknown Sender')}</div>
-                <div class="email-date">${formatEmailDate(email.date)}</div>
-            </div>
-            <div class="email-subject">${escapeHtml(email.subject || 'No Subject')}</div>
-            <div class="email-snippet">${escapeHtml(email.snippet || '')}</div>
-        </div>
-    `).join('');
+const emailsHTML = emails.map(email => `
+<div class="email-item ${email.unread ? 'unread' : ''}" onclick="openEmail('${email.id}')">
+<div class="email-header">
+<div class="email-from">${email.from || 'Unknown Sender'}</div>
+<div class="email-date">${formatEmailDate(email.date)}</div>
+</div>
+<div class="email-subject">${email.subject || 'No Subject'}</div>
+<div class="email-snippet">${email.snippet || ''}</div>
+</div>
+`).join('');
 
-    emailsList.innerHTML = emailsHTML;
+emailsList.innerHTML = emailsHTML;
 }
 
 function formatEmailDate(dateString) {
-    if (!dateString) return '';
-    const date = new Date(dateString);
-    const now = new Date();
-    const diffTime = Math.abs(now - date);
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+if (!dateString) return '';
+const date = new Date(dateString);
+const now = new Date();
+const diffTime = Math.abs(now - date);
+const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-    if (diffDays === 1) return 'Yesterday';
-    if (diffDays < 7) return `${diffDays} days ago`;
-    return date.toLocaleDateString();
+if (diffDays === 1) return 'Yesterday';
+if (diffDays < 7) return `${diffDays} days ago`;
+return date.toLocaleDateString();
 }
 
 function openEmail(emailId) {
-    console.log('Opening email:', emailId);
-    // TODO: Implement email detail view
+console.log('Opening email:', emailId);
+// TODO: Implement email detail view
 }
 
 function logout() {
-    localStorage.removeItem('khizr_assistant_gate');
-    localStorage.removeItem('khizr_assistant_auth');
-    window.location.href = 'index.html';
+localStorage.removeItem('khizr_assistant_gate');
+localStorage.removeItem('khizr_assistant_auth');
+window.location.href = 'index.html';
 }
 
 function checkAppAuth() {
-    const gateAuth = localStorage.getItem('khizr_assistant_gate');
-    if (!gateAuth) {
-        window.location.href = 'index.html';
-        return;
-    }
+const gateAuth = localStorage.getItem('khizr_assistant_gate');
+if (!gateAuth) {
+window.location.href = 'index.html';
+return;
+}
 
-    try {
-        const authData = JSON.parse(gateAuth);
-        if (!authData.authenticated || Date.now() > authData.expires) {
-            localStorage.removeItem('khizr_assistant_gate');
-            window.location.href = 'index.html';
-            return;
-        }
-    } catch (error) {
-        localStorage.removeItem('khizr_assistant_gate');
-        window.location.href = 'index.html';
-        return;
-    }
+try {
+const authData = JSON.parse(gateAuth);
+if (!authData.authenticated || Date.now() > authData.expires) {
+localStorage.removeItem('khizr_assistant_gate');
+window.location.href = 'index.html';
+return;
+}
+} catch (error) {
+localStorage.removeItem('khizr_assistant_gate');
+window.location.href = 'index.html';
+return;
+}
 }
 
 // Close modals on escape key
 document.addEventListener('keydown', function(event) {
-    if (event.key === 'Escape') {
-        const modals = document.querySelectorAll('.modal-overlay');
-        modals.forEach(modal => {
-            if (modal.style.display === 'flex') {
-                modal.style.display = 'none';
-            }
-        });
-    }
+if (event.key === 'Escape') {
+const modals = document.querySelectorAll('.modal-overlay');
+modals.forEach(modal => {
+if (modal.style.display === 'flex') {
+modal.style.display = 'none';
+}
+});
+}
 });
 
 // Close modals on outside click
 document.addEventListener('click', function(event) {
-    if (event.target.classList.contains('modal-overlay')) {
-        event.target.style.display = 'none';
-    }
+if (event.target.classList.contains('modal-overlay')) {
+event.target.style.display = 'none';
+}
 });
 
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', function() {
-    checkAppAuth();
-    initializeApp();
+checkAppAuth();
+initializeApp();
 
-    const savedTheme = localStorage.getItem('theme') || 'purple';
-    setTheme(savedTheme);
+const savedTheme = localStorage.getItem('theme') || 'purple';
+setTheme(savedTheme);
 });
+
 </script>
 
 </body>
