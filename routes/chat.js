@@ -78,15 +78,23 @@ User Context: ${context}
 
 Guidelines:
 - Be helpful, concise, and friendly
+- Use structured markdown formatting for better readability
+- When providing complex information, use headers, lists, and code blocks
 - When users mention tasks (zz prefix), acknowledge you'll help create them
 - When users ask questions (?), provide informative answers
 - When users mark urgent (!!), acknowledge the priority
 - Reference their existing tasks/projects when relevant
-- Suggest improvements based on their current workload`;
+- Suggest improvements based on their current workload
+- Format responses with clear sections and bullet points when appropriate`;
 
     // Add preference-based system prompt additions
     if (personalizedContext.system_prompt_addition) {
       systemPrompt += personalizedContext.system_prompt_addition;
+    }
+
+    // Add word tree formatting instruction if user prefers it
+    if (personalizedContext.response_format === 'word_tree') {
+      systemPrompt += '\n\nIMPORTANT: Structure your responses using word tree format with clear hierarchical organization, bullet points, and code blocks for technical content.';
     }
 
     const completion = await openai.chat.completions.create({
