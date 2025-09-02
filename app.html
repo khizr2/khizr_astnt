@@ -2089,21 +2089,6 @@ Daddy Agent monitors task completion, escalates urgent items, and provides proac
 `);
 }
 
-// Load projects
-try {
-const response = await fetch(`${API_URL}/api/projects`, {
-headers: getAuthHeaders()
-});
-const data = await response.json();
-
-if (data.success) {
-displayProjects(data.projects);
-}
-} catch (error) {
-console.error('Failed to load projects:', error);
-}
-}
-
 function displayProjects(projects) {
 const projectList = document.getElementById('projectList');
 if (!projectList) return;
