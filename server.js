@@ -27,7 +27,22 @@ const PORT = process.env.PORT || 10000;
 app.set('trust proxy', 1);
 
 // Security middleware
-app.use(helmet());
+app.use(helmet({
+    contentSecurityPolicy: {
+        directives: {
+            defaultSrc: ["'self'"],
+            styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+            scriptSrc: ["'self'"],
+            imgSrc: ["'self'", "data:", "https:"],
+            connectSrc: ["'self'", "https://openrouter.ai", "https://api.openrouter.ai"],
+            fontSrc: ["'self'", "https://fonts.gstatic.com", "https://fonts.googleapis.com"],
+            objectSrc: ["'none'"],
+            mediaSrc: ["'self'"],
+            frameSrc: ["'none'"],
+        },
+    },
+    crossOriginEmbedderPolicy: false // Disable COEP for development
+}));
 app.use(cors({
     origin: true,
     credentials: true
@@ -42,7 +57,7 @@ const limiter = rateLimit({
 app.use('/api/', limiter);
 
 // Static file serving
-app.use(express.static('public'));
+app.use('/public', express.static('public'));
 
 // Body parsing middleware
 app.use(express.json({ limit: '10mb' }));
@@ -68,6 +83,7 @@ app.use('/api/agents', agentRoutes);
 app.use('/api/messaging', messagingRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/api/user/preferences', preferencesRoutes);
+
 // Serve main application
 app.get('/', (req, res) => {
     res.sendFile(__dirname + '/app.html');
@@ -89,20 +105,20 @@ app.get('/health', (req, res) => {
 // Error handling middleware
 app.use((err, req, res, next) => {
     logger.error('Error:', err);
-    
+
     if (err.type === 'entity.parse.failed') {
         return res.status(400).json({ error: 'Invalid JSON payload' });
     }
-    
-    res.status(500).json({ 
+
+    res.status(500).json({
         error: 'Internal server error',
         message: process.env.NODE_ENV === 'development' ? err.message : 'Something went wrong'
     });
 });
 
-// 404 handler
-app.use('*', (req, res) => {
-    res.status(404).json({ error: 'Route not found' });
+// 404 handler - This should be LAST and only catch API routes
+app.use('/api/*', (req, res) => {
+    res.status(404).json({ error: 'API route not found' });
 });
 
 // Start server
