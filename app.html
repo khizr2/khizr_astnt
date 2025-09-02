@@ -174,6 +174,45 @@ margin-left: 16px;
   background: rgba(139, 92, 246, 0.1);
 }
 
+.approvals-btn {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: 16px;
+  padding: 4px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  margin-left: 8px;
+  position: relative;
+}
+
+.approvals-btn:hover {
+  color: var(--primary);
+  background: rgba(139, 92, 246, 0.1);
+}
+
+.approvals-btn[data-count="0"]::after {
+  display: none;
+}
+
+.approvals-btn::after {
+  content: attr(data-count);
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  background: var(--secondary);
+  color: white;
+  border-radius: 50%;
+  width: 16px;
+  height: 16px;
+  font-size: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 500;
+}
+
 /* Navigation */
 .nav {
 display: flex;
@@ -636,11 +675,11 @@ opacity: 0.9;
 }
 
 /* Views */
-.project-view, .mind-view, .chat-view, .emails-view, .goals-view, .insights-view, .approvals-view {
+.project-view, .mind-view, .chat-view, .emails-view, .goals-view, .insights-view, .approvals-view, .agents-view {
 display: none;
 }
 
-.project-view.active, .mind-view.active, .chat-view.active, .emails-view.active, .goals-view.active, .insights-view.active, .approvals-view.active {
+.project-view.active, .mind-view.active, .chat-view.active, .emails-view.active, .goals-view.active, .insights-view.active, .approvals-view.active, .agents-view.active {
 display: block;
 }
 
@@ -761,6 +800,204 @@ opacity: 1;
 background: var(--primary);
 border-color: var(--primary);
 color: white;
+}
+
+/* Running Tasks Styles */
+.running-task-item {
+display: flex;
+align-items: center;
+gap: 8px;
+padding: 6px 0;
+border-bottom: 1px solid var(--border);
+}
+
+.running-task-item:last-child {
+border-bottom: none;
+}
+
+.running-task-indicator {
+font-size: 14px;
+animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+0% { transform: rotate(0deg); }
+100% { transform: rotate(360deg); }
+}
+
+.running-task-info {
+flex: 1;
+}
+
+.running-task-title {
+font-size: 12px;
+font-weight: 500;
+color: var(--text-primary);
+margin-bottom: 2px;
+}
+
+.running-task-status {
+font-size: 10px;
+color: var(--text-secondary);
+}
+
+/* Agent Dashboard Styles */
+.agent-dashboard-grid {
+display: grid;
+grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+gap: 20px;
+margin-bottom: 30px;
+}
+
+.dashboard-card {
+background: var(--bg-card);
+border: 1px solid var(--border);
+border-radius: 8px;
+padding: 20px;
+}
+
+.dashboard-card h3 {
+color: var(--text-accent);
+font-size: 14px;
+font-weight: 600;
+margin-bottom: 15px;
+margin-top: 0;
+}
+
+.agent-status-item {
+display: flex;
+align-items: center;
+gap: 10px;
+padding: 8px 0;
+border-bottom: 1px solid var(--border);
+}
+
+.agent-status-item:last-child {
+border-bottom: none;
+}
+
+.agent-indicator {
+width: 8px;
+height: 8px;
+border-radius: 50%;
+}
+
+.agent-indicator.online {
+background: var(--success);
+}
+
+.agent-indicator.busy {
+background: var(--warning);
+}
+
+.agent-indicator.offline {
+background: var(--text-secondary);
+}
+
+.agent-info {
+flex: 1;
+}
+
+.agent-name {
+font-size: 12px;
+font-weight: 500;
+color: var(--text-primary);
+}
+
+.agent-task {
+font-size: 10px;
+color: var(--text-secondary);
+}
+
+.agent-controls {
+background: var(--bg-card);
+border: 1px solid var(--border);
+border-radius: 8px;
+padding: 20px;
+margin-top: 20px;
+}
+
+.agent-controls h3 {
+color: var(--text-accent);
+font-size: 14px;
+font-weight: 600;
+margin-bottom: 15px;
+margin-top: 0;
+}
+
+.control-buttons {
+display: flex;
+gap: 10px;
+flex-wrap: wrap;
+}
+
+/* Decision Tree Styles */
+.decision-node {
+background: var(--bg-card);
+border: 1px solid var(--border);
+border-radius: 6px;
+padding: 10px;
+margin: 5px 0;
+font-size: 12px;
+}
+
+.decision-node.active {
+border-color: var(--primary);
+background: rgba(139, 92, 246, 0.05);
+}
+
+.decision-branch {
+margin-left: 20px;
+border-left: 2px solid var(--border);
+padding-left: 10px;
+}
+
+/* Activity Styles */
+.activity-item {
+display: flex;
+align-items: center;
+gap: 10px;
+padding: 8px 0;
+border-bottom: 1px solid var(--border);
+font-size: 12px;
+}
+
+.activity-item:last-child {
+border-bottom: none;
+}
+
+.activity-time {
+color: var(--text-secondary);
+font-size: 10px;
+}
+
+.activity-description {
+flex: 1;
+color: var(--text-primary);
+}
+
+/* Metrics Styles */
+.metric-item {
+display: flex;
+justify-content: space-between;
+align-items: center;
+padding: 8px 0;
+border-bottom: 1px solid var(--border);
+}
+
+.metric-item:last-child {
+border-bottom: none;
+}
+
+.metric-label {
+font-size: 12px;
+color: var(--text-secondary);
+}
+
+.metric-value {
+font-size: 12px;
+font-weight: 500;
+color: var(--text-accent);
 }
 
 /* Modal styles and other existing CSS from previous version... */
@@ -1109,6 +1346,9 @@ padding: 20px;
       <button class="theme-btn purple active" onclick="setTheme('purple')"></button>
       <button class="theme-btn red" onclick="setTheme('red')"></button>
     </div>
+    <button class="approvals-btn notification-badge" data-count="0" onclick="showView('approvals')" id="approvalsHeaderBtn" title="Approvals">
+      🔔
+    </button>
     <button class="preference-btn" onclick="showPreferenceModal()" title="Preference Settings">⚙️</button>
     <button class="logout-btn" onclick="logout()" title="Logout">🚪</button>
   </div>
@@ -1132,7 +1372,7 @@ padding: 20px;
 <button class="nav-btn active" onclick="showView('today')">today</button>
 <button class="nav-btn" onclick="showView('projects')">projects</button>
 <button class="nav-btn" onclick="showView('goals')">goals</button>
-<button class="nav-btn notification-badge" data-count="0" onclick="showView('approvals')" id="approvalsNavBtn">approvals</button>
+<button class="nav-btn" onclick="showView('agents')">agents</button>
 <button class="nav-btn" onclick="showView('chat')">ai chat</button>
 <button class="nav-btn" onclick="showView('emails')">emails</button>
 </nav>
@@ -1158,16 +1398,17 @@ tasks
 </div>
 
 <!-- AI Input -->
-<div class="code-card">
-<div class="section-header">quick process</div>
-<div class="ai-input-container">
-<div class="ai-prompt">tell me what's on your mind</div>
+<div class="code-card" style="background: transparent; border: none; box-shadow: none;">
+<div class="section-header" style="color: var(--text-secondary); font-size: 11px;">quick process</div>
+<div class="ai-input-container" style="border: none; padding: 0;">
+<div class="ai-prompt" style="color: var(--text-secondary); font-size: 12px; margin-bottom: 8px;">tell me what's on your mind</div>
 <textarea
 class="ai-textarea"
 placeholder="? research question | zz task | !! urgent | og preserve note"
 id="aiNote"
+style="border: 1px solid var(--border); background: var(--bg);"
 ></textarea>
-<button class="ai-send-btn" onclick="processAINote()">run</button>
+<button class="ai-send-btn" onclick="processAINote()" style="background: var(--primary); color: white; border: none; font-size: 12px;">run</button>
 </div>
 </div>
 </div>
@@ -1181,6 +1422,14 @@ id="aiNote"
 </div>
 </div>
 
+<!-- Running Tasks -->
+<div class="code-card">
+<div class="section-header">running tasks</div>
+<div id="runningTasks">
+<!-- Currently running tasks will be loaded here -->
+</div>
+</div>
+
 <!-- Time-bound Events -->
 <div class="code-card">
 <div class="section-header">timebound</div>
@@ -1190,9 +1439,11 @@ id="aiNote"
 </div>
 
 <!-- Quick Actions -->
-<button class="mind-btn" onclick="showMindPage()">
+<div style="margin-top: 20px;">
+<button class="mind-btn" onclick="showMindPage()" style="background: transparent; border: 1px solid var(--border); color: var(--text-primary); font-size: 13px; padding: 8px 16px; border-radius: 4px;">
  on my mind
 </button>
+</div>
 </div>
 </div>
 
@@ -1231,6 +1482,54 @@ id="aiNote"
 <div class="code-card boxed">
 <div class="section-header">goals</div>
 <p>Goals tracking coming soon...</p>
+</div>
+</div>
+
+<!-- AI Agent Dashboard -->
+<div id="agents-view" class="agents-view">
+<div class="code-card boxed">
+<div class="section-header">🤖 AI Agent Dashboard</div>
+
+<!-- Agent Status Overview -->
+<div class="agent-dashboard-grid">
+<div class="dashboard-card">
+<h3>Agent Status</h3>
+<div id="agentStatusOverview">
+<!-- Agent status will be loaded here -->
+</div>
+</div>
+
+<div class="dashboard-card">
+<h3>Decision Tree</h3>
+<div id="decisionTree">
+<!-- Decision tree visualization will be loaded here -->
+</div>
+</div>
+
+<div class="dashboard-card">
+<h3>Recent Activity</h3>
+<div id="agentActivity">
+<!-- Agent activity history will be loaded here -->
+</div>
+</div>
+
+<div class="dashboard-card">
+<h3>Performance Metrics</h3>
+<div id="agentMetrics">
+<!-- Performance metrics will be loaded here -->
+</div>
+</div>
+</div>
+
+<!-- Agent Control Panel -->
+<div class="agent-controls">
+<h3>Agent Controls</h3>
+<div class="control-buttons">
+<button class="btn-primary" onclick="refreshAgentStatus()">🔄 Refresh Status</button>
+<button class="btn-secondary" onclick="showAgentAnalytics()">📊 Analytics</button>
+<button class="btn-secondary" onclick="showDaddyControls()">👨‍👧 Daddy Controls</button>
+</div>
+</div>
 </div>
 </div>
 
@@ -1409,21 +1708,21 @@ Refresh
 <div class="preference-content">
 <div class="preference-section">
 <h4 style="color: var(--text-accent); font-size: 13px; margin-bottom: 12px;">🧠 Pattern Intelligence</h4>
-<div id="patternInsights" class="pattern-insights">
+    <div id="patternInsights" class="pattern-insights">
     <div class="pattern-metric">
-        <span class="metric-label">Communication Style</span>
+        <span class="metric-label">💬 Your Communication Style</span>
         <span class="metric-value" id="commStyle">Learning...</span>
     </div>
     <div class="pattern-metric">
-        <span class="metric-label">Peak Productivity</span>
+        <span class="metric-label">⚡ Your Most Productive Hours</span>
         <span class="metric-value" id="peakHours">Learning...</span>
     </div>
     <div class="pattern-metric">
-        <span class="metric-label">Task Completion Rate</span>
+        <span class="metric-label">🎯 Task Completion Rate</span>
         <span class="metric-value" id="completionRate">Learning...</span>
     </div>
     <div class="pattern-metric">
-        <span class="metric-label">Daddy Agent Status</span>
+        <span class="metric-label">👨‍👧 Daddy Agent</span>
         <span class="metric-value" id="daddyStatus">Active</span>
     </div>
 </div>
@@ -1581,6 +1880,8 @@ const data = await response.json();
 
 if (data.success) {
 displayTasks(data.tasks);
+// Also load running tasks separately
+displayRunningTasks(data.tasks);
 }
 } catch (error) {
 console.error('Failed to load tasks:', error);
@@ -1611,8 +1912,187 @@ ${task.task_type === 'agent' ? '<span class="task-priority research">AGENT</span
 tasksList.innerHTML = tasksHTML;
 }
 
+function displayRunningTasks(tasks) {
+const runningTasksContainer = document.getElementById('runningTasks');
+if (!runningTasksContainer) return;
+
+// Filter tasks that are likely running (pending status, agent-assigned, or recently created)
+const runningTasks = tasks.filter(task =>
+task.status === 'pending' &&
+(task.task_type === 'agent' || task.created_at)
+).slice(0, 3); // Show max 3 running tasks
+
+if (runningTasks.length === 0) {
+runningTasksContainer.innerHTML = '<div style="color: var(--text-secondary); font-style: italic; font-size: 12px;">No tasks running</div>';
+return;
+}
+
+const runningHTML = runningTasks.map(task => `
+<div class="running-task-item">
+<div class="running-task-indicator">🔄</div>
+<div class="running-task-info">
+<div class="running-task-title">${task.title}</div>
+<div class="running-task-status">${task.task_type === 'agent' ? 'Agent Processing' : 'Pending'}</div>
+</div>
+</div>
+`).join('');
+
+runningTasksContainer.innerHTML = runningHTML;
+}
+
+// Agent Dashboard Functions
+async function loadAgentDashboard() {
+await loadAgentStatusOverview();
+await loadDecisionTree();
+await loadAgentActivity();
+await loadAgentMetrics();
+}
+
+async function loadAgentStatusOverview() {
+const container = document.getElementById('agentStatusOverview');
+if (!container) return;
+
+try {
+const response = await fetch(`${API_URL}/api/agents`, {
+headers: getAuthHeaders()
+});
+const data = await response.json();
+
+if (data.success) {
+const statusHTML = data.agents.map(agent => `
+<div class="agent-status-item">
+<div class="agent-indicator ${agent.status}"></div>
+<div class="agent-info">
+<div class="agent-name">${agent.display_name}</div>
+<div class="agent-task">${agent.status === 'busy' ? 'Working on task...' : agent.status}</div>
+</div>
+</div>
+`).join('');
+
+container.innerHTML = statusHTML;
+}
+} catch (error) {
+console.error('Failed to load agent status overview:', error);
+container.innerHTML = '<div style="color: var(--text-secondary);">Unable to load agent status</div>';
+}
+}
+
+async function loadDecisionTree() {
+const container = document.getElementById('decisionTree');
+if (!container) return;
+
+const decisionTreeHTML = `
+<div class="decision-node active">
+🤖 Agent Decision Flow
+<div class="decision-branch">
+<div class="decision-node">
+📧 Email Processing
+<div class="decision-branch">
+<div class="decision-node">✅ Auto-respond</div>
+<div class="decision-node">⏰ Schedule follow-up</div>
+</div>
+</div>
+<div class="decision-node">
+📝 Task Management
+<div class="decision-branch">
+<div class="decision-node">🎯 Create task</div>
+<div class="decision-node">👨‍👧 Escalate to Daddy Agent</div>
+</div>
+</div>
+<div class="decision-node">
+🧠 Pattern Learning
+<div class="decision-branch">
+<div class="decision-node">📊 Analyze patterns</div>
+<div class="decision-node">💡 Generate suggestions</div>
+</div>
+</div>
+</div>
+</div>
+`;
+
+container.innerHTML = decisionTreeHTML;
+}
+
+async function loadAgentActivity() {
+const container = document.getElementById('agentActivity');
+if (!container) return;
+
+// Mock activity data - in real implementation, this would come from backend
+const activities = [
+{ time: '2 min ago', description: 'Browser Agent completed research task' },
+{ time: '5 min ago', description: 'Daddy Agent escalated high-priority task' },
+{ time: '12 min ago', description: 'Email Agent processed 3 new messages' },
+{ time: '18 min ago', description: 'PM Agent created project milestone' },
+{ time: '25 min ago', description: 'Research Agent analyzed user patterns' }
+];
+
+const activityHTML = activities.map(activity => `
+<div class="activity-item">
+<span class="activity-time">${activity.time}</span>
+<span class="activity-description">${activity.description}</span>
+</div>
+`).join('');
+
+container.innerHTML = activityHTML;
+}
+
+async function loadAgentMetrics() {
+const container = document.getElementById('agentMetrics');
+if (!container) return;
+
+// Mock metrics data - in real implementation, this would come from backend
+const metrics = [
+{ label: 'Tasks Completed', value: '24' },
+{ label: 'Response Time', value: '1.2s' },
+{ label: 'Success Rate', value: '94%' },
+{ label: 'Active Agents', value: '4/4' },
+{ label: 'Patterns Learned', value: '156' },
+{ label: 'User Satisfaction', value: '4.8/5' }
+];
+
+const metricsHTML = metrics.map(metric => `
+<div class="metric-item">
+<span class="metric-label">${metric.label}</span>
+<span class="metric-value">${metric.value}</span>
+</div>
+`).join('');
+
+container.innerHTML = metricsHTML;
+}
+
+function refreshAgentStatus() {
+loadAgentDashboard();
+showToast('Agent status refreshed', 'success');
+}
+
+function showAgentAnalytics() {
+// Reuse existing daddy analytics function
+showDaddyAnalytics();
+}
+
+function showDaddyControls() {
+// Show daddy controls modal
+showModal('Daddy Agent Controls', `
+<div style="padding: 20px;">
+<h3>Daddy Agent Configuration</h3>
+<div style="margin: 20px 0;">
+<button class="btn btn-small" onclick="toggleDaddyMonitoring()" id="daddyToggle">
+👨‍👧 Toggle Daddy Mode
+</button>
+</div>
+<div style="margin: 20px 0;">
+<button class="btn btn-small" onclick="showDaddyAnalytics()">
+📈 View Analytics
+</button>
+</div>
+<p style="color: var(--text-secondary); font-size: 12px;">
+Daddy Agent monitors task completion, escalates urgent items, and provides proactive suggestions.
+</p>
+</div>
+`);
+}
+
 // Load projects
-async function loadProjects() {
 try {
 const response = await fetch(`${API_URL}/api/projects`, {
 headers: getAuthHeaders()
@@ -1857,9 +2337,9 @@ approvalsList.innerHTML = approvalsHTML;
 }
 
 function updateApprovalsBadge(count) {
-const badge = document.getElementById('approvalsNavBtn');
-if (badge) {
-badge.setAttribute('data-count', count);
+const headerBadge = document.getElementById('approvalsHeaderBtn');
+if (headerBadge) {
+headerBadge.setAttribute('data-count', count);
 }
 }
 
@@ -2260,12 +2740,17 @@ const viewElement = document.getElementById(`${viewName}-view`);
 if (viewElement) {
 viewElement.style.display = 'block';
 viewElement.classList.add('active');
+
+// Load data for specific views
+if (viewName === 'agents') {
+loadAgentDashboard();
+}
 }
 }
 
 document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
 document.querySelectorAll('.nav-btn').forEach(btn => {
-if (btn.textContent.toLowerCase().includes(viewName.toLowerCase()) || 
+if (btn.textContent.toLowerCase().includes(viewName.toLowerCase()) ||
     (viewName === 'chat' && btn.textContent.toLowerCase().includes('chat'))) {
 btn.classList.add('active');
 }
@@ -2724,16 +3209,22 @@ async function loadPatternInsights() {
 
         const data = await response.json();
 
-        // Update pattern insights
-        document.getElementById('commStyle').textContent =
-            data.patterns.communicationStyle?.prefersBrief ? 'Brief' :
-            data.patterns.communicationStyle?.prefersDetailed ? 'Detailed' : 'Balanced';
+        // Update pattern insights with clearer descriptions
+        const commStyle = data.patterns.communicationStyle?.prefersBrief ? 'Brief & Direct' :
+                         data.patterns.communicationStyle?.prefersDetailed ? 'Detailed & Thorough' :
+                         'Balanced Style';
 
-        document.getElementById('peakHours').textContent =
-            data.patterns.preferredTimes?.peakHours?.join(', ') || 'Learning...';
+        const peakHours = data.patterns.preferredTimes?.peakHours?.length > 0 ?
+                         data.patterns.preferredTimes.peakHours.map(h => `${h}:00`).join(', ') :
+                         'Still learning your schedule';
 
-        document.getElementById('completionRate').textContent =
-            data.patterns.taskCompletion?.highCompletionRate ? 'High' : 'Growing';
+        const completionRate = data.patterns.taskCompletion?.highCompletionRate ?
+                              'Excellent (95%+ completion)' :
+                              'Good (75-94% completion)';
+
+        document.getElementById('commStyle').textContent = commStyle;
+        document.getElementById('peakHours').textContent = peakHours;
+        document.getElementById('completionRate').textContent = completionRate;
 
     } catch (error) {
         console.log('Pattern insights not available');
