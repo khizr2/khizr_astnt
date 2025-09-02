@@ -17,6 +17,8 @@
 --text-accent: #A855F7;
 --border: #27272A;
 --border-accent: #3F3F46;
+--success: #10B981;
+--warning: #F59E0B;
 }
 
 .theme-red {
@@ -54,10 +56,31 @@ padding: 40px 20px;
 /* Header */
 .header {
 display: flex;
-justify-content: flex-end;
+justify-content: space-between;
 align-items: center;
 margin-bottom: 60px;
 padding-bottom: 20px;
+}
+
+.agent-status {
+display: flex;
+gap: 8px;
+align-items: center;
+}
+
+.agent-indicator {
+width: 8px;
+height: 8px;
+border-radius: 50%;
+background: var(--success);
+}
+
+.agent-indicator.busy {
+background: var(--warning);
+}
+
+.agent-indicator.offline {
+background: var(--text-secondary);
 }
 
 .theme-toggle {
@@ -144,6 +167,32 @@ height: 1px;
 background: var(--primary);
 }
 
+/* Notification Badge */
+.notification-badge {
+position: relative;
+}
+
+.notification-badge::after {
+content: attr(data-count);
+position: absolute;
+top: -8px;
+right: -8px;
+background: var(--secondary);
+color: white;
+border-radius: 50%;
+width: 16px;
+height: 16px;
+font-size: 10px;
+display: flex;
+align-items: center;
+justify-content: center;
+font-weight: 500;
+}
+
+.notification-badge[data-count="0"]::after {
+display: none;
+}
+
 /* Main Layout */
 .today-view {
 display: grid;
@@ -172,6 +221,26 @@ font-weight: 600;
 text-transform: uppercase;
 letter-spacing: 0.5px;
 margin-bottom: 20px;
+display: flex;
+justify-content: space-between;
+align-items: center;
+}
+
+.add-btn {
+background: var(--primary);
+border: none;
+border-radius: 3px;
+padding: 4px 8px;
+color: white;
+cursor: pointer;
+font-size: 10px;
+font-family: inherit;
+font-weight: 500;
+transition: all 0.2s ease;
+}
+
+.add-btn:hover {
+opacity: 0.9;
 }
 
 /* Tasks */
@@ -252,85 +321,181 @@ color: var(--primary);
 background: rgba(139, 92, 246, 0.1);
 }
 
-/* Date Display */
-.date-display {
-font-size: 16px;
-font-weight: 500;
-color: var(--text-primary);
-text-transform: capitalize;
+/* Agent Status Cards */
+.agent-card {
+background: rgba(139, 92, 246, 0.05);
+border: 1px solid var(--border);
+border-radius: 6px;
+padding: 12px;
+margin-bottom: 8px;
 }
 
-/* Time Events */
-.time-list {
-list-style: none;
+.agent-card.busy {
+border-color: var(--warning);
+background: rgba(245, 158, 11, 0.05);
 }
 
-.time-item {
-display: flex;
-align-items: center;
-padding: 6px 0;
-font-family: inherit;
+.agent-card.offline {
+opacity: 0.6;
 }
 
-.time {
+.agent-name {
+font-size: 11px;
+font-weight: 600;
 color: var(--primary);
-font-weight: 500;
-min-width: 80px;
-font-size: 12px;
+margin-bottom: 4px;
 }
 
-.time-separator {
+.agent-task {
+font-size: 10px;
 color: var(--text-secondary);
-margin: 0 16px;
-font-weight: 300;
 }
 
-.event-title {
+/* Chat Interface */
+.chat-container {
+display: flex;
+flex-direction: column;
+height: 500px;
+background: var(--bg-card);
+border: 1px solid var(--border);
+border-radius: 6px;
+}
+
+.chat-messages {
+flex: 1;
+padding: 20px;
+overflow-y: auto;
+display: flex;
+flex-direction: column;
+gap: 16px;
+}
+
+.chat-message {
+display: flex;
+flex-direction: column;
+max-width: 80%;
+}
+
+.chat-message.user {
+align-self: flex-end;
+}
+
+.chat-message.assistant {
+align-self: flex-start;
+}
+
+.message-content {
+padding: 12px 16px;
+border-radius: 8px;
+font-size: 13px;
+}
+
+.chat-message.user .message-content {
+background: var(--primary);
+color: white;
+}
+
+.chat-message.assistant .message-content {
+background: rgba(139, 92, 246, 0.1);
+border: 1px solid var(--border);
 color: var(--text-primary);
-font-weight: 400;
 }
 
-/* AI Input */
-.ai-input-container {
-position: relative;
+.message-time {
+font-size: 10px;
+color: var(--text-secondary);
+margin-top: 4px;
+padding: 0 4px;
 }
 
-.ai-prompt {
-color: var(--text-accent);
-font-size: 12px;
-margin-bottom: 12px;
-font-weight: 500;
+.chat-input-container {
+padding: 16px;
+border-top: 1px solid var(--border);
+display: flex;
+gap: 8px;
 }
 
-.ai-textarea {
-width: 100%;
+.chat-input {
+flex: 1;
 background: transparent;
-border: none;
-padding: 0;
+border: 1px solid var(--border);
+border-radius: 4px;
+padding: 8px 12px;
 color: var(--text-primary);
 font-family: inherit;
 font-size: 13px;
-resize: none;
-height: 100px;
-transition: border-color 0.2s ease;
 }
 
-.ai-textarea:focus {
+.chat-input:focus {
 outline: none;
+border-color: var(--primary);
 }
 
-.ai-textarea::placeholder {
-color: var(--text-secondary);
-font-style: italic;
-}
-
-.ai-send-btn {
-position: absolute;
-bottom: 0;
-right: 0;
+.chat-send-btn {
 background: var(--primary);
 border: none;
-border-radius: 3px;
+border-radius: 4px;
+padding: 8px 16px;
+color: white;
+cursor: pointer;
+font-size: 12px;
+font-family: inherit;
+font-weight: 500;
+transition: all 0.2s ease;
+}
+
+.chat-send-btn:hover {
+opacity: 0.9;
+}
+
+.chat-send-btn:disabled {
+opacity: 0.5;
+cursor: not-allowed;
+}
+
+/* Approval Cards */
+.approval-item {
+background: rgba(245, 158, 11, 0.1);
+border: 1px solid var(--warning);
+border-radius: 6px;
+padding: 16px;
+margin-bottom: 12px;
+}
+
+.approval-header {
+display: flex;
+justify-content: between;
+align-items: flex-start;
+margin-bottom: 8px;
+}
+
+.approval-title {
+font-weight: 600;
+color: var(--warning);
+font-size: 13px;
+}
+
+.approval-cost {
+font-size: 11px;
+color: var(--text-secondary);
+}
+
+.approval-description {
+font-size: 12px;
+color: var(--text-primary);
+margin-bottom: 12px;
+line-height: 1.4;
+}
+
+.approval-actions {
+display: flex;
+gap: 8px;
+}
+
+.approve-btn {
+background: var(--success);
+border: none;
+border-radius: 4px;
 padding: 6px 12px;
 color: white;
 cursor: pointer;
@@ -340,40 +505,33 @@ font-weight: 500;
 transition: all 0.2s ease;
 }
 
-.ai-send-btn:hover {
-opacity: 0.9;
-transform: scale(0.98);
-}
-
-/* Mind Button */
-.mind-btn {
-background: transparent;
+.reject-btn {
+background: var(--secondary);
 border: none;
-padding: 0;
-color: var(--primary);
+border-radius: 4px;
+padding: 6px 12px;
+color: white;
 cursor: pointer;
-font-size: 13px;
+font-size: 11px;
 font-family: inherit;
 font-weight: 500;
-width: 100%;
 transition: all 0.2s ease;
-text-align: left;
 }
 
-.mind-btn:hover {
-color: var(--text-primary);
+.approve-btn:hover, .reject-btn:hover {
+opacity: 0.9;
 }
 
 /* Views */
-.project-view, .mind-view, .bigpage-view, .emails-view, .goals-view, .insights-view {
+.project-view, .mind-view, .chat-view, .emails-view, .goals-view, .insights-view, .approvals-view {
 display: none;
 }
 
-.project-view.active, .mind-view.active, .bigpage-view.active, .emails-view.active, .goals-view.active, .insights-view.active {
+.project-view.active, .mind-view.active, .chat-view.active, .emails-view.active, .goals-view.active, .insights-view.active, .approvals-view.active {
 display: block;
 }
 
-/* Project Items */
+/* Rest of your existing CSS... */
 .project-item {
 background: var(--bg-card);
 border: 1px solid var(--border);
@@ -401,187 +559,116 @@ color: var(--text-secondary);
 font-size: 12px;
 }
 
-/* Mind Textarea */
-.mind-textarea {
-width: 100%;
-min-height: 120px;
-background: transparent;
-border: 1px solid var(--border);
-border-radius: 4px;
-padding: 16px;
-color: var(--text-primary);
-font-family: inherit;
-font-size: 13px;
-resize: vertical;
-transition: border-color 0.2s ease;
+/* Modal styles and other existing CSS from previous version... */
+.modal-overlay {
+position: fixed;
+top: 0;
+left: 0;
+right: 0;
+bottom: 0;
+background: rgba(0, 0, 0, 0.8);
+display: flex;
+align-items: center;
+justify-content: center;
+z-index: 1000;
 }
 
-.mind-textarea:focus {
-outline: none;
-border-color: var(--primary);
-}
-
-.mind-textarea::placeholder {
-color: var(--text-secondary);
-font-style: italic;
-}
-
-.mind-save-btn {
-background: var(--primary);
-border: none;
-border-radius: 4px;
-padding: 8px 16px;
-color: white;
-cursor: pointer;
-font-size: 12px;
-font-family: inherit;
-font-weight: 500;
-margin-top: 12px;
-transition: all 0.2s ease;
-}
-
-.mind-save-btn:hover {
-opacity: 0.9;
-}
-
-/* Big Page Input */
-.big-page-input {
-width: 100%;
-min-height: 300px;
+.modal {
 background: var(--bg-card);
 border: 1px solid var(--border);
-border-radius: 6px;
-padding: 20px;
+border-radius: 8px;
+padding: 24px;
+max-width: 500px;
+width: 90%;
+max-height: 80vh;
+overflow-y: auto;
+}
+
+.modal-header {
+display: flex;
+justify-content: space-between;
+align-items: center;
+margin-bottom: 20px;
+}
+
+.modal-title {
+font-size: 14px;
+font-weight: 600;
 color: var(--text-primary);
-font-family: inherit;
-font-size: 13px;
-resize: vertical;
-transition: border-color 0.2s ease;
 }
 
-.big-page-input:focus {
-outline: none;
-border-color: var(--primary);
-}
-
-.big-page-input::placeholder {
+.modal-close {
+background: none;
+border: none;
 color: var(--text-secondary);
-font-style: italic;
+cursor: pointer;
+font-size: 16px;
+padding: 4px;
 }
 
-.big-page-help {
-background: rgba(139, 92, 246, 0.1);
-border: 1px solid var(--primary);
-border-radius: 4px;
-padding: 12px;
-margin-bottom: 12px;
-font-size: 11px;
-color: var(--text-secondary);
-}
-
-.big-page-help strong {
+.modal-close:hover {
 color: var(--primary);
 }
 
-.process-btn {
-background: var(--primary);
-border: none;
-border-radius: 4px;
-padding: 8px 16px;
-color: white;
-cursor: pointer;
-font-size: 12px;
-font-family: inherit;
-font-weight: 500;
-transition: all 0.2s ease;
-}
-
-.process-btn:hover {
-opacity: 0.9;
-}
-
-.process-btn:disabled {
-opacity: 0.5;
-cursor: not-allowed;
-}
-
-.processing-status {
-background: var(--bg-card);
-border: 1px solid var(--border);
-border-radius: 6px;
-padding: 16px;
-margin-top: 12px;
-}
-
-.processed-results {
-margin-top: 20px;
-}
-
-.result-category {
-background: var(--bg-card);
-border: 1px solid var(--border);
-border-radius: 6px;
-padding: 16px;
+.form-group {
 margin-bottom: 16px;
 }
 
-.result-category h4 {
-color: var(--primary);
+.form-label {
+display: block;
 font-size: 12px;
-font-weight: 600;
-text-transform: uppercase;
-margin-bottom: 12px;
-}
-
-.result-item {
-background: rgba(139, 92, 246, 0.05);
-border-left: 2px solid var(--primary);
-padding: 8px 12px;
-margin-bottom: 8px;
-font-size: 12px;
-}
-
-.result-item.urgent {
-border-left-color: var(--secondary);
-background: rgba(239, 68, 68, 0.05);
-}
-
-.result-item.research {
-border-left-color: #10B981;
-background: rgba(16, 185, 129, 0.05);
-}
-
-.result-item.preserved {
-border-left-color: #F59E0B;
-background: rgba(245, 158, 11, 0.05);
-}
-
-/* Research Items */
-.research-list {
-list-style: none;
-}
-
-.research-item {
-background: var(--bg-card);
-border: 1px solid var(--border);
-border-radius: 6px;
-padding: 16px;
-margin-bottom: 12px;
-}
-
-.research-question {
-color: var(--primary);
 font-weight: 500;
-margin-bottom: 8px;
+color: var(--text-accent);
+margin-bottom: 6px;
 }
 
-.research-status {
-font-size: 11px;
+.form-input, .form-textarea {
+width: 100%;
+background: transparent;
+border: 1px solid var(--border);
+border-radius: 4px;
+padding: 8px 12px;
+color: var(--text-primary);
+font-family: inherit;
+font-size: 13px;
+}
+
+.form-textarea {
+resize: vertical;
+min-height: 80px;
+}
+
+.form-input:focus, .form-textarea:focus {
+outline: none;
+border-color: var(--primary);
+}
+
+.form-buttons {
+display: flex;
+gap: 8px;
+justify-content: flex-end;
+margin-top: 20px;
+}
+
+.btn-secondary {
+background: transparent;
+border: 1px solid var(--border);
+border-radius: 4px;
+padding: 8px 16px;
 color: var(--text-secondary);
+cursor: pointer;
+font-size: 12px;
+font-family: inherit;
+font-weight: 500;
+transition: all 0.2s ease;
 }
 
-/* Email Controls */
-.gmail-connect-btn, .refresh-emails-btn {
+.btn-secondary:hover {
+border-color: var(--primary);
+color: var(--primary);
+}
+
+.btn-primary {
 background: var(--primary);
 border: none;
 border-radius: 4px;
@@ -592,10 +679,9 @@ font-size: 12px;
 font-family: inherit;
 font-weight: 500;
 transition: all 0.2s ease;
-margin-right: 8px;
 }
 
-.gmail-connect-btn:hover, .refresh-emails-btn:hover {
+.btn-primary:hover {
 opacity: 0.9;
 }
 
@@ -618,19 +704,37 @@ margin-bottom: 32px;
 .header {
 margin-bottom: 40px;
 }
+
+.chat-container {
+height: 400px;
+}
+
+.modal {
+width: 95%;
+padding: 20px;
+}
 }
 </style>
 </head>
 <body class="theme-purple">
 
 <div class="container">
-<!-- Header -->
+<!-- Header with Agent Status -->
 <header class="header">
+<div class="agent-status" id="agentStatus">
+<div class="agent-indicator" id="browserAgent" title="Browser Agent"></div>
+<div class="agent-indicator" id="coderAgent" title="Coder Agent"></div>
+<div class="agent-indicator" id="pmAgent" title="PM Agent"></div>
+<div class="agent-indicator" id="researchAgent" title="Research Agent"></div>
+</div>
+
+<div class="header-controls">
 <div class="theme-toggle">
 <button class="theme-btn purple active" onclick="setTheme('purple')"></button>
 <button class="theme-btn red" onclick="setTheme('red')"></button>
 </div>
 <button class="logout-btn" onclick="logout()" title="Logout">🚪</button>
+</div>
 </header>
 
 <!-- Navigation -->
@@ -638,8 +742,8 @@ margin-bottom: 40px;
 <button class="nav-btn active" onclick="showView('today')">today</button>
 <button class="nav-btn" onclick="showView('projects')">projects</button>
 <button class="nav-btn" onclick="showView('goals')">goals</button>
-<button class="nav-btn" onclick="showView('insights')">insights</button>
-<button class="nav-btn" onclick="showView('bigpage')">big page</button>
+<button class="nav-btn notification-badge" data-count="0" onclick="showView('approvals')" id="approvalsNavBtn">approvals</button>
+<button class="nav-btn" onclick="showView('chat')">ai chat</button>
 <button class="nav-btn" onclick="showView('emails')">emails</button>
 </nav>
 
@@ -652,51 +756,25 @@ margin-bottom: 40px;
 <div class="date-display" id="dateDisplay"></div>
 </div>
 
-<!-- Dynamic Tasks (populated from Big Page processing) -->
+<!-- Dynamic Tasks -->
 <div class="code-card" id="tasksContainer">
-<div class="section-header">tasks</div>
+<div class="section-header">
+tasks
+<button class="add-btn" onclick="showAddTaskModal()">+ add</button>
+</div>
 <ul class="task-list" id="tasksList">
-<li class="task-item">
-<span class="task-title">sell bidu</span>
-<div class="task-actions">
-<button class="task-action-btn" onclick="archiveTask(1)" title="Archive">📁</button>
-<button class="task-action-btn" onclick="addToCalendar(1)" title="Add to Calendar">📅</button>
-<button class="task-action-btn" onclick="deleteTask(1)" title="Delete">🗑️</button>
-</div>
-</li>
-<li class="task-item">
-<span class="task-title">review quarterly plan</span>
-<div class="task-actions">
-<button class="task-action-btn" onclick="archiveTask(2)" title="Archive">📁</button>
-<button class="task-action-btn" onclick="addToCalendar(2)" title="Add to Calendar">📅</button>
-<button class="task-action-btn" onclick="deleteTask(2)" title="Delete">🗑️</button>
-</div>
-</li>
-<li class="task-item">
-<span class="task-title">call mom</span>
-<div class="task-actions">
-<button class="task-action-btn" onclick="archiveTask(3)" title="Archive">📁</button>
-<button class="task-action-btn" onclick="addToCalendar(3)" title="Add to Calendar">📅</button>
-<button class="task-action-btn" onclick="deleteTask(3)" title="Delete">🗑️</button>
-</div>
-</li>
+<!-- Tasks will be loaded dynamically -->
 </ul>
-</div>
-
-<!-- Research Queue -->
-<div class="code-card" id="researchContainer" style="display: none;">
-<div class="section-header">research queue</div>
-<ul class="research-list" id="researchList"></ul>
 </div>
 
 <!-- AI Input -->
 <div class="code-card">
-<div class="section-header">process</div>
+<div class="section-header">quick process</div>
 <div class="ai-input-container">
 <div class="ai-prompt">tell me what's on your mind</div>
 <textarea
 class="ai-textarea"
-placeholder="need to prep for client meeting, also buy groceries..."
+placeholder="? research question | zz task | !! urgent | og preserve note"
 id="aiNote"
 ></textarea>
 <button class="ai-send-btn" onclick="processAINote()">run</button>
@@ -705,29 +783,23 @@ id="aiNote"
 </div>
 
 <div class="sidebar">
+<!-- Agent Status -->
+<div class="code-card">
+<div class="section-header">agents</div>
+<div id="agentCards">
+<!-- Agent status cards will be loaded here -->
+</div>
+</div>
+
 <!-- Time-bound Events -->
 <div class="code-card">
 <div class="section-header">timebound</div>
-<ul class="time-list">
-<li class="time-item">
-<span class="time">1:00 PM</span>
-<span class="time-separator">-</span>
-<span class="event-title">meeting with neil</span>
-</li>
-<li class="time-item">
-<span class="time">2:00 PM</span>
-<span class="time-separator">-</span>
-<span class="event-title">party</span>
-</li>
-<li class="time-item">
-<span class="time">6:00 PM</span>
-<span class="time-separator">-</span>
-<span class="event-title">gym session</span>
-</li>
+<ul class="time-list" id="timeEvents">
+<!-- Calendar events will be loaded here -->
 </ul>
 </div>
 
-<!-- On My Mind -->
+<!-- Quick Actions -->
 <button class="mind-btn" onclick="showMindPage()">
  on my mind
 </button>
@@ -737,20 +809,22 @@ id="aiNote"
 <!-- Other Views -->
 <div id="project-view" class="project-view">
 <div class="code-card boxed">
-<div class="section-header">projects</div>
-<div class="project-list">
-<div class="project-item" onclick="openProject('website-redesign')">
-<div class="project-title">website redesign</div>
-<div class="project-desc">3/5 tasks completed • Due next week</div>
+<div class="section-header">
+projects
+<button class="add-btn" onclick="showAddProjectModal()">+ add</button>
 </div>
-<div class="project-item" onclick="openProject('health-goals')">
-<div class="project-title">health goals</div>
-<div class="project-desc">1/3 tasks completed • Ongoing</div>
+<div class="project-list" id="projectList">
+<!-- Projects will be loaded dynamically -->
 </div>
-<div class="project-item" onclick="openProject('learn-react')">
-<div class="project-title">learn react</div>
-<div class="project-desc">2/8 tasks completed • 2 months left</div>
 </div>
+</div>
+
+<!-- Approvals View -->
+<div id="approvals-view" class="approvals-view">
+<div class="code-card boxed">
+<div class="section-header">approvals needed</div>
+<div id="approvalsList">
+<!-- Pending approvals will be loaded here -->
 </div>
 </div>
 </div>
@@ -759,13 +833,6 @@ id="aiNote"
 <div class="code-card boxed">
 <div class="section-header">goals</div>
 <p>Goals tracking coming soon...</p>
-</div>
-</div>
-
-<div id="insights-view" class="insights-view">
-<div class="code-card boxed">
-<div class="section-header">insights</div>
-<p>AI insights coming soon...</p>
 </div>
 </div>
 
@@ -781,303 +848,526 @@ placeholder="Share your thoughts, ideas, concerns..."
 </div>
 </div>
 
-<div id="bigpage-view" class="bigpage-view">
+<!-- AI Chat View -->
+<div id="chat-view" class="chat-view">
 <div class="code-card boxed">
-<div class="section-header">big page</div>
-<div class="big-page-help">
-<strong>Prefix System:</strong> 
-<strong>?</strong> research questions • 
-<strong>zz</strong> tasks • 
-<strong>og</strong> preserve notes • 
-<strong>!!</strong> urgent items • 
-<strong>no prefix</strong> general thoughts
+<div class="section-header">ai chat</div>
+<div class="chat-container">
+<div class="chat-messages" id="chatMessages">
+<!-- Chat history will be loaded here -->
 </div>
-<textarea
-id="bigPageInput"
-class="big-page-input"
-placeholder="? what are the best practices for React performance
-zz buy groceries milk bread eggs cheese
-og remember John's quote about customer feedback
-!! call mom about dinner this weekend
-thinking about switching project management systems"
-></textarea>
-<div class="big-page-controls" style="margin-top:12px; display:flex; gap:8px; justify-content:flex-end">
-<button id="processBigPage" class="process-btn" onclick="processBigPage()">process & organize</button>
+<div class="chat-input-container">
+<input 
+type="text" 
+class="chat-input" 
+id="chatInput" 
+placeholder="Type your message or use prefixes: ? zz og !!"
+onkeypress="handleChatKeyPress(event)"
+>
+<button class="chat-send-btn" id="chatSendBtn" onclick="sendChatMessage()">Send</button>
 </div>
-<div id="processingStatus" class="processing-status" style="display:none">
-<div id="statusMessage"></div>
 </div>
-<div id="processedResults" class="processed-results" style="display:none"></div>
 </div>
 </div>
 
+<!-- Email View -->
 <div id="emails-view" class="emails-view">
 <div class="code-card boxed">
 <div class="section-header">emails</div>
 <div class="emails-controls" style="margin-bottom: 20px;">
-<button class="gmail-connect-btn" id="gmailConnectBtn" onclick="connectGmail()" style="display:none">
- Connect Gmail
+<button class="btn-primary" onclick="connectGmail()" id="gmailConnectBtn">
+Connect Gmail
 </button>
-<button class="refresh-emails-btn" onclick="refreshEmails()">
- Refresh
+<button class="btn-secondary" onclick="refreshEmails()" id="refreshEmailsBtn" style="display:none;">
+Refresh
 </button>
+<span id="emailStatus" style="margin-left: 12px; font-size: 11px; color: var(--text-secondary);"></span>
 </div>
 <div class="emails-list" id="emailsList">
-<p>Email integration coming soon...</p>
+<p>Click "Connect Gmail" to start managing your emails...</p>
 </div>
 </div>
 </div>
 
+</div>
+
+<!-- Add Task Modal -->
+<div id="addTaskModal" class="modal-overlay" style="display: none;">
+<div class="modal">
+<div class="modal-header">
+<h3 class="modal-title">Add New Task</h3>
+<button class="modal-close" onclick="closeModal('addTaskModal')">×</button>
+</div>
+<form onsubmit="submitTask(event)">
+<div class="form-group">
+<label class="form-label">Task Title</label>
+<input type="text" class="form-input" id="taskTitle" required>
+</div>
+<div class="form-group">
+<label class="form-label">Priority</label>
+<select class="form-input" id="taskPriority">
+<option value="normal">Normal</option>
+<option value="urgent">Urgent</option>
+<option value="low">Low</option>
+</select>
+</div>
+<div class="form-group">
+<label class="form-label">Assign To</label>
+<select class="form-input" id="taskAssignTo">
+<option value="human">Me</option>
+<option value="browser_agent">Browser Agent</option>
+<option value="coder_agent">Coder Agent</option>
+<option value="pm_agent">PM Agent</option>
+<option value="researcher_agent">Research Agent</option>
+</select>
+</div>
+<div class="form-group">
+<label class="form-label">Description (optional)</label>
+<textarea class="form-textarea" id="taskDescription" placeholder="Additional details..."></textarea>
+</div>
+<div class="form-buttons">
+<button type="button" class="btn-secondary" onclick="closeModal('addTaskModal')">Cancel</button>
+<button type="submit" class="btn-primary">Add Task</button>
+</div>
+</form>
+</div>
+</div>
+
+<!-- Add Project Modal -->
+<div id="addProjectModal" class="modal-overlay" style="display: none;">
+<div class="modal">
+<div class="modal-header">
+<h3 class="modal-title">Add New Project</h3>
+<button class="modal-close" onclick="closeModal('addProjectModal')">×</button>
+</div>
+<form onsubmit="submitProject(event)">
+<div class="form-group">
+<label class="form-label">Project Name</label>
+<input type="text" class="form-input" id="projectName" required>
+</div>
+<div class="form-group">
+<label class="form-label">Description</label>
+<textarea class="form-textarea" id="projectDescription" placeholder="What is this project about?"></textarea>
+</div>
+<div class="form-group">
+<label class="form-label">Due Date (optional)</label>
+<input type="date" class="form-input" id="projectDueDate">
+</div>
+<div class="form-buttons">
+<button type="button" class="btn-secondary" onclick="closeModal('addProjectModal')">Cancel</button>
+<button type="submit" class="btn-primary">Add Project</button>
+</div>
+</form>
+</div>
 </div>
 
 <script>
 const API_URL = "https://khizr-assistant-api.onrender.com";
 
-// Global state for processed items
-let processedTasks = [];
-let processedResearch = [];
-let processedNotes = [];
-let processedUrgent = [];
+// Global state
+let agents = [];
+let currentUser = null;
+let notifications = 0;
+let pendingApprovals = [];
 
-// Theme switching
-function setTheme(theme) {
-document.body.className = `theme-${theme}`;
-document.querySelectorAll('.theme-btn').forEach(btn => btn.classList.remove('active'));
-const active = document.querySelector(`.theme-btn.${theme}`);
-if (active) active.classList.add('active');
-localStorage.setItem('theme', theme);
-}
-
-// View switching
-function showView(viewName) {
-// Hide all views
-document.querySelectorAll('[id$="-view"]').forEach(view => {
-view.style.display = 'none';
-view.classList.remove('active');
-});
-
-// Show selected view
-if (viewName === 'today') {
-document.getElementById('today-view').style.display = 'grid';
-} else {
-const viewElement = document.getElementById(`${viewName}-view`);
-if (viewElement) {
-viewElement.style.display = 'block';
-viewElement.classList.add('active');
-}
-}
-
-// Update nav buttons
-document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
-document.querySelectorAll('.nav-btn').forEach(btn => {
-if (btn.textContent.toLowerCase() === String(viewName).toLowerCase()) {
-btn.classList.add('active');
-}
-});
-}
-
-// Intelligent Big Page Processing
-function processBigPage() {
-const input = document.getElementById('bigPageInput');
-const content = input.value.trim();
-if (!content) return;
-
-const processBtn = document.getElementById('processBigPage');
-const processingStatus = document.getElementById('processingStatus');
-const statusMessage = document.getElementById('statusMessage');
-const resultsDiv = document.getElementById('processedResults');
-
-// Show processing status
-processingStatus.style.display = 'block';
-resultsDiv.style.display = 'none';
-statusMessage.textContent = 'Analyzing your thoughts...';
-processBtn.disabled = true;
-
-// Process the content
-setTimeout(() => {
-statusMessage.textContent = 'Categorizing entries...';
-
-setTimeout(() => {
-statusMessage.textContent = 'Creating actionable items...';
-
-setTimeout(() => {
-const results = processContent(content);
-displayProcessedResults(results);
-statusMessage.textContent = 'Done! Your thoughts have been organized.';
-
-// Re-enable button and clear input after delay
-setTimeout(() => {
-processBtn.disabled = false;
-input.value = '';
-processingStatus.style.display = 'none';
-resultsDiv.style.display = 'block';
-updateDashboard();
-}, 1000);
-}, 1000);
-}, 1000);
-}, 500);
-}
-
-function processContent(content) {
-const lines = content.split('\n').filter(line => line.trim());
-const results = {
-tasks: [],
-research: [],
-urgent: [],
-preserved: [],
-general: []
+// Authentication helper
+function getAuthHeaders() {
+const token = localStorage.getItem('khizr_assistant_auth');
+return {
+'Authorization': `Bearer ${token}`,
+'Content-Type': 'application/json'
 };
+}
 
-lines.forEach((line, index) => {
-const trimmed = line.trim();
-if (!trimmed) return;
+// Initialize application
+async function initializeApp() {
+try {
+await loadAgentStatus();
+await loadTasks();
+await loadProjects();
+await loadApprovals();
+await loadChatHistory();
+updateDateDisplay();
+setInterval(loadAgentStatus, 30000); // Update agent status every 30 seconds
+setInterval(loadApprovals, 60000); // Check for approvals every minute
+} catch (error) {
+console.error('Failed to initialize app:', error);
+}
+}
 
-// Research questions (?)
-if (trimmed.startsWith('?')) {
-results.research.push({
-id: `research_${Date.now()}_${index}`,
-question: trimmed.substring(1).trim(),
-status: 'queued',
-priority: 'medium'
+// Load agent status
+async function loadAgentStatus() {
+try {
+const response = await fetch(`${API_URL}/agents`, {
+headers: getAuthHeaders()
+});
+const data = await response.json();
+
+if (data.success) {
+agents = data.agents;
+updateAgentIndicators();
+updateAgentCards();
+}
+} catch (error) {
+console.error('Failed to load agent status:', error);
+}
+}
+
+function updateAgentIndicators() {
+agents.forEach(agent => {
+const indicator = document.getElementById(agent.name.replace('_', '') + 'Agent');
+if (indicator) {
+indicator.className = `agent-indicator ${agent.status}`;
+}
 });
 }
-// Tasks (zz)
-else if (trimmed.toLowerCase().startsWith('zz')) {
-results.tasks.push({
-id: `task_${Date.now()}_${index}`,
-title: trimmed.substring(2).trim(),
-priority: 'normal',
-created: new Date()
+
+function updateAgentCards() {
+const agentCards = document.getElementById('agentCards');
+if (!agentCards) return;
+
+const cardsHTML = agents.map(agent => `
+<div class="agent-card ${agent.status}">
+<div class="agent-name">${agent.display_name}</div>
+<div class="agent-task">${agent.status === 'busy' ? 'Working on task...' : agent.status}</div>
+</div>
+`).join('');
+
+agentCards.innerHTML = cardsHTML;
+}
+
+// Load tasks
+async function loadTasks() {
+try {
+const response = await fetch(`${API_URL}/tasks?limit=10`, {
+headers: getAuthHeaders()
 });
-}
-// Urgent items (!!)
-else if (trimmed.startsWith('!!')) {
-results.urgent.push({
-id: `urgent_${Date.now()}_${index}`,
-title: trimmed.substring(2).trim(),
-priority: 'urgent',
-created: new Date()
-});
-}
-// Preserve as-is (og)
-else if (trimmed.toLowerCase().startsWith('og')) {
-results.preserved.push({
-id: `preserved_${Date.now()}_${index}`,
-content: trimmed.substring(2).trim(),
-type: 'note'
-});
-}
-// General thoughts (no prefix)
-else {
-results.general.push({
-id: `general_${Date.now()}_${index}`,
-content: trimmed,
-category: categorizeThought(trimmed)
-});
-}
-});
+const data = await response.json();
 
-// Store globally
-processedTasks = [...processedTasks, ...results.tasks, ...results.urgent];
-processedResearch = [...processedResearch, ...results.research];
-processedNotes = [...processedNotes, ...results.preserved, ...results.general];
-
-return results;
+if (data.success) {
+displayTasks(data.tasks);
+}
+} catch (error) {
+console.error('Failed to load tasks:', error);
+}
 }
 
-function categorizeThought(thought) {
-const lower = thought.toLowerCase();
-if (lower.includes('project') || lower.includes('plan') || lower.includes('strategy')) return 'project';
-if (lower.includes('meeting') || lower.includes('call') || lower.includes('schedule')) return 'schedule';
-if (lower.includes('buy') || lower.includes('purchase') || lower.includes('order')) return 'shopping';
-if (lower.includes('follow up') || lower.includes('contact') || lower.includes('reach out')) return 'communication';
-return 'general';
-}
-
-function displayProcessedResults(results) {
-const resultsDiv = document.getElementById('processedResults');
-let html = '';
-
-if (results.urgent.length > 0) {
-html += `
-<div class="result-category">
-<h4>🔥 Urgent Items</h4>
-${results.urgent.map(item => `<div class="result-item urgent">${item.title}</div>`).join('')}
-</div>`;
-}
-
-if (results.tasks.length > 0) {
-html += `
-<div class="result-category">
-<h4>✅ Tasks Created</h4>
-${results.tasks.map(task => `<div class="result-item">${task.title}</div>`).join('')}
-</div>`;
-}
-
-if (results.research.length > 0) {
-html += `
-<div class="result-category">
-<h4>🔍 Research Queue</h4>
-${results.research.map(r => `<div class="result-item research">${r.question}</div>`).join('')}
-</div>`;
-}
-
-if (results.preserved.length > 0) {
-html += `
-<div class="result-category">
-<h4>📝 Preserved Notes</h4>
-${results.preserved.map(note => `<div class="result-item preserved">${note.content}</div>`).join('')}
-</div>`;
-}
-
-if (results.general.length > 0) {
-html += `
-<div class="result-category">
-<h4>💭 General Thoughts</h4>
-${results.general.map(thought => `<div class="result-item">${thought.content} <small>(${thought.category})</small></div>`).join('')}
-</div>`;
-}
-
-resultsDiv.innerHTML = html;
-}
-
-function updateDashboard() {
-// Update tasks list on today view
+function displayTasks(tasks) {
 const tasksList = document.getElementById('tasksList');
-if (processedTasks.length > 0) {
-const tasksHTML = processedTasks.map(task => `
+if (!tasksList) return;
+
+if (tasks.length === 0) {
+tasksList.innerHTML = '<li style="color: var(--text-secondary); font-style: italic;">No tasks yet. Create one above!</li>';
+return;
+}
+
+const tasksHTML = tasks.map(task => `
 <li class="task-item ${task.priority === 'urgent' ? 'urgent' : ''}">
 <span class="task-title">${task.title}</span>
 ${task.priority === 'urgent' ? '<span class="task-priority urgent">URGENT</span>' : ''}
+${task.task_type === 'agent' ? '<span class="task-priority research">AGENT</span>' : ''}
 <div class="task-actions">
-<button class="task-action-btn" onclick="archiveTask('${task.id}')" title="Archive">📁</button>
-<button class="task-action-btn" onclick="addToCalendar('${task.id}')" title="Add to Calendar">📅</button>
+<button class="task-action-btn" onclick="completeTask('${task.id}')" title="Complete">✓</button>
 <button class="task-action-btn" onclick="deleteTask('${task.id}')" title="Delete">🗑️</button>
 </div>
 </li>
 `).join('');
 
-// Replace existing tasks or add to them
 tasksList.innerHTML = tasksHTML;
 }
 
-// Update research queue
-const researchContainer = document.getElementById('researchContainer');
-const researchList = document.getElementById('researchList');
-if (processedResearch.length > 0) {
-researchContainer.style.display = 'block';
-const researchHTML = processedResearch.map(research => `
-<li class="research-item">
-<div class="research-question">${research.question}</div>
-<div class="research-status">Status: ${research.status} • Priority: ${research.priority}</div>
-</li>
-`).join('');
-researchList.innerHTML = researchHTML;
+// Load projects
+async function loadProjects() {
+try {
+const response = await fetch(`${API_URL}/projects`, {
+headers: getAuthHeaders()
+});
+const data = await response.json();
+
+if (data.success) {
+displayProjects(data.projects);
+}
+} catch (error) {
+console.error('Failed to load projects:', error);
 }
 }
 
-// AI Note processing (quick processing for smaller inputs)
-function processAINote() {
+function displayProjects(projects) {
+const projectList = document.getElementById('projectList');
+if (!projectList) return;
+
+if (projects.length === 0) {
+projectList.innerHTML = '<p style="color: var(--text-secondary); font-style: italic;">No projects yet. Create one above!</p>';
+return;
+}
+
+const projectsHTML = projects.map(project => `
+<div class="project-item" onclick="openProject('${project.id}')">
+<div class="project-title">${project.name}</div>
+<div class="project-desc">${project.description || 'No description'}</div>
+</div>
+`).join('');
+
+projectList.innerHTML = projectsHTML;
+}
+
+// Load pending approvals
+async function loadApprovals() {
+try {
+const response = await fetch(`${API_URL}/approvals/pending`, {
+headers: getAuthHeaders()
+});
+const data = await response.json();
+
+if (data.success) {
+pendingApprovals = data.approvals;
+displayApprovals(data.approvals);
+updateApprovalsBadge(data.approvals.length);
+}
+} catch (error) {
+console.error('Failed to load approvals:', error);
+}
+}
+
+function displayApprovals(approvals) {
+const approvalsList = document.getElementById('approvalsList');
+if (!approvalsList) return;
+
+if (approvals.length === 0) {
+approvalsList.innerHTML = '<p style="color: var(--text-secondary);">No approvals needed right now.</p>';
+return;
+}
+
+const approvalsHTML = approvals.map(approval => `
+<div class="approval-item">
+<div class="approval-header">
+<div class="approval-title">${approval.title}</div>
+${approval.estimated_cost ? `<div class="approval-cost">${approval.estimated_cost}</div>` : ''}
+</div>
+<div class="approval-description">${approval.description}</div>
+<div class="approval-actions">
+<button class="approve-btn" onclick="handleApproval('${approval.id}', 'approved')">Approve</button>
+<button class="reject-btn" onclick="handleApproval('${approval.id}', 'rejected')">Reject</button>
+</div>
+</div>
+`).join('');
+
+approvalsList.innerHTML = approvalsHTML;
+}
+
+function updateApprovalsBadge(count) {
+const badge = document.getElementById('approvalsNavBtn');
+if (badge) {
+badge.setAttribute('data-count', count);
+}
+}
+
+// Chat functionality
+async function loadChatHistory() {
+try {
+const response = await fetch(`${API_URL}/chat/history`, {
+headers: getAuthHeaders()
+});
+const data = await response.json();
+
+if (data.success && data.chat_history.length > 0) {
+const messagesContainer = document.getElementById('chatMessages');
+messagesContainer.innerHTML = ''; // Clear existing messages
+data.chat_history.forEach(msg => {
+addChatMessage('user', msg.description);
+// Add a simple response for historical messages
+addChatMessage('assistant', 'Message processed and stored in your knowledge base.');
+});
+} else {
+// Add welcome message if no history
+addChatMessage('assistant', 'Hey! I\'m your AI assistant. You can ask me anything or use our prefix system: <strong>?</strong> for research, <strong>zz</strong> for tasks, <strong>!!</strong> for urgent items.');
+}
+} catch (error) {
+console.error('Failed to load chat history:', error);
+}
+}
+
+function sendChatMessage() {
+const input = document.getElementById('chatInput');
+const message = input.value.trim();
+if (!message) return;
+
+addChatMessage('user', message);
+input.value = '';
+
+const sendBtn = document.getElementById('chatSendBtn');
+sendBtn.disabled = true;
+sendBtn.textContent = 'Thinking...';
+
+processChatMessage(message);
+}
+
+async function processChatMessage(message) {
+try {
+const response = await fetch(`${API_URL}/chat/process`, {
+method: 'POST',
+headers: getAuthHeaders(),
+body: JSON.stringify({ message })
+});
+
+const data = await response.json();
+
+if (data.success) {
+addChatMessage('assistant', data.message);
+
+// Refresh tasks if new ones were created
+if (data.type === 'task_created' || data.type === 'urgent_created' || data.type === 'research_created') {
+await loadTasks();
+}
+} else {
+addChatMessage('assistant', 'Sorry, I encountered an error processing your message.');
+}
+} catch (error) {
+addChatMessage('assistant', 'Connection error. Please try again.');
+console.error('Chat processing error:', error);
+} finally {
+const sendBtn = document.getElementById('chatSendBtn');
+sendBtn.disabled = false;
+sendBtn.textContent = 'Send';
+}
+}
+
+function addChatMessage(sender, content) {
+const messagesContainer = document.getElementById('chatMessages');
+const messageDiv = document.createElement('div');
+messageDiv.className = `chat-message ${sender}`;
+
+const now = new Date();
+const timeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+messageDiv.innerHTML = `
+<div class="message-content">${content}</div>
+<div class="message-time">${timeString}</div>
+`;
+
+messagesContainer.appendChild(messageDiv);
+messagesContainer.scrollTop = messagesContainer.scrollHeight;
+}
+
+function handleChatKeyPress(event) {
+if (event.key === 'Enter' && !event.shiftKey) {
+event.preventDefault();
+sendChatMessage();
+}
+}
+
+// Task management
+async function submitTask(event) {
+event.preventDefault();
+const title = document.getElementById('taskTitle').value.trim();
+const priority = document.getElementById('taskPriority').value;
+const assigned_to = document.getElementById('taskAssignTo').value;
+const description = document.getElementById('taskDescription').value.trim();
+
+if (!title) return;
+
+try {
+const response = await fetch(`${API_URL}/tasks`, {
+method: 'POST',
+headers: getAuthHeaders(),
+body: JSON.stringify({
+title,
+priority,
+assigned_to: assigned_to === 'human' ? null : assigned_to,
+task_type: assigned_to === 'human' ? 'manual' : 'agent',
+description
+})
+});
+
+const data = await response.json();
+
+if (data.success) {
+closeModal('addTaskModal');
+await loadTasks();
+
+// Reset form
+document.getElementById('taskTitle').value = '';
+document.getElementById('taskDescription').value = '';
+document.getElementById('taskPriority').value = 'normal';
+document.getElementById('taskAssignTo').value = 'human';
+}
+} catch (error) {
+console.error('Failed to create task:', error);
+}
+}
+
+async function completeTask(taskId) {
+try {
+const response = await fetch(`${API_URL}/tasks/${taskId}/status`, {
+method: 'PATCH',
+headers: getAuthHeaders(),
+body: JSON.stringify({ status: 'completed' })
+});
+
+if (response.ok) {
+await loadTasks();
+}
+} catch (error) {
+console.error('Failed to complete task:', error);
+}
+}
+
+async function deleteTask(taskId) {
+// For now, we'll mark as cancelled instead of deleting
+await completeTask(taskId);
+}
+
+// Project management
+async function submitProject(event) {
+event.preventDefault();
+const name = document.getElementById('projectName').value.trim();
+const description = document.getElementById('projectDescription').value.trim();
+const due_date = document.getElementById('projectDueDate').value;
+
+if (!name) return;
+
+try {
+const response = await fetch(`${API_URL}/projects`, {
+method: 'POST',
+headers: getAuthHeaders(),
+body: JSON.stringify({ name, description, due_date })
+});
+
+const data = await response.json();
+
+if (data.success) {
+closeModal('addProjectModal');
+await loadProjects();
+
+// Reset form
+document.getElementById('projectName').value = '';
+document.getElementById('projectDescription').value = '';
+document.getElementById('projectDueDate').value = '';
+}
+} catch (error) {
+console.error('Failed to create project:', error);
+}
+}
+
+// Approval handling
+async function handleApproval(approvalId, status) {
+try {
+const response = await fetch(`${API_URL}/approvals/${approvalId}`, {
+method: 'PATCH',
+headers: getAuthHeaders(),
+body: JSON.stringify({ status })
+});
+
+if (response.ok) {
+await loadApprovals();
+}
+} catch (error) {
+console.error('Failed to handle approval:', error);
+}
+}
+
+// AI Note processing (quick processing)
+async function processAINote() {
 const note = document.getElementById('aiNote')?.value || '';
 if (!note.trim()) return;
 
@@ -1088,69 +1378,79 @@ const originalText = btn.textContent;
 btn.textContent = 'processing...';
 btn.disabled = true;
 
-// Process the note using the same logic
-const results = processContent(note);
-
-setTimeout(() => {
-btn.textContent = 'done';
-updateDashboard();
+try {
+await processChatMessage(note);
+document.getElementById('aiNote').value = '';
+await loadTasks(); // Refresh tasks in case new ones were created
+} catch (error) {
+console.error('Failed to process AI note:', error);
+} finally {
 setTimeout(() => {
 btn.textContent = originalText;
 btn.disabled = false;
-document.getElementById('aiNote').value = '';
 }, 1000);
-}, 1500);
+}
 }
 
-// On My Mind page
+// UI Helper functions
+function showView(viewName) {
+document.querySelectorAll('[id$="-view"]').forEach(view => {
+view.style.display = 'none';
+view.classList.remove('active');
+});
+
+if (viewName === 'today') {
+document.getElementById('today-view').style.display = 'grid';
+} else {
+const viewElement = document.getElementById(`${viewName}-view`);
+if (viewElement) {
+viewElement.style.display = 'block';
+viewElement.classList.add('active');
+}
+}
+
+document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+document.querySelectorAll('.nav-btn').forEach(btn => {
+if (btn.textContent.toLowerCase().includes(viewName.toLowerCase()) || 
+    (viewName === 'chat' && btn.textContent.toLowerCase().includes('chat'))) {
+btn.classList.add('active');
+}
+});
+}
+
+function setTheme(theme) {
+document.body.className = `theme-${theme}`;
+document.querySelectorAll('.theme-btn').forEach(btn => btn.classList.remove('active'));
+const active = document.querySelector(`.theme-btn.${theme}`);
+if (active) active.classList.add('active');
+localStorage.setItem('theme', theme);
+}
+
+function showAddTaskModal() {
+document.getElementById('addTaskModal').style.display = 'flex';
+document.getElementById('taskTitle').focus();
+}
+
+function showAddProjectModal() {
+document.getElementById('addProjectModal').style.display = 'flex';
+document.getElementById('projectName').focus();
+}
+
+function closeModal(modalId) {
+document.getElementById(modalId).style.display = 'none';
+}
+
 function showMindPage() {
 showView('mind');
 }
 
-// Task actions
-function archiveTask(taskId) {
-console.log('Archiving task:', taskId);
-processedTasks = processedTasks.filter(task => task.id !== taskId);
-updateDashboard();
-}
-
-function addToCalendar(taskId) {
-console.log('Adding to calendar:', taskId);
-const task = processedTasks.find(t => t.id === taskId);
-if (task) {
-// In a real implementation, this would integrate with calendar API
-alert(`Task "${task.title}" would be added to calendar`);
-}
-}
-
-function deleteTask(taskId) {
-console.log('Deleting task:', taskId);
-processedTasks = processedTasks.filter(task => task.id !== taskId);
-updateDashboard();
-}
-
-// Project management
-function openProject(projectId) {
-console.log('Opening project:', projectId);
-// TODO: Implement project detail view
-}
-
-// Mind notes
 function saveMindNote() {
 const input = document.getElementById('mindInput');
 const content = input.value.trim();
 if (!content) return;
 
 console.log('Saving mind note:', content);
-// Store in processed notes
-processedNotes.push({
-id: `mind_${Date.now()}`,
-content: content,
-type: 'mind_note',
-created: new Date()
-});
 
-// Show success feedback
 const btn = document.querySelector('.mind-save-btn');
 const originalText = btn.textContent;
 btn.textContent = 'saved!';
@@ -1160,31 +1460,119 @@ input.value = '';
 }, 1000);
 }
 
-// Email functionality
-function connectGmail() {
-console.log('Connecting to Gmail...');
-// TODO: Implement Gmail OAuth
+function openProject(projectId) {
+console.log('Opening project:', projectId);
+// TODO: Implement project detail view
 }
 
-function refreshEmails() {
-console.log('Refreshing emails...');
-// TODO: Implement email refresh
-}
-
-// Initialize
 function updateDateDisplay() {
 const dateDisplay = document.getElementById('dateDisplay');
 if (dateDisplay) {
 const now = new Date();
 const options = {
 weekday: 'long',
-
 year: 'numeric',
 month: 'long',
 day: 'numeric'
 };
 dateDisplay.textContent = now.toLocaleDateString('en-US', options);
 }
+}
+
+// Gmail functionality (existing)
+async function connectGmail() {
+const connectBtn = document.getElementById('gmailConnectBtn');
+const refreshBtn = document.getElementById('refreshEmailsBtn');
+const status = document.getElementById('emailStatus');
+
+connectBtn.disabled = true;
+connectBtn.textContent = 'Connecting...';
+status.textContent = 'Authenticating with Gmail...';
+
+try {
+const response = await fetch(`${API_URL}/gmail/connect`, {
+method: 'POST',
+headers: getAuthHeaders()
+});
+
+if (response.ok) {
+connectBtn.style.display = 'none';
+refreshBtn.style.display = 'inline-block';
+status.textContent = 'Connected to Gmail ✓';
+await loadEmails();
+} else {
+throw new Error('Failed to connect');
+}
+} catch (error) {
+status.textContent = 'Connection failed. Please try again.';
+connectBtn.disabled = false;
+connectBtn.textContent = 'Connect Gmail';
+}
+}
+
+async function loadEmails() {
+const status = document.getElementById('emailStatus');
+status.textContent = 'Loading emails...';
+
+try {
+const response = await fetch(`${API_URL}/gmail/messages`, {
+headers: getAuthHeaders()
+});
+
+if (response.ok) {
+const data = await response.json();
+displayEmails(data.messages || []);
+status.textContent = `Loaded ${data.messages?.length || 0} emails`;
+} else {
+throw new Error('Failed to load emails');
+}
+} catch (error) {
+status.textContent = 'Failed to load emails';
+console.error('Email loading error:', error);
+}
+}
+
+async function refreshEmails() {
+await loadEmails();
+}
+
+function displayEmails(emails) {
+const emailsList = document.getElementById('emailsList');
+
+if (emails.length === 0) {
+emailsList.innerHTML = '<p>No emails found.</p>';
+return;
+}
+
+const emailsHTML = emails.map(email => `
+<div class="email-item ${email.unread ? 'unread' : ''}" onclick="openEmail('${email.id}')">
+<div class="email-header">
+<div class="email-from">${email.from || 'Unknown Sender'}</div>
+<div class="email-date">${formatEmailDate(email.date)}</div>
+</div>
+<div class="email-subject">${email.subject || 'No Subject'}</div>
+<div class="email-snippet">${email.snippet || ''}</div>
+</div>
+`).join('');
+
+emailsList.innerHTML = emailsHTML;
+}
+
+function formatEmailDate(dateString) {
+if (!dateString) return '';
+const date = new Date(dateString);
+const now = new Date();
+const diffTime = Math.abs(now - date);
+const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+if (diffDays === 1) return 'Yesterday';
+if (diffDays < 7) return `${diffDays} days ago`;
+return date.toLocaleDateString();
+}
+
+function openEmail(emailId) {
+console.log('Opening email:', emailId);
+// TODO: Implement email detail view
 }
 
 function logout() {
@@ -1214,66 +1602,32 @@ return;
 }
 }
 
-// Load saved data from localStorage
-function loadSavedData() {
-const savedTasks = localStorage.getItem('khizr_processed_tasks');
-const savedResearch = localStorage.getItem('khizr_processed_research');
-const savedNotes = localStorage.getItem('khizr_processed_notes');
+// Close modals on escape key
+document.addEventListener('keydown', function(event) {
+if (event.key === 'Escape') {
+const modals = document.querySelectorAll('.modal-overlay');
+modals.forEach(modal => {
+if (modal.style.display === 'flex') {
+modal.style.display = 'none';
+}
+});
+}
+});
 
-if (savedTasks) {
-try {
-processedTasks = JSON.parse(savedTasks);
-} catch (e) {
-processedTasks = [];
+// Close modals on outside click
+document.addEventListener('click', function(event) {
+if (event.target.classList.contains('modal-overlay')) {
+event.target.style.display = 'none';
 }
-}
-
-if (savedResearch) {
-try {
-processedResearch = JSON.parse(savedResearch);
-} catch (e) {
-processedResearch = [];
-}
-}
-
-if (savedNotes) {
-try {
-processedNotes = JSON.parse(savedNotes);
-} catch (e) {
-processedNotes = [];
-}
-}
-
-updateDashboard();
-}
-
-// Save data to localStorage
-function saveDataToStorage() {
-localStorage.setItem('khizr_processed_tasks', JSON.stringify(processedTasks));
-localStorage.setItem('khizr_processed_research', JSON.stringify(processedResearch));
-localStorage.setItem('khizr_processed_notes', JSON.stringify(processedNotes));
-}
-
-// Auto-save data when it changes
-function autoSave() {
-saveDataToStorage();
-}
+});
 
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', function() {
-updateDateDisplay();
 checkAppAuth();
-loadSavedData();
+initializeApp();
 
-// Load saved theme
 const savedTheme = localStorage.getItem('theme') || 'purple';
 setTheme(savedTheme);
-
-// Auto-save every 30 seconds
-setInterval(autoSave, 30000);
-
-// Save before page unload
-window.addEventListener('beforeunload', autoSave);
 });
 
 </script>
