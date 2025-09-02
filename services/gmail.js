@@ -117,8 +117,8 @@ class GmailService {
         }
     }
 
-    // Fetch emails from Gmail
-    async fetchEmails(userId, maxResults = 50) {
+    // Fetch emails from Gmail with configurable options
+    async fetchEmails(userId, maxResults = 50, options = {}) {
         try {
             const tokens = await this.getTokens(userId);
             if (!tokens) {
@@ -131,12 +131,15 @@ class GmailService {
 
             const gmail = google.gmail({ version: 'v1', auth: this.oauth2Client });
 
-            // Fetch emails with enhanced filtering for truly important emails only
+            // Build Gmail search query
+            const query = this.buildGmailQuery(options);
+
+            // Fetch emails with enhanced filtering
             const response = await gmail.users.messages.list({
                 userId: 'me',
                 maxResults: maxResults,
-                q: 'is:important -category:promotions -category:social -category:updates -category:forums -label:unread -older_than:30d',
-                labelIds: ['INBOX', 'IMPORTANT']
+                q: query,
+                labelIds: ['INBOX']
             });
 
             const messages = response.data.messages || [];
@@ -149,11 +152,54 @@ class GmailService {
                 }
             }
 
+            logger.info(`Fetched ${emails.length} emails for user ${userId}`);
             return emails;
         } catch (error) {
             logger.error('Error fetching emails:', error);
             throw error;
         }
+    }
+
+    // Build Gmail search query based on options
+    buildGmailQuery(options = {}) {
+        const queryParts = [];
+
+        // Default to important emails only, but allow override
+        if (options.includeAll !== true) {
+            queryParts.push('is:important');
+            queryParts.push('-category:promotions');
+            queryParts.push('-category:social');
+            queryParts.push('-category:updates');
+            queryParts.push('-category:forums');
+        }
+
+        // Add time filters
+        if (options.since) {
+            queryParts.push(`after:${options.since}`);
+        }
+        if (options.before) {
+            queryParts.push(`before:${options.before}`);
+        }
+        if (options.olderThan) {
+            queryParts.push(`older_than:${options.olderThan}d`);
+        } else {
+            // Default to last 30 days unless explicitly disabled
+            if (options.noTimeLimit !== true) {
+                queryParts.push('older_than:30d');
+            }
+        }
+
+        // Add label filters
+        if (options.label) {
+            queryParts.push(`label:${options.label}`);
+        }
+
+        // Add sender filters
+        if (options.from) {
+            queryParts.push(`from:${options.from}`);
+        }
+
+        return queryParts.join(' ');
     }
 
     // Get detailed email information

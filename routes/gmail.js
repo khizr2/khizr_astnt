@@ -55,7 +55,7 @@ router.get('/status', authenticateToken, async (req, res) => {
 // Fetch and process emails (requires auth)
 router.get('/emails', authenticateToken, async (req, res) => {
     try {
-        const { limit = 20, refresh = false } = req.query;
+        const { limit = 20, refresh = false, sort = 'received_at', order = 'desc', priority_filter } = req.query;
 
         // If refresh is true, fetch from Gmail API
         if (refresh === 'true') {
@@ -102,13 +102,38 @@ router.get('/emails', authenticateToken, async (req, res) => {
             logger.info(`Processed ${processedEmails.length} emails for user ${req.user.id}`);
         }
 
+        // Build dynamic query with sorting and filtering
+        let whereClause = 'WHERE user_id = $1';
+        let orderByClause = 'ORDER BY received_at DESC';
+        let params = [req.user.id];
+        let paramIndex = 2;
+
+        // Add priority filter if specified
+        if (priority_filter) {
+            if (priority_filter === 'high') {
+                whereClause += ` AND priority <= 2`;
+            } else if (priority_filter === 'medium') {
+                whereClause += ` AND priority BETWEEN 3 AND 4`;
+            } else if (priority_filter === 'low') {
+                whereClause += ` AND priority >= 5`;
+            }
+        }
+
+        // Add sorting
+        if (sort === 'priority') {
+            orderByClause = `ORDER BY priority ${order === 'asc' ? 'ASC' : 'DESC'}, received_at DESC`;
+        } else if (sort === 'subject') {
+            orderByClause = `ORDER BY subject ${order === 'asc' ? 'ASC' : 'DESC'}, received_at DESC`;
+        } else if (sort === 'sender') {
+            orderByClause = `ORDER BY sender ${order === 'asc' ? 'ASC' : 'DESC'}, received_at DESC`;
+        } else {
+            orderByClause = `ORDER BY received_at ${order === 'asc' ? 'ASC' : 'DESC'}`;
+        }
+
         // Get emails from database
         const result = await query(
-            `SELECT * FROM emails 
-             WHERE user_id = $1 
-             ORDER BY received_at DESC 
-             LIMIT $2`,
-            [req.user.id, parseInt(limit)]
+            `SELECT * FROM emails ${whereClause} ${orderByClause} LIMIT $${paramIndex}`,
+            [...params, parseInt(limit)]
         );
 
         res.json(result.rows);

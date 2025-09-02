@@ -2292,16 +2292,37 @@ showToast('Failed to delete project', 'error');
 }
 }
 
+// Create test approval for UI testing (call from browser console)
+async function createTestApproval() {
+    try {
+        const response = await fetch(`${API_URL}/api/agents/approvals/test`, {
+            method: 'POST',
+            headers: getAuthHeaders()
+        });
+        const data = await response.json();
+        if (data.success) {
+            console.log('Test approval created:', data);
+            await loadApprovals(); // Reload approvals
+            showToast('Test approval created! Check the bell icon.', 'success');
+        } else {
+            console.error('Failed to create test approval:', data);
+        }
+    } catch (error) {
+        console.error('Error creating test approval:', error);
+    }
+}
+
 // Load pending approvals
 async function loadApprovals() {
 try {
-const response = await fetch(`${API_URL}/api/approvals/pending`, {
+const response = await fetch(`${API_URL}/api/agents/approvals/pending`, {
 headers: getAuthHeaders()
 });
 const data = await response.json();
 
 if (data.success) {
 pendingApprovals = data.approvals;
+console.log('Loaded approvals:', data.approvals.length, data.approvals);
 displayApprovals(data.approvals);
 updateApprovalsBadge(data.approvals.length);
 }
@@ -2337,9 +2358,13 @@ approvalsList.innerHTML = approvalsHTML;
 }
 
 function updateApprovalsBadge(count) {
+console.log('Updating approvals badge with count:', count);
 const headerBadge = document.getElementById('approvalsHeaderBtn');
 if (headerBadge) {
+console.log('Found header badge element:', headerBadge);
 headerBadge.setAttribute('data-count', count);
+} else {
+console.log('Header badge element not found!');
 }
 }
 

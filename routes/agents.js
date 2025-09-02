@@ -7188,6 +7188,44 @@ router.get('/approvals/pending', async (req, res) => {
     }
 });
 
+// Test endpoint to create a sample approval for UI testing
+router.post('/approvals/test', async (req, res) => {
+    try {
+        const sampleApproval = {
+            user_id: req.user.id,
+            agent_id: null,
+            action_type: 'test_notification',
+            action_data: {
+                message: 'This is a test notification to verify the bell icon and red dot work correctly.',
+                test: true
+            },
+            reason: 'Testing notification UI system',
+            risk_level: 'low',
+            priority: 5,
+            expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString() // 24 hours from now
+        };
+
+        const { data, error } = await supabase
+            .from('approvals_queue')
+            .insert([sampleApproval])
+            .select()
+            .single();
+
+        if (error) throw error;
+
+        logger.info(`Created test approval for user ${req.user.id}`);
+        res.json({
+            success: true,
+            message: 'Test approval created successfully',
+            approval: data
+        });
+
+    } catch (error) {
+        logger.error('Create test approval error:', error);
+        res.status(500).json({ error: 'Failed to create test approval' });
+    }
+});
+
 // Handle approval decision
 router.patch('/approvals/:id', async (req, res) => {
     try {
@@ -9983,15 +10021,26 @@ router.get('/daddy/analytics', async (req, res) => {
         const cutoffDate = new Date();
         cutoffDate.setDate(cutoffDate.getDate() - parseInt(days));
 
-        const { data: logs, error } = await supabase
-            .from('agent_logs')
-            .select('*')
-            .eq('user_id', userId)
-            .eq('agent_id', 'daddy_agent')
-            .gte('created_at', cutoffDate.toISOString())
-            .order('created_at', { ascending: false });
+        // Get logs for real agents only (skip daddy agent since it's not stored in DB)
+        const { data: agents } = await supabase
+            .from('agents')
+            .select('id')
+            .eq('user_id', userId);
 
-        if (error) throw error;
+        let logs = [];
+        if (agents && agents.length > 0) {
+            const agentIds = agents.map(a => a.id);
+            const { data: agentLogs, error } = await supabase
+                .from('agent_logs')
+                .select('*')
+                .eq('user_id', userId)
+                .in('agent_id', agentIds)
+                .gte('created_at', cutoffDate.toISOString())
+                .order('created_at', { ascending: false });
+
+            if (error) throw error;
+            logs = agentLogs || [];
+        }
 
         // Analyze effectiveness
         const escalations = logs.filter(log => log.action === 'task_escalation_triggered');
@@ -10048,19 +10097,8 @@ router.put('/daddy/config', async (req, res) => {
         // Apply updates
         Object.assign(daddyAgent, validUpdates);
 
-        // Log configuration change
-        await supabase
-            .from('agent_logs')
-            .insert([{
-                agent_id: 'daddy_agent',
-                user_id: userId,
-                action: 'configuration_updated',
-                details: {
-                    updates: validUpdates,
-                    timestamp: new Date().toISOString()
-                },
-                severity: 'info'
-            }]);
+        // Log configuration change (skip database logging for daddy agent since it's not a real agent)
+        logger.info(`Daddy agent configuration updated for user ${userId}:`, validUpdates);
 
         res.json({
             success: true,

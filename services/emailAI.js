@@ -3,14 +3,52 @@ const { logger } = require('../utils/logger');
 
 class EmailAIProcessor {
     constructor() {
-        this.openai = new OpenAI({
-            apiKey: process.env.OPENAI_API_KEY
-        });
+        // Initialize available AI services
+        this.aiServices = {};
+
+        // OpenAI (primary)
+        if (process.env.OPENAI_API_KEY) {
+            this.aiServices.openai = new OpenAI({
+                apiKey: process.env.OPENAI_API_KEY
+            });
+        }
+
+        // LMStudio (localhost)
+        if (process.env.LMSTUDIO_BASE_URL) {
+            this.aiServices.lmstudio = new OpenAI({
+                baseURL: process.env.LMSTUDIO_BASE_URL + "/v1",
+                apiKey: "lm-studio" // LMStudio doesn't require a real key
+            });
+        }
+
+        // OpenRouter (structure ready but disabled for now)
+        if (process.env.OPENROUTER_API_KEY && process.env.ENABLE_OPENROUTER === 'true') {
+            this.aiServices.openrouter = new OpenAI({
+                baseURL: "https://openrouter.ai/api/v1",
+                apiKey: process.env.OPENROUTER_API_KEY
+            });
+        }
+
+        // Default to first available service
+        this.defaultService = Object.keys(this.aiServices)[0] || null;
     }
 
-        // Analyze email and determine priority, importance, and generate word tree summary
-    async analyzeEmail(email) {
+    // Get the appropriate AI service
+    getAIService(serviceName = null) {
+        if (serviceName && this.aiServices[serviceName]) {
+            return this.aiServices[serviceName];
+        }
+        return this.aiServices[this.defaultService];
+    }
+
+    // Analyze email and determine priority, importance, and generate word tree summary
+    async analyzeEmail(email, serviceName = null) {
         try {
+            const aiService = this.getAIService(serviceName);
+            if (!aiService) {
+                throw new Error('No AI service available for email analysis');
+            }
+
             const prompt = `
     Analyze this email and provide a JSON response with the following structure:
 {
@@ -48,8 +86,16 @@ Consider:
 - Priority 5 = Low importance (can be ignored)
 `;
 
-            const response = await this.openai.chat.completions.create({
-                model: "gpt-3.5-turbo",
+            // Choose model based on service
+            let model = "gpt-3.5-turbo";
+            if (serviceName === 'lmstudio') {
+                model = process.env.LMSTUDIO_MODEL || "local-model";
+            } else if (serviceName === 'openrouter') {
+                model = process.env.OPENROUTER_MODEL || "anthropic/claude-3-haiku";
+            }
+
+            const response = await aiService.chat.completions.create({
+                model: model,
                 messages: [
                     {
                         role: "system",
@@ -188,8 +234,13 @@ Consider:
     }
 
     // Generate a more detailed response draft
-    async generateResponse(email, context = '') {
+    async generateResponse(email, context = '', serviceName = null) {
         try {
+            const aiService = this.getAIService(serviceName);
+            if (!aiService) {
+                throw new Error('No AI service available for response generation');
+            }
+
             const prompt = `
 Generate a professional email response based on the following email:
 
@@ -211,8 +262,16 @@ Requirements:
 Generate only the email body content (no subject line or headers):
 `;
 
-            const response = await this.openai.chat.completions.create({
-                model: "gpt-3.5-turbo",
+            // Choose model based on service
+            let model = "gpt-3.5-turbo";
+            if (serviceName === 'lmstudio') {
+                model = process.env.LMSTUDIO_MODEL || "local-model";
+            } else if (serviceName === 'openrouter') {
+                model = process.env.OPENROUTER_MODEL || "anthropic/claude-3-haiku";
+            }
+
+            const response = await aiService.chat.completions.create({
+                model: model,
                 messages: [
                     {
                         role: "system",

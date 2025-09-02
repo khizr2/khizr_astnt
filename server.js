@@ -23,6 +23,9 @@ const { logger } = require('./utils/logger');
 const app = express();
 const PORT = process.env.PORT || 10000;
 
+// Trust proxy for reverse proxy deployments (like Render)
+app.set('trust proxy', 1);
+
 // Security middleware
 app.use(helmet());
 app.use(cors({
