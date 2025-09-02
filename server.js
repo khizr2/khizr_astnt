@@ -14,6 +14,8 @@ const gmailRoutes = require('./routes/gmail');
 const notificationRoutes = require('./routes/notifications');
 const debugRoutes = require('./routes/debug');
 const agentRoutes = require('./routes/agents');
+const messagingRoutes = require('./routes/messaging');
+const chatRoutes = require('./routes/chat');
 
 const { logger } = require('./utils/logger');
 
@@ -56,6 +58,8 @@ app.use('/api/gmail', gmailRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/debug', debugRoutes);
 app.use('/api/agents', agentRoutes);
+app.use('/api/messaging', messagingRoutes);
+app.use('/api/chat', chatRoutes);
 // Health check endpoint
 app.get('/', (req, res) => {
     res.json({ 

@@ -857,10 +857,24 @@ placeholder="Share your thoughts, ideas, concerns..."
 <!-- Chat history will be loaded here -->
 </div>
 <div class="chat-input-container">
-<input 
-type="text" 
-class="chat-input" 
-id="chatInput" 
+  <!-- Add AI model selector -->
+  <div class="ai-model-selector" style="margin-bottom: 8px; display: flex; align-items: center; gap: 8px;">
+    <label for="aiModel" style="font-size: 11px; color: var(--text-secondary);">AI Model:</label>
+    <select id="aiModel" style="padding: 4px 8px; border: 1px solid var(--border); border-radius: 4px; background: var(--bg-card); color: var(--text-primary); font-size: 12px;">
+      <option value="anthropic/claude-3.5-sonnet">Claude 3.5 Sonnet (Best)</option>
+      <option value="anthropic/claude-3-haiku">Claude 3 Haiku (Fast)</option>
+      <option value="openai/gpt-4o">GPT-4o (Latest)</option>
+      <option value="openai/gpt-4o-mini">GPT-4o Mini (Cheap)</option>
+      <option value="google/gemini-pro-1.5">Gemini Pro 1.5</option>
+      <option value="meta-llama/llama-3.1-70b-instruct">Llama 3.1 70B</option>
+      <option value="mistralai/mistral-large">Mistral Large</option>
+    </select>
+  </div>
+
+<input
+type="text"
+class="chat-input"
+id="chatInput"
 placeholder="Type your message or use prefixes: ? zz og !!"
 onkeypress="handleChatKeyPress(event)"
 >
@@ -969,6 +983,17 @@ let agents = [];
 let currentUser = null;
 let notifications = 0;
 let pendingApprovals = [];
+
+// Available AI models for display
+const AVAILABLE_MODELS = {
+  'anthropic/claude-3.5-sonnet': 'Claude 3.5 Sonnet',
+  'anthropic/claude-3-haiku': 'Claude 3 Haiku',
+  'openai/gpt-4o': 'GPT-4o',
+  'openai/gpt-4o-mini': 'GPT-4o Mini',
+  'google/gemini-pro-1.5': 'Gemini Pro 1.5',
+  'meta-llama/llama-3.1-70b-instruct': 'Llama 3.1 70B',
+  'mistralai/mistral-large': 'Mistral Large'
+};
 
 // Authentication helper
 function getAuthHeaders() {
@@ -1203,33 +1228,51 @@ processChatMessage(message);
 }
 
 async function processChatMessage(message) {
-try {
-const response = await fetch(`${API_URL}/api/chat/process`, {
-method: 'POST',
-headers: getAuthHeaders(),
-body: JSON.stringify({ message })
-});
+  try {
+    const aiModel = document.getElementById('aiModel').value;
 
-const data = await response.json();
+    const response = await fetch(`${API_URL}/api/chat/process`, {
+      method: 'POST',
+      headers: getAuthHeaders(),
+      body: JSON.stringify({ message, model: aiModel })
+    });
 
-if (data.success) {
-addChatMessage('assistant', data.message);
+    const data = await response.json();
 
-// Refresh tasks if new ones were created
-if (data.type === 'task_created' || data.type === 'urgent_created' || data.type === 'research_created') {
-await loadTasks();
-}
-} else {
-addChatMessage('assistant', 'Sorry, I encountered an error processing your message.');
-}
-} catch (error) {
-addChatMessage('assistant', 'Connection error. Please try again.');
-console.error('Chat processing error:', error);
-} finally {
-const sendBtn = document.getElementById('chatSendBtn');
-sendBtn.disabled = false;
-sendBtn.textContent = 'Send';
-}
+    if (data.success) {
+      addChatMessage('assistant', data.message);
+
+      // Show which model was used
+      if (data.model_used) {
+        const modelName = AVAILABLE_MODELS[data.model_used] || data.model_used;
+        addChatMessage('system', `🤖 ${modelName}`);
+      }
+
+      // Handle task/project creation based on message type
+      if (data.type === 'task_created' || data.type === 'urgent_created') {
+        await loadTasks();
+        await loadApprovals();
+      } else if (data.type === 'project_related') {
+        await loadProjects();
+      }
+    } else {
+      addChatMessage('assistant', data.message);
+
+      // Handle specific error types
+      if (data.error_type === 'rate_limit') {
+        addChatMessage('system', '⚠️ Rate limit reached. Please wait before sending more messages.');
+      } else if (data.error_type === 'insufficient_credits') {
+        addChatMessage('system', '💰 OpenRouter credits exhausted. Please add more credits.');
+      }
+    }
+  } catch (error) {
+    console.error('Chat processing error:', error);
+    addChatMessage('assistant', 'Connection error. Please check your internet and try again.');
+  } finally {
+    const sendBtn = document.getElementById('chatSendBtn');
+    sendBtn.disabled = false;
+    sendBtn.textContent = 'Send';
+  }
 }
 
 function addChatMessage(sender, content) {
