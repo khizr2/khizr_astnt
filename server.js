@@ -26,23 +26,31 @@ const PORT = process.env.PORT || 10000;
 // Trust proxy for reverse proxy deployments (like Render)
 app.set('trust proxy', 1);
 
-// Security middleware
-app.use(helmet({
-    contentSecurityPolicy: {
-        directives: {
-            defaultSrc: ["'self'"],
-            styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
-            scriptSrc: ["'self'"],
-            imgSrc: ["'self'", "data:", "https:"],
-            connectSrc: ["'self'", "https://openrouter.ai", "https://api.openrouter.ai"],
-            fontSrc: ["'self'", "https://fonts.gstatic.com", "https://fonts.googleapis.com"],
-            objectSrc: ["'none'"],
-            mediaSrc: ["'self'"],
-            frameSrc: ["'none'"],
+// Security middleware - Disable CSP for development
+if (process.env.NODE_ENV === 'production') {
+    app.use(helmet({
+        contentSecurityPolicy: {
+            directives: {
+                defaultSrc: ["'self'"],
+                styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+                scriptSrc: ["'self'"],
+                imgSrc: ["'self'", "data:", "https:"],
+                connectSrc: ["'self'", "https://openrouter.ai", "https://api.openrouter.ai"],
+                fontSrc: ["'self'", "https://fonts.gstatic.com", "https://fonts.googleapis.com"],
+                objectSrc: ["'none'"],
+                mediaSrc: ["'self'"],
+                frameSrc: ["'none'"],
+            },
         },
-    },
-    crossOriginEmbedderPolicy: false // Disable COEP for development
-}));
+        crossOriginEmbedderPolicy: false
+    }));
+} else {
+    // Development mode - minimal security headers
+    app.use(helmet({
+        contentSecurityPolicy: false,
+        crossOriginEmbedderPolicy: false
+    }));
+}
 app.use(cors({
     origin: true,
     credentials: true
@@ -87,11 +95,6 @@ app.use('/api/user/preferences', preferencesRoutes);
 // Serve main application
 app.get('/', (req, res) => {
     res.sendFile(__dirname + '/app.html');
-});
-
-// Serve test page
-app.get('/test', (req, res) => {
-    res.sendFile(__dirname + '/test-page.html');
 });
 
 // API health check endpoint
