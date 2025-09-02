@@ -218,4 +218,96 @@ router.get('/meta/categories', async (req, res) => {
     }
 });
 
+// Update project
+router.patch('/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { name, description, priority, deadline, status, category } = req.body;
+
+        const updateFields = [];
+        const values = [req.user.id, id];
+        let paramCount = 2;
+
+        if (name !== undefined) {
+            updateFields.push(`title = $${++paramCount}`);
+            values.push(name);
+        }
+        if (description !== undefined) {
+            updateFields.push(`description = $${++paramCount}`);
+            values.push(description);
+        }
+        if (priority !== undefined) {
+            updateFields.push(`priority = $${++paramCount}`);
+            values.push(priority);
+        }
+        if (deadline !== undefined) {
+            updateFields.push(`deadline = $${++paramCount}`);
+            values.push(deadline ? new Date(deadline) : null);
+        }
+        if (status !== undefined) {
+            updateFields.push(`status = $${++paramCount}`);
+            values.push(status);
+        }
+
+        if (updateFields.length === 0) {
+            return res.status(400).json({ error: 'No fields to update' });
+        }
+
+        updateFields.push(`updated_at = CURRENT_TIMESTAMP`);
+
+        const updateQuery = `
+            UPDATE projects
+            SET ${updateFields.join(', ')}
+            WHERE id = $2 AND user_id = $1
+            RETURNING *
+        `;
+
+        const result = await query(updateQuery, values);
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({ error: 'Project not found' });
+        }
+
+        logger.info(`Project ${id} updated by user ${req.user.id}`);
+        res.json({
+            success: true,
+            project: result.rows[0]
+        });
+
+    } catch (error) {
+        logger.error('Update project error:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+// Delete project
+router.delete('/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        // Check if project exists and belongs to user
+        const projectResult = await query(
+            'SELECT id, title FROM projects WHERE id = $1 AND user_id = $2',
+            [id, req.user.id]
+        );
+
+        if (projectResult.rows.length === 0) {
+            return res.status(404).json({ error: 'Project not found' });
+        }
+
+        // Delete project (cascade will handle related records)
+        await query('DELETE FROM projects WHERE id = $1 AND user_id = $2', [id, req.user.id]);
+
+        logger.info(`Project ${id} deleted by user ${req.user.id}`);
+        res.json({
+            success: true,
+            message: 'Project deleted successfully'
+        });
+
+    } catch (error) {
+        logger.error('Delete project error:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
 module.exports = router;

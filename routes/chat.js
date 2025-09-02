@@ -290,32 +290,36 @@ async function getUserContext(userId) {
 }
 
 // Create task from chat message
-async function createTaskFromChat(message, userId) {
+async function createTaskFromChat(chatMessage, userId) {
   try {
     const { supabase } = require('../database/connection');
 
-    // Extract task title by removing prefix
-    let title = message.trim();
+    // Extract task content by removing prefix
+    let fullContent = chatMessage.trim();
     let priority = 3; // Default normal priority
 
-    if (message.toLowerCase().startsWith('zz ')) {
-      title = message.substring(3).trim();
+    if (chatMessage.toLowerCase().startsWith('zz ')) {
+      fullContent = chatMessage.substring(3).trim();
       priority = 3; // Normal priority
-    } else if (message.toLowerCase().startsWith('!! ')) {
-      title = message.substring(3).trim();
+    } else if (chatMessage.toLowerCase().startsWith('!! ')) {
+      fullContent = chatMessage.substring(3).trim();
       priority = 1; // Urgent priority
-    } else if (message.toLowerCase().startsWith('zz')) {
-      title = message.substring(2).trim();
+    } else if (chatMessage.toLowerCase().startsWith('zz')) {
+      fullContent = chatMessage.substring(2).trim();
       priority = 3;
-    } else if (message.toLowerCase().startsWith('!!')) {
-      title = message.substring(2).trim();
+    } else if (chatMessage.toLowerCase().startsWith('!!')) {
+      fullContent = chatMessage.substring(2).trim();
       priority = 1;
     }
 
     // Don't create empty tasks
-    if (!title) {
-      return { success: false, error: 'Task title cannot be empty' };
+    if (!fullContent) {
+      return { success: false, error: 'Task content cannot be empty' };
     }
+
+    // Use full content as title (after VARCHAR limit increase)
+    let title = fullContent;
+    let description = null;
 
     // Insert task into database
     const { data, error } = await supabase
@@ -336,10 +340,12 @@ async function createTaskFromChat(message, userId) {
     }
 
     logger.info(`Created task from chat: "${title}" (priority: ${priority}) for user: ${userId}`);
+    const priorityText = priority === 1 ? 'urgent' : 'normal';
+
     return {
       success: true,
       task: data,
-      message: `Task "${title}" created successfully with ${priority === 1 ? 'urgent' : 'normal'} priority.`
+      message: `Task "${title}" created successfully with ${priorityText} priority.`
     };
 
   } catch (error) {
@@ -416,3 +422,7 @@ router.post('/feedback', async (req, res) => {
 });
 
 module.exports = router;
+
+// Export functions for testing
+module.exports.createTaskFromChat = createTaskFromChat;
+module.exports.getUserContext = getUserContext;

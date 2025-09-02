@@ -9747,11 +9747,26 @@ router.post('/patterns/feedback', async (req, res) => {
         }
 
         if (confidenceAdjustment !== 0) {
+            // First get current values
+            const { data: currentPattern, error: fetchError } = await supabase
+                .from('user_learning_patterns')
+                .select('confidence_score, successful_applications')
+                .eq('user_id', userId)
+                .eq('pattern_type', pattern_type)
+                .single();
+
+            if (fetchError) throw fetchError;
+
+            // Calculate new values
+            const newConfidenceScore = Math.max(0.1, Math.min(0.95, currentPattern.confidence_score + confidenceAdjustment));
+            const newSuccessfulApplications = currentPattern.successful_applications + 1;
+
+            // Update with calculated values
             const { error } = await supabase
                 .from('user_learning_patterns')
                 .update({
-                    confidence_score: supabase.sql`LEAST(0.95, GREATEST(0.1, confidence_score + ${confidenceAdjustment}))`,
-                    successful_applications: supabase.sql`successful_applications + 1`,
+                    confidence_score: newConfidenceScore,
+                    successful_applications: newSuccessfulApplications,
                     updated_at: new Date().toISOString()
                 })
                 .eq('user_id', userId)

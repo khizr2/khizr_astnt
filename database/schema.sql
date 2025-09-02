@@ -16,7 +16,7 @@ CREATE TABLE users (
 CREATE TABLE projects (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    title VARCHAR(255) NOT NULL,
+    title VARCHAR(1000) NOT NULL,
     description TEXT,
     priority INTEGER DEFAULT 3,
     status VARCHAR(50) DEFAULT 'active',
@@ -30,7 +30,7 @@ CREATE TABLE tasks (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     project_id UUID REFERENCES projects(id) ON DELETE SET NULL,
-    title VARCHAR(255) NOT NULL,
+    title VARCHAR(1000) NOT NULL,
     description TEXT,
     priority INTEGER DEFAULT 3,
     status VARCHAR(50) DEFAULT 'pending',
@@ -48,7 +48,7 @@ CREATE TABLE tasks (
 CREATE TABLE goals (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    title VARCHAR(255) NOT NULL,
+    title VARCHAR(1000) NOT NULL,
     description TEXT,
     type VARCHAR(50) NOT NULL,
     target_date DATE,
@@ -95,7 +95,7 @@ CREATE TABLE notifications (
     user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     email_id UUID REFERENCES emails(id) ON DELETE CASCADE,
     type VARCHAR(50) NOT NULL,
-    title VARCHAR(255) NOT NULL,
+    title VARCHAR(1000) NOT NULL,
     message TEXT,
     priority INTEGER DEFAULT 3,
     status VARCHAR(50) DEFAULT 'pending',
@@ -166,7 +166,7 @@ CREATE TABLE agent_tasks (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     agent_id UUID NOT NULL REFERENCES agents(id) ON DELETE CASCADE,
     task_id UUID REFERENCES tasks(id) ON DELETE SET NULL, -- Link to existing tasks table
-    title VARCHAR(255) NOT NULL,
+    title VARCHAR(1000) NOT NULL,
     description TEXT,
     type VARCHAR(100) NOT NULL, -- 'email_processing', 'task_creation', 'project_management', etc.
     priority INTEGER DEFAULT 3,
