@@ -404,3 +404,50 @@ CREATE INDEX idx_agent_metrics_agent_id ON agent_metrics(agent_id);
 CREATE INDEX idx_agent_metrics_task_id ON agent_metrics(task_id);
 CREATE INDEX idx_agent_metrics_metric_type ON agent_metrics(metric_type);
 CREATE INDEX idx_agent_metrics_timestamp ON agent_metrics(timestamp);
+
+-- ===========================================
+-- USER PREFERENCE LEARNING TABLES
+-- ===========================================
+
+-- User Preferences Table
+CREATE TABLE IF NOT EXISTS user_preferences (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    preference_type VARCHAR(100) NOT NULL, -- 'format', 'style', 'priority'
+    preference_key VARCHAR(255) NOT NULL, -- 'word_tree', 'brief_responses', 'completion_focus'
+    preference_value JSONB NOT NULL,
+    confidence_score DECIMAL(3,2) DEFAULT 0.5,
+    usage_count INTEGER DEFAULT 1,
+    last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(user_id, preference_type, preference_key)
+);
+
+-- Learning Patterns Table
+CREATE TABLE IF NOT EXISTS user_learning_patterns (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    pattern_type VARCHAR(100) NOT NULL,
+    pattern_data JSONB NOT NULL,
+    trigger_keywords TEXT[],
+    confidence_score DECIMAL(3,2) DEFAULT 0.5,
+    successful_applications INTEGER DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- ===========================================
+-- USER PREFERENCE INDEXES
+-- ===========================================
+
+-- User preferences indexes
+CREATE INDEX IF NOT EXISTS idx_user_preferences_user_type_key ON user_preferences(user_id, preference_type, preference_key);
+CREATE INDEX IF NOT EXISTS idx_user_preferences_user_id ON user_preferences(user_id);
+CREATE INDEX IF NOT EXISTS idx_user_preferences_type ON user_preferences(preference_type);
+CREATE INDEX IF NOT EXISTS idx_user_preferences_last_updated ON user_preferences(last_updated);
+
+-- User learning patterns indexes
+CREATE INDEX IF NOT EXISTS idx_user_learning_patterns_user_type ON user_learning_patterns(user_id, pattern_type);
+CREATE INDEX IF NOT EXISTS idx_user_learning_patterns_user_id ON user_learning_patterns(user_id);
+CREATE INDEX IF NOT EXISTS idx_user_learning_patterns_type ON user_learning_patterns(pattern_type);
+CREATE INDEX IF NOT EXISTS idx_user_learning_patterns_created_at ON user_learning_patterns(created_at);

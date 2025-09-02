@@ -16,6 +16,7 @@ const debugRoutes = require('./routes/debug');
 const agentRoutes = require('./routes/agents');
 const messagingRoutes = require('./routes/messaging');
 const chatRoutes = require('./routes/chat');
+const preferencesRoutes = require('./routes/preferences');
 
 const { logger } = require('./utils/logger');
 
@@ -60,6 +61,7 @@ app.use('/api/debug', debugRoutes);
 app.use('/api/agents', agentRoutes);
 app.use('/api/messaging', messagingRoutes);
 app.use('/api/chat', chatRoutes);
+app.use('/api/user/preferences', preferencesRoutes);
 // Health check endpoint
 app.get('/', (req, res) => {
     res.json({ 

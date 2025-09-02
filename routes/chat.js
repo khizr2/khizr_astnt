@@ -2,6 +2,7 @@ const express = require('express');
 const { authenticateToken } = require('../middleware/auth');
 const { logger } = require('../utils/logger');
 const OpenAI = require('openai');
+const { GlobalPreferenceLearner } = require('../services/PreferenceLearner');
 
 const router = express.Router();
 router.use(authenticateToken);
@@ -11,6 +12,9 @@ const openai = new OpenAI({
   apiKey: process.env.OPENROUTER_API_KEY,
   baseURL: "https://openrouter.ai/api/v1"
 });
+
+// Initialize Global Preference Learner
+const preferenceLearner = new GlobalPreferenceLearner();
 
 // Available models on OpenRouter (Free Models)
 const AVAILABLE_MODELS = {
@@ -60,12 +64,15 @@ router.post('/process', async (req, res) => {
     // Get user's context for personalized responses
     const context = await getUserContext(req.user.id);
 
-    const completion = await openai.chat.completions.create({
+    // Apply global preferences to personalize AI responses
+    const personalizedContext = await preferenceLearner.applyGlobalPreferences(req.user.id, {
       model: model,
-      messages: [
-        {
-          role: "system",
-          content: `You are a helpful personal assistant for a productivity app.
+      temperature: 0.7,
+      max_tokens: 1000
+    });
+
+    // Build system prompt with user context and preferences
+    let systemPrompt = `You are a helpful personal assistant for a productivity app.
 
 User Context: ${context}
 
@@ -75,26 +82,74 @@ Guidelines:
 - When users ask questions (?), provide informative answers
 - When users mark urgent (!!), acknowledge the priority
 - Reference their existing tasks/projects when relevant
-- Suggest improvements based on their current workload`
+- Suggest improvements based on their current workload`;
+
+    // Add preference-based system prompt additions
+    if (personalizedContext.system_prompt_addition) {
+      systemPrompt += personalizedContext.system_prompt_addition;
+    }
+
+    const completion = await openai.chat.completions.create({
+      model: personalizedContext.model || model,
+      messages: [
+        {
+          role: "system",
+          content: systemPrompt
         },
         { role: "user", content: message }
       ],
-      max_tokens: 1000,
-      temperature: 0.7
+      max_tokens: personalizedContext.max_tokens || 1000,
+      temperature: personalizedContext.temperature || 0.7
     });
 
     const aiResponse = completion.choices[0].message.content;
 
+    // Learn from this interaction to improve future responses
+    try {
+      await preferenceLearner.learnFromInteraction(req.user.id, {
+        message: message,
+        response: aiResponse,
+        timestamp: new Date().toISOString(),
+        model: model,
+        context: context
+      });
+    } catch (learningError) {
+      logger.warn('Preference learning failed, continuing with response:', learningError);
+    }
+
     // Detect message type for frontend actions
     const messageType = detectMessageType(message);
 
-    res.json({
+    // Handle task creation for 'zz' and '!!' prefixes
+    let taskResult = null;
+    if (messageType === 'task_created' || messageType === 'urgent_created') {
+      taskResult = await createTaskFromChat(message, req.user.id);
+    }
+
+    // Prepare response
+    const response = {
       success: true,
       message: aiResponse,
       model_used: model,
       type: messageType,
       timestamp: new Date().toISOString()
-    });
+    };
+
+    // Add task creation result if applicable
+    if (taskResult) {
+      response.task_created = taskResult.success;
+      response.task_message = taskResult.message;
+      if (taskResult.task) {
+        response.task_id = taskResult.task.id;
+        response.task_title = taskResult.task.title;
+        response.task_priority = taskResult.task.priority;
+      }
+      if (taskResult.error) {
+        response.task_error = taskResult.error;
+      }
+    }
+
+    res.json(response);
 
   } catch (error) {
     logger.error('Chat processing error:', error);
@@ -234,6 +289,65 @@ async function getUserContext(userId) {
   }
 }
 
+// Create task from chat message
+async function createTaskFromChat(message, userId) {
+  try {
+    const { supabase } = require('../database/connection');
+
+    // Extract task title by removing prefix
+    let title = message.trim();
+    let priority = 3; // Default normal priority
+
+    if (message.toLowerCase().startsWith('zz ')) {
+      title = message.substring(3).trim();
+      priority = 3; // Normal priority
+    } else if (message.toLowerCase().startsWith('!! ')) {
+      title = message.substring(3).trim();
+      priority = 1; // Urgent priority
+    } else if (message.toLowerCase().startsWith('zz')) {
+      title = message.substring(2).trim();
+      priority = 3;
+    } else if (message.toLowerCase().startsWith('!!')) {
+      title = message.substring(2).trim();
+      priority = 1;
+    }
+
+    // Don't create empty tasks
+    if (!title) {
+      return { success: false, error: 'Task title cannot be empty' };
+    }
+
+    // Insert task into database
+    const { data, error } = await supabase
+      .from('tasks')
+      .insert({
+        user_id: userId,
+        title: title,
+        priority: priority,
+        status: 'pending',
+        source: 'chat'
+      })
+      .select()
+      .single();
+
+    if (error) {
+      logger.error('Error creating task from chat:', error);
+      return { success: false, error: 'Failed to create task' };
+    }
+
+    logger.info(`Created task from chat: "${title}" (priority: ${priority}) for user: ${userId}`);
+    return {
+      success: true,
+      task: data,
+      message: `Task "${title}" created successfully with ${priority === 1 ? 'urgent' : 'normal'} priority.`
+    };
+
+  } catch (error) {
+    logger.error('Error in createTaskFromChat:', error);
+    return { success: false, error: 'Internal server error creating task' };
+  }
+}
+
 // Detect message type based on prefixes and content
 function detectMessageType(message) {
   const msg = message.toLowerCase().trim();
@@ -265,5 +379,40 @@ function detectMessageType(message) {
 
   return 'general_chat';
 }
+
+// Feedback endpoint for learning from user responses
+router.post('/feedback', async (req, res) => {
+  try {
+    const { messageId, feedback } = req.body;
+
+    if (!messageId || !feedback) {
+      return res.status(400).json({ error: 'messageId and feedback are required' });
+    }
+
+    if (!['positive', 'negative'].includes(feedback)) {
+      return res.status(400).json({ error: 'feedback must be either "positive" or "negative"' });
+    }
+
+    // Learn from feedback using the preference learner
+    await preferenceLearner.learnFromFeedback(req.user.id, {
+      messageId,
+      feedback,
+      timestamp: new Date().toISOString()
+    });
+
+    logger.info(`Feedback received: ${feedback} for message ${messageId} from user ${req.user.id}`);
+
+    res.json({
+      success: true,
+      message: 'Feedback recorded successfully'
+    });
+  } catch (error) {
+    logger.error('Error processing feedback:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to process feedback'
+    });
+  }
+});
 
 module.exports = router;

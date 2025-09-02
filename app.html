@@ -124,8 +124,54 @@ margin-left: 16px;
 }
 
 .logout-btn:hover {
-color: var(--primary);
-background: rgba(139, 92, 246, 0.1);
+  color: var(--primary);
+  background: rgba(139, 92, 246, 0.1);
+}
+
+/* Preference Indicators */
+.preference-indicators {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-left: 20px;
+}
+
+.preference-badge {
+  background: rgba(139, 92, 246, 0.1);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 4px 8px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.preference-badge:hover {
+  background: rgba(139, 92, 246, 0.2);
+  border-color: var(--primary);
+}
+
+.preference-btn {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: 16px;
+  padding: 4px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  margin-right: 8px;
+}
+
+.preference-btn:hover {
+  color: var(--primary);
+  background: rgba(139, 92, 246, 0.1);
 }
 
 /* Navigation */
@@ -402,10 +448,43 @@ color: var(--text-primary);
 }
 
 .message-time {
-font-size: 10px;
-color: var(--text-secondary);
-margin-top: 4px;
-padding: 0 4px;
+  font-size: 10px;
+  color: var(--text-secondary);
+  margin-top: 4px;
+  padding: 0 4px;
+}
+
+/* Message Feedback */
+.message-feedback {
+  display: flex;
+  gap: 4px;
+  margin-top: 8px;
+  margin-left: 16px;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.chat-message:hover .message-feedback {
+  opacity: 1;
+}
+
+.feedback-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  padding: 4px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.feedback-btn:hover {
+  background: rgba(139, 92, 246, 0.1);
+  transform: scale(1.1);
+}
+
+.feedback-btn:active {
+  transform: scale(0.95);
 }
 
 .chat-input-container {
@@ -682,7 +761,174 @@ transition: all 0.2s ease;
 }
 
 .btn-primary:hover {
-opacity: 0.9;
+  opacity: 0.9;
+}
+
+/* Preference Modal Styles */
+.preference-content {
+  margin-top: 20px;
+}
+
+.preference-section {
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.preference-section:last-child {
+  border-bottom: none;
+}
+
+.preference-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.preference-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+
+.preference-name {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.preference-confidence {
+  font-size: 11px;
+  color: var(--text-secondary);
+  background: rgba(139, 92, 246, 0.1);
+  padding: 2px 6px;
+  border-radius: 10px;
+}
+
+.preference-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.preference-toggle input[type="checkbox"] {
+  width: 14px;
+  height: 14px;
+}
+
+.preference-controls {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  margin-top: 16px;
+}
+
+/* Pattern Intelligence Styles */
+.pattern-insights {
+    padding: 15px;
+}
+
+.pattern-metric {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.pattern-metric:last-child {
+    border-bottom: none;
+}
+
+.metric-label {
+    font-size: 13px;
+    color: var(--text-secondary);
+}
+
+.metric-value {
+    font-size: 13px;
+    color: var(--text-accent);
+    font-weight: 500;
+}
+
+/* Smart Suggestions Styles */
+.suggestion-list {
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.suggestion-item {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.suggestion-item:hover {
+    background: var(--bg-card);
+}
+
+.suggestion-item:last-child {
+    border-bottom: none;
+}
+
+.suggestion-icon {
+    margin-right: 10px;
+    font-size: 16px;
+}
+
+.suggestion-text {
+    flex: 1;
+    font-size: 13px;
+    color: var(--text-primary);
+}
+
+.suggestion-confidence {
+    font-size: 11px;
+    color: var(--text-secondary);
+    background: var(--border);
+    padding: 2px 6px;
+    border-radius: 10px;
+}
+
+/* Daddy Controls Styles */
+.daddy-controls {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.btn-small {
+    padding: 6px 12px;
+    font-size: 11px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background: var(--bg-card);
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-small:hover {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+}
+
+/* Badge Styles */
+.badge {
+    background: var(--primary);
+    color: white;
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: 10px;
+    margin-left: 8px;
 }
 
 /* Responsive */
@@ -728,12 +974,66 @@ padding: 20px;
 <div class="agent-indicator" id="researchAgent" title="Research Agent"></div>
 </div>
 
-<div class="header-controls">
-<div class="theme-toggle">
-<button class="theme-btn purple active" onclick="setTheme('purple')"></button>
-<button class="theme-btn red" onclick="setTheme('red')"></button>
+  <!-- Preference Indicators -->
+  <div id="preferenceIndicators" class="preference-indicators">
+    <!-- Dynamic preference badges will appear here -->
+  </div>
+
+  <div class="header-controls">
+    <div class="theme-toggle">
+      <button class="theme-btn purple active" onclick="setTheme('purple')"></button>
+      <button class="theme-btn red" onclick="setTheme('red')"></button>
+    </div>
+    <button class="preference-btn" onclick="showPreferenceModal()" title="Preference Settings">⚙️</button>
+    <button class="logout-btn" onclick="logout()" title="Logout">🚪</button>
+  </div>
+</header>
+
+<!-- Pattern Intelligence Dashboard -->
+<div class="code-card boxed" style="margin-top: 20px;">
+    <div class="code-header">
+        <span class="code-title">🧠 Pattern Intelligence</span>
+        <button class="preference-btn" onclick="showPatternInsights()" title="View detailed patterns">📊</button>
+    </div>
+    <div id="patternInsights" class="pattern-insights">
+        <div class="pattern-metric">
+            <span class="metric-label">Communication Style</span>
+            <span class="metric-value" id="commStyle">Learning...</span>
+        </div>
+        <div class="pattern-metric">
+            <span class="metric-label">Peak Productivity</span>
+            <span class="metric-value" id="peakHours">Learning...</span>
+        </div>
+        <div class="pattern-metric">
+            <span class="metric-label">Task Completion Rate</span>
+            <span class="metric-value" id="completionRate">Learning...</span>
+        </div>
+        <div class="pattern-metric">
+            <span class="metric-label">Daddy Agent Status</span>
+            <span class="metric-value" id="daddyStatus">Active</span>
+        </div>
+    </div>
 </div>
-<button class="logout-btn" onclick="logout()" title="Logout">🚪</button>
+
+<!-- Smart Suggestions Panel -->
+<div class="code-card boxed" style="margin-top: 10px;">
+    <div class="code-header">
+        <span class="code-title">💡 Smart Suggestions</span>
+        <span class="badge" id="suggestionCount">0</span>
+    </div>
+    <div id="suggestionList" class="suggestion-list">
+        <!-- Dynamic suggestions appear here -->
+    </div>
+</div>
+
+<!-- Daddy Agent Controls -->
+<div class="daddy-controls" style="margin-top: 10px;">
+    <button class="btn btn-small" onclick="toggleDaddyMonitoring()" id="daddyToggle">
+        👨‍👧 Toggle Daddy Mode
+    </button>
+    <button class="btn btn-small" onclick="showDaddyAnalytics()">
+        📈 Analytics
+    </button>
 </div>
 </header>
 
@@ -995,6 +1295,35 @@ Refresh
 </div>
 </div>
 
+<!-- Preference Management Modal -->
+<div id="preferenceModal" class="modal-overlay" style="display: none;">
+<div class="modal">
+<div class="modal-header">
+<h3 class="modal-title">AI Preferences & Learning</h3>
+<button class="modal-close" onclick="closeModal('preferenceModal')">×</button>
+</div>
+<div class="preference-content">
+<div class="preference-section">
+<h4 style="color: var(--text-accent); font-size: 13px; margin-bottom: 12px;">Current Preferences</h4>
+<div id="currentPreferences" class="preference-list">
+<!-- Preferences will be loaded here -->
+</div>
+</div>
+
+<div class="preference-section">
+<h4 style="color: var(--text-accent); font-size: 13px; margin-bottom: 12px;">Preference Learning</h4>
+<p style="font-size: 12px; color: var(--text-secondary); margin-bottom: 12px;">
+Your preferences are automatically learned from your feedback and interaction patterns.
+</p>
+<div class="preference-controls">
+<button class="btn-secondary" onclick="resetPreferences()">Reset All Preferences</button>
+<button class="btn-primary" onclick="updatePreferences()">Update Preferences</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+
 <script>
 const API_URL = "https://khizr-assistant-api.onrender.com";
 
@@ -1046,9 +1375,18 @@ await loadTasks();
 await loadProjects();
 await loadApprovals();
 await loadChatHistory();
+await updatePatternIndicators(); // Load pattern indicators
+await loadPatternInsights(); // Load pattern intelligence
+await loadSmartSuggestions(); // Load smart suggestions
 updateDateDisplay();
 setInterval(loadAgentStatus, 30000); // Update agent status every 30 seconds
 setInterval(loadApprovals, 60000); // Check for approvals every minute
+// Update pattern data every 5 minutes
+setInterval(() => {
+    updatePatternIndicators();
+    loadPatternInsights();
+    loadSmartSuggestions();
+}, 300000);
 } catch (error) {
 console.error('Failed to initialize app:', error);
 }
@@ -1311,17 +1649,31 @@ async function processChatMessage(message) {
   }
 }
 
-function addChatMessage(sender, content) {
+function addChatMessage(sender, content, messageId = null) {
 const messagesContainer = document.getElementById('chatMessages');
 const messageDiv = document.createElement('div');
 messageDiv.className = `chat-message ${sender}`;
 
+// Generate unique message ID if not provided
+const msgId = messageId || `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+messageDiv.setAttribute('data-message-id', msgId);
+
 const now = new Date();
 const timeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+let feedbackHTML = '';
+if (sender === 'assistant') {
+  feedbackHTML = `
+  <div class="message-feedback">
+    <button class="feedback-btn" onclick="sendFeedback('${msgId}', 'positive')" title="Good response">👍</button>
+    <button class="feedback-btn" onclick="sendFeedback('${msgId}', 'negative')" title="Needs improvement">👎</button>
+  </div>`;
+}
 
 messageDiv.innerHTML = `
 <div class="message-content">${content}</div>
 <div class="message-time">${timeString}</div>
+${feedbackHTML}
 `;
 
 messagesContainer.appendChild(messageDiv);
@@ -1515,6 +1867,32 @@ document.getElementById('addProjectModal').style.display = 'flex';
 document.getElementById('projectName').focus();
 }
 
+function showModal(title, content) {
+    // Create modal overlay
+    const modalOverlay = document.createElement('div');
+    modalOverlay.className = 'modal-overlay';
+    modalOverlay.onclick = (e) => {
+        if (e.target === modalOverlay) {
+            document.body.removeChild(modalOverlay);
+        }
+    };
+
+    // Create modal content
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+
+    modal.innerHTML = `
+        <div class="modal-header">
+            <h3 class="modal-title">${title}</h3>
+            <button class="modal-close" onclick="this.closest('.modal-overlay').remove()">×</button>
+        </div>
+        ${content}
+    `;
+
+    modalOverlay.appendChild(modal);
+    document.body.appendChild(modalOverlay);
+}
+
 function closeModal(modalId) {
 document.getElementById(modalId).style.display = 'none';
 }
@@ -1699,6 +2077,486 @@ if (event.target.classList.contains('modal-overlay')) {
 event.target.style.display = 'none';
 }
 });
+
+// Preference and Feedback Functions
+async function sendFeedback(messageId, feedback) {
+  try {
+    const response = await fetch(`${API_URL}/api/chat/feedback`, {
+      method: 'POST',
+      headers: getAuthHeaders(),
+      body: JSON.stringify({ messageId, feedback })
+    });
+
+    if (response.ok) {
+      // Show brief feedback confirmation
+      const feedbackBtn = event.target;
+      const originalText = feedbackBtn.textContent;
+      feedbackBtn.textContent = feedback === 'positive' ? '✓' : '✗';
+      feedbackBtn.style.opacity = '0.6';
+
+      setTimeout(() => {
+        feedbackBtn.textContent = originalText;
+        feedbackBtn.style.opacity = '1';
+      }, 1000);
+
+      // Update preferences after feedback
+      setTimeout(() => {
+        updatePatternIndicators();
+      }, 2000);
+    } else {
+      console.warn('Failed to send feedback');
+    }
+  } catch (error) {
+    console.error('Feedback error:', error);
+  }
+}
+
+// Replace the existing updatePreferenceIndicators function
+async function updatePatternIndicators() {
+    try {
+        const response = await fetch(`${API_URL}/api/agents/patterns/analyze`, {
+            headers: getAuthHeaders()
+        });
+
+        const data = await response.json();
+        const patterns = data.patterns;
+
+        const indicators = [];
+
+        // Communication style indicator
+        if (patterns.communicationStyle) {
+            const style = patterns.communicationStyle.prefersBrief ? 'Brief' :
+                         patterns.communicationStyle.prefersDetailed ? 'Detailed' : 'Balanced';
+            indicators.push(`💬 ${style}`);
+        }
+
+        // Productivity pattern
+        if (patterns.preferredTimes?.peakHours) {
+            indicators.push(`⚡ Peak: ${patterns.preferredTimes.peakHours[0]}:00`);
+        }
+
+        // Task completion indicator
+        if (patterns.taskCompletion?.highCompletionRate) {
+            indicators.push(`🎯 High Achiever`);
+        }
+
+        // Urgency pattern
+        if (patterns.urgencyPatterns?.frequentUrgentTasks) {
+            indicators.push(`🚨 Handles Pressure`);
+        }
+
+        document.getElementById('preferenceIndicators').innerHTML =
+            indicators.map(badge => `<span class="preference-badge">${badge}</span>`).join('');
+
+    } catch (error) {
+        console.log('Pattern indicators not available yet');
+    }
+}
+
+function displayPreferenceIndicators(preferences) {
+  const indicators = document.getElementById('preferenceIndicators');
+  if (!indicators) return;
+
+  const badges = [];
+
+  // Check format preferences
+  if (preferences?.format?.word_tree?.preferred) {
+    badges.push('🌳 Word Tree');
+  }
+
+  // Check style preferences
+  if (preferences?.style?.brief_responses?.preferred) {
+    badges.push('💬 Brief Mode');
+  }
+
+  // Check priority preferences
+  if (preferences?.priority?.completion_focus?.preferred) {
+    badges.push('🎯 Completion Focus');
+  }
+
+  // Display badges
+  if (badges.length > 0) {
+    const badgesHTML = badges.map(badge => `<span class="preference-badge">${badge}</span>`).join('');
+    indicators.innerHTML = badgesHTML;
+  } else {
+    indicators.innerHTML = '<span class="preference-badge" style="opacity: 0.6;">Learning preferences...</span>';
+  }
+}
+
+function showPreferenceModal() {
+  document.getElementById('preferenceModal').style.display = 'flex';
+  loadCurrentPreferences();
+}
+
+async function loadCurrentPreferences() {
+  try {
+    const response = await fetch(`${API_URL}/api/user/preferences`, {
+      headers: getAuthHeaders()
+    });
+
+    if (response.ok) {
+      const preferences = await response.json();
+      displayCurrentPreferences(preferences);
+    }
+  } catch (error) {
+    console.error('Failed to load preferences for modal:', error);
+  }
+}
+
+function displayCurrentPreferences(preferences) {
+  const container = document.getElementById('currentPreferences');
+  if (!container) return;
+
+  const preferenceItems = [];
+
+  // Format preferences
+  if (preferences?.format?.word_tree) {
+    preferenceItems.push(createPreferenceItem('Word Tree Format', preferences.format.word_tree));
+  }
+
+  // Style preferences
+  if (preferences?.style?.brief_responses) {
+    preferenceItems.push(createPreferenceItem('Brief Responses', preferences.style.brief_responses));
+  }
+
+  // Priority preferences
+  if (preferences?.priority?.completion_focus) {
+    preferenceItems.push(createPreferenceItem('Completion Focus', preferences.priority.completion_focus));
+  }
+
+  if (preferenceItems.length > 0) {
+    container.innerHTML = preferenceItems.join('');
+  } else {
+    container.innerHTML = '<p style="color: var(--text-secondary); font-style: italic;">No preferences learned yet. Keep using the chat and providing feedback!</p>';
+  }
+}
+
+function createPreferenceItem(name, preferenceData) {
+  const confidence = preferenceData.confidence || 0;
+  const isEnabled = preferenceData.preferred || false;
+
+  return `
+  <div class="preference-item">
+    <div class="preference-name">${name}</div>
+    <div class="preference-toggle">
+      <span class="preference-confidence">${Math.round(confidence * 100)}% confidence</span>
+      <input type="checkbox" ${isEnabled ? 'checked' : ''} onchange="togglePreference('${name.toLowerCase().replace(/\s+/g, '_')}', this.checked)">
+    </div>
+  </div>`;
+}
+
+async function togglePreference(preferenceName, enabled) {
+  try {
+    const response = await fetch(`${API_URL}/api/user/preferences/${preferenceName}`, {
+      method: 'PATCH',
+      headers: getAuthHeaders(),
+      body: JSON.stringify({ enabled })
+    });
+
+    if (response.ok) {
+      // Refresh preferences after update
+      updatePatternIndicators();
+      loadCurrentPreferences();
+    }
+  } catch (error) {
+    console.error('Failed to update preference:', error);
+  }
+}
+
+async function resetPreferences() {
+  if (!confirm('Are you sure you want to reset all preferences? This will clear all learned patterns.')) {
+    return;
+  }
+
+  try {
+    const response = await fetch(`${API_URL}/api/user/preferences/reset`, {
+      method: 'POST',
+      headers: getAuthHeaders()
+    });
+
+    if (response.ok) {
+      updatePatternIndicators();
+      loadCurrentPreferences();
+      alert('Preferences have been reset. The AI will start learning from scratch.');
+    }
+  } catch (error) {
+    console.error('Failed to reset preferences:', error);
+    alert('Failed to reset preferences. Please try again.');
+  }
+}
+
+async function updatePreferences() {
+  // This could be extended to batch update multiple preferences
+  updatePatternIndicators();
+  loadCurrentPreferences();
+  alert('Preferences updated successfully!');
+}
+
+// Pattern Intelligence Functions
+async function loadPatternInsights() {
+    try {
+        const response = await fetch(`${API_URL}/api/agents/patterns/analyze`, {
+            headers: getAuthHeaders()
+        });
+
+        const data = await response.json();
+
+        // Update pattern insights
+        document.getElementById('commStyle').textContent =
+            data.patterns.communicationStyle?.prefersBrief ? 'Brief' :
+            data.patterns.communicationStyle?.prefersDetailed ? 'Detailed' : 'Balanced';
+
+        document.getElementById('peakHours').textContent =
+            data.patterns.preferredTimes?.peakHours?.join(', ') || 'Learning...';
+
+        document.getElementById('completionRate').textContent =
+            data.patterns.taskCompletion?.highCompletionRate ? 'High' : 'Growing';
+
+    } catch (error) {
+        console.log('Pattern insights not available');
+    }
+}
+
+async function loadSmartSuggestions() {
+    try {
+        const response = await fetch(`${API_URL}/api/agents/daddy/suggestions`, {
+            headers: getAuthHeaders()
+        });
+
+        const data = await response.json();
+
+        const suggestionsHtml = data.suggestions.map(suggestion => `
+            <div class="suggestion-item" onclick="applySuggestion('${suggestion.type}')">
+                <span class="suggestion-icon">${getSuggestionIcon(suggestion.type)}</span>
+                <span class="suggestion-text">${suggestion.message}</span>
+                <span class="suggestion-confidence">${Math.round(suggestion.confidence * 100)}%</span>
+            </div>
+        `).join('');
+
+        document.getElementById('suggestionList').innerHTML = suggestionsHtml;
+        document.getElementById('suggestionCount').textContent = data.suggestions.length;
+
+    } catch (error) {
+        console.log('Suggestions not available');
+    }
+}
+
+function getSuggestionIcon(type) {
+    const icons = {
+        task_breakdown: '🔨',
+        scheduling: '⏰',
+        communication: '💬',
+        productivity: '⚡'
+    };
+    return icons[type] || '💡';
+}
+
+// Daddy Agent Functions
+async function toggleDaddyMonitoring() {
+    try {
+        const response = await fetch(`${API_URL}/api/agents/daddy/status`, {
+            headers: getAuthHeaders()
+        });
+
+        const data = await response.json();
+        const currentLevel = data.status.monitoring_level;
+
+        // Toggle between low and high
+        const newLevel = currentLevel === 'low' ? 'high' : 'low';
+
+        const updateResponse = await fetch(`${API_URL}/api/agents/daddy/config`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': getAuthHeaders()['Authorization']
+            },
+            body: JSON.stringify({ monitoringLevel: newLevel })
+        });
+
+        if (updateResponse.ok) {
+            document.getElementById('daddyToggle').textContent =
+                `👨‍👧 ${newLevel === 'high' ? 'Disable' : 'Enable'} Daddy Mode`;
+            showToast(`Daddy agent ${newLevel === 'high' ? 'activated' : 'deactivated'}`, 'success');
+        }
+
+    } catch (error) {
+        showToast('Failed to toggle daddy monitoring', 'error');
+    }
+}
+
+async function showDaddyAnalytics() {
+    try {
+        const response = await fetch(`${API_URL}/api/agents/daddy/analytics`, {
+            headers: getAuthHeaders()
+        });
+
+        const data = await response.json();
+
+        const analyticsHtml = `
+            <div style="padding: 20px;">
+                <h3>Daddy Agent Analytics</h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 15px;">
+                    <div style="background: var(--bg-card); padding: 15px; border-radius: 8px;">
+                        <div style="font-size: 24px; margin-bottom: 5px;">📊</div>
+                        <div style="font-weight: 600;">${data.current_metrics.tasksMonitored}</div>
+                        <div style="color: var(--text-secondary); font-size: 12px;">Tasks Monitored</div>
+                    </div>
+                    <div style="background: var(--bg-card); padding: 15px; border-radius: 8px;">
+                        <div style="font-size: 24px; margin-bottom: 5px;">🚨</div>
+                        <div style="font-weight: 600;">${data.current_metrics.escalationsTriggered}</div>
+                        <div style="color: var(--text-secondary); font-size: 12px;">Escalations</div>
+                    </div>
+                    <div style="background: var(--bg-card); padding: 15px; border-radius: 8px;">
+                        <div style="font-size: 24px; margin-bottom: 5px;">💡</div>
+                        <div style="font-weight: 600;">${data.current_metrics.suggestionsProvided}</div>
+                        <div style="color: var(--text-secondary); font-size: 12px;">Suggestions</div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        showModal('Daddy Agent Analytics', analyticsHtml);
+
+    } catch (error) {
+        showToast('Failed to load analytics', 'error');
+    }
+}
+
+async function applySuggestion(type) {
+    try {
+        // Log that user clicked on suggestion
+        await fetch(`${API_URL}/api/agents/patterns/feedback`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': getAuthHeaders()['Authorization']
+            },
+            body: JSON.stringify({
+                pattern_type: type,
+                feedback: { helpful: true }
+            })
+        });
+
+        showToast('Thanks for the feedback! I\'ll use this to improve my suggestions.', 'success');
+
+    } catch (error) {
+        console.log('Feedback submission failed');
+    }
+}
+
+function showPatternInsights() {
+    const insightsHtml = `
+        <div style="padding: 20px;">
+            <h3>Your AI Learning Patterns</h3>
+            <p style="color: var(--text-secondary); margin-bottom: 20px;">
+                Based on your interactions, I've learned these patterns about how you work best:
+            </p>
+            <div id="detailedInsights">
+                Loading detailed insights...
+            </div>
+        </div>
+    `;
+
+    showModal('Pattern Insights', insightsHtml);
+    loadDetailedInsights();
+}
+
+async function loadDetailedInsights() {
+    try {
+        const response = await fetch(`${API_URL}/api/agents/patterns/analyze`, {
+            headers: getAuthHeaders()
+        });
+
+        const data = await response.json();
+        const patterns = data.patterns;
+
+        const insights = [];
+
+        if (patterns.communicationStyle) {
+            insights.push(`
+                <div style="background: var(--bg-card); padding: 15px; border-radius: 8px; margin-bottom: 10px;">
+                    <h4 style="margin-bottom: 8px;">💬 Communication Style</h4>
+                    <p>You prefer ${patterns.communicationStyle.prefersBrief ? 'brief, direct communication' :
+                                   patterns.communicationStyle.prefersDetailed ? 'detailed, comprehensive responses' :
+                                   'balanced communication'}. I adapt my responses accordingly.</p>
+                </div>
+            `);
+        }
+
+        if (patterns.taskCompletion) {
+            insights.push(`
+                <div style="background: var(--bg-card); padding: 15px; border-radius: 8px; margin-bottom: 10px;">
+                    <h4 style="margin-bottom: 8px;">🎯 Task Completion</h4>
+                    <p>${patterns.taskCompletion.highCompletionRate ?
+                        'You have a strong track record of completing tasks!' :
+                        'You\'re building great completion habits.'}
+                        ${patterns.taskCompletion.prefersSmallTasks ?
+                        'You work best when tasks are broken into smaller steps.' : ''}</p>
+                </div>
+            `);
+        }
+
+        document.getElementById('detailedInsights').innerHTML = insights.join('');
+
+    } catch (error) {
+        document.getElementById('detailedInsights').innerHTML =
+            '<p>Insights not available yet. Keep using the assistant to build your patterns!</p>';
+    }
+}
+
+// Enhanced toast for smart notifications
+function showSmartToast(message, type = 'info') {
+    const colors = {
+        smart: '#8B5CF6',
+        success: '#10B981',
+        error: '#EF4444',
+        info: '#3B82F6'
+    };
+
+    const toast = document.createElement('div');
+    toast.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: ${colors[type] || colors.info};
+        color: white;
+        padding: 12px 20px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 500;
+        z-index: 10000;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        animation: slideIn 0.3s ease;
+        max-width: 400px;
+    `;
+
+    toast.innerHTML = message;
+    document.body.appendChild(toast);
+
+    setTimeout(() => {
+        toast.style.animation = 'slideOut 0.3s ease';
+        setTimeout(() => document.body.removeChild(toast), 300);
+    }, 4000);
+}
+
+// Add to CSS
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes slideIn {
+        from { transform: translateX(100%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+    }
+    @keyframes slideOut {
+        from { transform: translateX(0); opacity: 1; }
+        to { transform: translateX(100%); opacity: 0; }
+    }
+`;
+document.head.appendChild(style);
+
+// Make showToast available globally if it doesn't exist
+if (typeof showToast === 'undefined') {
+    window.showToast = showSmartToast;
+}
 
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', function() {

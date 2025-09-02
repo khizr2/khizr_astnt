@@ -9629,4 +9629,700 @@ function estimateUserSatisfaction(conversations) {
     return Math.max(0, Math.min(1, satisfactionScore));
 }
 
+// ===========================================
+// PATTERN RECOGNITION AND DADDY AGENT INTEGRATION
+// ===========================================
+
+const { GlobalPreferenceLearner } = require('../services/PreferenceLearner');
+const { DaddyAgent } = require('../services/DaddyAgent');
+
+// Initialize preference learner and daddy agents
+const preferenceLearner = new GlobalPreferenceLearner();
+const activeDaddyAgents = new Map(); // userId -> DaddyAgent instance
+
+// Get or create daddy agent for user
+async function getDaddyAgent(userId) {
+    if (!activeDaddyAgents.has(userId)) {
+        const preferences = await preferenceLearner.getUserPreferences(userId);
+        const patterns = await preferenceLearner.analyzePatterns(userId);
+        const recommendations = await preferenceLearner.getDaddyAgentRecommendations(userId);
+
+        const daddyAgent = new DaddyAgent({
+            userId,
+            preferences,
+            patterns,
+            ...recommendations
+        });
+
+        await daddyAgent.initialize();
+        activeDaddyAgents.set(userId, daddyAgent);
+    }
+    return activeDaddyAgents.get(userId);
+}
+
+// ===========================================
+// PATTERN RECOGNITION ENDPOINTS
+// ===========================================
+
+// Analyze user patterns and generate insights
+router.get('/patterns/analyze', async (req, res) => {
+    try {
+        const userId = req.user.id;
+
+        const patterns = await preferenceLearner.analyzePatterns(userId);
+        const suggestions = await preferenceLearner.generateProactiveSuggestions(userId, patterns);
+
+        res.json({
+            success: true,
+            patterns,
+            suggestions,
+            timestamp: new Date().toISOString()
+        });
+
+    } catch (error) {
+        logger.error('Error analyzing patterns:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Failed to analyze patterns',
+            message: error.message
+        });
+    }
+});
+
+// Get user learning patterns
+router.get('/patterns/learning', async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const { pattern_type } = req.query;
+
+        let query = supabase
+            .from('user_learning_patterns')
+            .select('*')
+            .eq('user_id', userId)
+            .order('updated_at', { ascending: false });
+
+        if (pattern_type) {
+            query = query.eq('pattern_type', pattern_type);
+        }
+
+        const { data: patterns, error } = await query;
+
+        if (error) throw error;
+
+        res.json({
+            success: true,
+            patterns: patterns || [],
+            count: patterns?.length || 0
+        });
+
+    } catch (error) {
+        logger.error('Error fetching learning patterns:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Failed to fetch learning patterns',
+            message: error.message
+        });
+    }
+});
+
+// Update pattern confidence based on user feedback
+router.post('/patterns/feedback', async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const { pattern_type, pattern_data, feedback } = req.body;
+
+        if (!pattern_type || !feedback) {
+            return res.status(400).json({
+                success: false,
+                error: 'pattern_type and feedback are required'
+            });
+        }
+
+        // Update pattern confidence based on feedback
+        let confidenceAdjustment = 0;
+        if (feedback.helpful) {
+            confidenceAdjustment = 0.1;
+        } else if (feedback.not_helpful) {
+            confidenceAdjustment = -0.05;
+        }
+
+        if (confidenceAdjustment !== 0) {
+            const { error } = await supabase
+                .from('user_learning_patterns')
+                .update({
+                    confidence_score: supabase.sql`LEAST(0.95, GREATEST(0.1, confidence_score + ${confidenceAdjustment}))`,
+                    successful_applications: supabase.sql`successful_applications + 1`,
+                    updated_at: new Date().toISOString()
+                })
+                .eq('user_id', userId)
+                .eq('pattern_type', pattern_type);
+
+            if (error) throw error;
+        }
+
+        res.json({
+            success: true,
+            message: 'Pattern feedback recorded',
+            adjustment: confidenceAdjustment
+        });
+
+    } catch (error) {
+        logger.error('Error recording pattern feedback:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Failed to record feedback',
+            message: error.message
+        });
+    }
+});
+
+// ===========================================
+// DADDY AGENT ENDPOINTS
+// ===========================================
+
+// Get daddy agent status and configuration
+router.get('/daddy/status', async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const daddyAgent = await getDaddyAgent(userId);
+
+        res.json({
+            success: true,
+            status: {
+                active: true,
+                monitoring_level: daddyAgent.monitoringLevel,
+                escalation_threshold: daddyAgent.escalationThreshold,
+                proactive_suggestions: daddyAgent.proactiveSuggestions,
+                personalized_reminders: daddyAgent.personalizedReminders,
+                task_breakdown: daddyAgent.taskBreakdown,
+                communication_style: daddyAgent.communicationStyle,
+                metrics: daddyAgent.getMetrics()
+            }
+        });
+
+    } catch (error) {
+        logger.error('Error getting daddy agent status:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Failed to get daddy agent status',
+            message: error.message
+        });
+    }
+});
+
+// Start daddy agent monitoring for a task
+router.post('/daddy/monitor/task/:taskId', async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const { taskId } = req.params;
+        const { custom_config } = req.body;
+
+        // Verify task belongs to user
+        const { data: task } = await supabase
+            .from('tasks')
+            .select('*')
+            .eq('id', taskId)
+            .eq('user_id', userId)
+            .single();
+
+        if (!task) {
+            return res.status(404).json({
+                success: false,
+                error: 'Task not found or access denied'
+            });
+        }
+
+        const daddyAgent = await getDaddyAgent(userId);
+
+        // Apply custom configuration if provided
+        if (custom_config) {
+            Object.assign(daddyAgent, custom_config);
+        }
+
+        await daddyAgent.startTaskMonitoring(taskId, task);
+
+        res.json({
+            success: true,
+            message: 'Daddy agent monitoring started',
+            task_id: taskId,
+            monitoring_config: {
+                level: daddyAgent.monitoringLevel,
+                escalation_threshold: daddyAgent.escalationThreshold,
+                proactive_suggestions: daddyAgent.proactiveSuggestions
+            }
+        });
+
+    } catch (error) {
+        logger.error('Error starting task monitoring:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Failed to start task monitoring',
+            message: error.message
+        });
+    }
+});
+
+// Stop daddy agent monitoring for a task
+router.delete('/daddy/monitor/task/:taskId', async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const { taskId } = req.params;
+
+        const daddyAgent = await getDaddyAgent(userId);
+        daddyAgent.stopTaskMonitoring(taskId);
+
+        res.json({
+            success: true,
+            message: 'Daddy agent monitoring stopped',
+            task_id: taskId
+        });
+
+    } catch (error) {
+        logger.error('Error stopping task monitoring:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Failed to stop task monitoring',
+            message: error.message
+        });
+    }
+});
+
+// Get daddy agent suggestions for user
+router.get('/daddy/suggestions', async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const { limit = 10, category } = req.query;
+
+        const daddyAgent = await getDaddyAgent(userId);
+        const patterns = await preferenceLearner.analyzePatterns(userId);
+        const suggestions = await preferenceLearner.generateProactiveSuggestions(userId, patterns);
+
+        // Filter by category if specified
+        let filteredSuggestions = suggestions;
+        if (category) {
+            filteredSuggestions = suggestions.filter(s => s.category === category);
+        }
+
+        // Limit results
+        filteredSuggestions = filteredSuggestions.slice(0, parseInt(limit));
+
+        res.json({
+            success: true,
+            suggestions: filteredSuggestions,
+            total_available: suggestions.length,
+            filtered_count: filteredSuggestions.length,
+            categories: [...new Set(suggestions.map(s => s.category))]
+        });
+
+    } catch (error) {
+        logger.error('Error getting daddy agent suggestions:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Failed to get suggestions',
+            message: error.message
+        });
+    }
+});
+
+// Process feedback on daddy agent suggestions
+router.post('/daddy/feedback', async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const { suggestion_id, feedback } = req.body;
+
+        if (!suggestion_id || !feedback) {
+            return res.status(400).json({
+                success: false,
+                error: 'suggestion_id and feedback are required'
+            });
+        }
+
+        const daddyAgent = await getDaddyAgent(userId);
+        await daddyAgent.processFeedback(suggestion_id, feedback);
+
+        res.json({
+            success: true,
+            message: 'Feedback recorded successfully'
+        });
+
+    } catch (error) {
+        logger.error('Error processing daddy agent feedback:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Failed to process feedback',
+            message: error.message
+        });
+    }
+});
+
+// Get daddy agent analytics and effectiveness metrics
+router.get('/daddy/analytics', async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const { days = 30 } = req.query;
+
+        const daddyAgent = await getDaddyAgent(userId);
+        const metrics = daddyAgent.getMetrics();
+
+        // Get historical data from database
+        const cutoffDate = new Date();
+        cutoffDate.setDate(cutoffDate.getDate() - parseInt(days));
+
+        const { data: logs, error } = await supabase
+            .from('agent_logs')
+            .select('*')
+            .eq('user_id', userId)
+            .eq('agent_id', 'daddy_agent')
+            .gte('created_at', cutoffDate.toISOString())
+            .order('created_at', { ascending: false });
+
+        if (error) throw error;
+
+        // Analyze effectiveness
+        const escalations = logs.filter(log => log.action === 'task_escalation_triggered');
+        const suggestions = logs.filter(log => log.action.includes('suggestion'));
+
+        const effectiveness = {
+            escalation_rate: logs.length > 0 ? escalations.length / logs.length : 0,
+            suggestion_rate: logs.length > 0 ? suggestions.length / logs.length : 0,
+            avg_response_time: logs
+                .filter(log => log.duration_ms)
+                .reduce((sum, log) => sum + log.duration_ms, 0) / logs.length || 0,
+            total_actions: logs.length,
+            period_days: parseInt(days)
+        };
+
+        res.json({
+            success: true,
+            current_metrics: metrics,
+            historical_effectiveness: effectiveness,
+            recent_activity: logs.slice(0, 20) // Last 20 activities
+        });
+
+    } catch (error) {
+        logger.error('Error getting daddy agent analytics:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Failed to get analytics',
+            message: error.message
+        });
+    }
+});
+
+// Update daddy agent configuration
+router.put('/daddy/config', async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const updates = req.body;
+
+        const daddyAgent = await getDaddyAgent(userId);
+
+        // Validate configuration updates
+        const validKeys = [
+            'monitoringLevel', 'escalationThreshold', 'proactiveSuggestions',
+            'personalizedReminders', 'taskBreakdown', 'communicationStyle'
+        ];
+
+        const validUpdates = {};
+        Object.keys(updates).forEach(key => {
+            if (validKeys.includes(key)) {
+                validUpdates[key] = updates[key];
+            }
+        });
+
+        // Apply updates
+        Object.assign(daddyAgent, validUpdates);
+
+        // Log configuration change
+        await supabase
+            .from('agent_logs')
+            .insert([{
+                agent_id: 'daddy_agent',
+                user_id: userId,
+                action: 'configuration_updated',
+                details: {
+                    updates: validUpdates,
+                    timestamp: new Date().toISOString()
+                },
+                severity: 'info'
+            }]);
+
+        res.json({
+            success: true,
+            message: 'Daddy agent configuration updated',
+            new_config: {
+                monitoring_level: daddyAgent.monitoringLevel,
+                escalation_threshold: daddyAgent.escalationThreshold,
+                proactive_suggestions: daddyAgent.proactiveSuggestions,
+                personalized_reminders: daddyAgent.personalizedReminders,
+                task_breakdown: daddyAgent.taskBreakdown,
+                communication_style: daddyAgent.communicationStyle
+            }
+        });
+
+    } catch (error) {
+        logger.error('Error updating daddy agent configuration:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Failed to update configuration',
+            message: error.message
+        });
+    }
+});
+
+// ===========================================
+// PROACTIVE FEATURES ENDPOINTS
+// ===========================================
+
+// Get predictive task suggestions
+router.get('/predictive/tasks', async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const patterns = await preferenceLearner.analyzePatterns(userId);
+
+        // Get user's current tasks
+        const { data: currentTasks } = await supabase
+            .from('tasks')
+            .select('*')
+            .eq('user_id', userId)
+            .eq('status', 'pending')
+            .order('priority', { ascending: true })
+            .limit(10);
+
+        const suggestions = [];
+
+        // Generate task-based suggestions
+        if (patterns.taskCompletion?.prefersSmallTasks && currentTasks) {
+            const largeTasks = currentTasks.filter(task =>
+                task.description && task.description.length > 300
+            );
+
+            largeTasks.forEach(task => {
+                suggestions.push({
+                    type: 'task_breakdown',
+                    task_id: task.id,
+                    task_title: task.title,
+                    suggestion: 'Consider breaking this complex task into smaller, manageable steps',
+                    confidence: 0.8,
+                    action_type: 'break_down'
+                });
+            });
+        }
+
+        // Time-based suggestions
+        if (patterns.preferredTimes?.peakHours) {
+            const now = new Date();
+            const currentHour = now.getHours();
+            const bestHour = patterns.preferredTimes.peakHours[0];
+
+            if (Math.abs(currentHour - bestHour) >= 2) {
+                suggestions.push({
+                    type: 'scheduling',
+                    suggestion: `You're most productive around ${bestHour}:00. Consider scheduling important work during your peak hours.`,
+                    confidence: patterns.preferredTimes.confidence,
+                    action_type: 'schedule_reminder'
+                });
+            }
+        }
+
+        res.json({
+            success: true,
+            suggestions,
+            pattern_insights: {
+                completion_focus: patterns.taskCompletion?.completionFocus,
+                preferred_times: patterns.preferredTimes?.peakHours,
+                urgency_patterns: patterns.urgencyPatterns?.frequentUrgentTasks
+            }
+        });
+
+    } catch (error) {
+        logger.error('Error getting predictive task suggestions:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Failed to get predictive suggestions',
+            message: error.message
+        });
+    }
+});
+
+// Get predictive communication suggestions
+router.get('/predictive/communication', async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const patterns = await preferenceLearner.analyzePatterns(userId);
+
+        const suggestions = [];
+
+        // Communication style suggestions
+        if (patterns.communicationStyle?.prefersBrief) {
+            suggestions.push({
+                type: 'communication_style',
+                suggestion: 'Based on your patterns, you prefer concise communication. I\'ll keep responses brief and to the point.',
+                confidence: patterns.communicationStyle.confidence,
+                style: 'brief'
+            });
+        } else if (patterns.communicationStyle?.prefersDetailed) {
+            suggestions.push({
+                type: 'communication_style',
+                suggestion: 'You seem to prefer detailed responses. I\'ll provide comprehensive information when appropriate.',
+                confidence: patterns.communicationStyle.confidence,
+                style: 'detailed'
+            });
+        }
+
+        // Response timing suggestions
+        if (patterns.preferredTimes?.peakHours) {
+            suggestions.push({
+                type: 'response_timing',
+                suggestion: `I'll prioritize responses during your most active hours: ${patterns.preferredTimes.peakHours.join(', ')}`,
+                confidence: patterns.preferredTimes.confidence,
+                preferred_hours: patterns.preferredTimes.peakHours
+            });
+        }
+
+        res.json({
+            success: true,
+            suggestions,
+            communication_profile: {
+                style: patterns.communicationStyle?.prefersBrief ? 'brief' :
+                       patterns.communicationStyle?.prefersDetailed ? 'detailed' : 'balanced',
+                question_frequency: patterns.communicationStyle?.asksManyQuestions ? 'high' : 'normal',
+                directness: patterns.communicationStyle?.directCommunication ? 'high' : 'normal'
+            }
+        });
+
+    } catch (error) {
+        logger.error('Error getting predictive communication suggestions:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Failed to get communication suggestions',
+            message: error.message
+        });
+    }
+});
+
+// ===========================================
+// INTEGRATION HELPERS
+// ===========================================
+
+// Enhanced task creation with pattern integration
+router.post('/tasks/enhanced', async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const { title, description, priority, deadline, project_id } = req.body;
+
+        if (!title) {
+            return res.status(400).json({
+                success: false,
+                error: 'Task title is required'
+            });
+        }
+
+        // Get patterns to enhance task creation
+        const patterns = await preferenceLearner.analyzePatterns(userId);
+
+        // Auto-adjust priority based on patterns
+        let adjustedPriority = priority || 3;
+        if (patterns.urgencyPatterns?.frequentUrgentTasks) {
+            adjustedPriority = Math.min(2, adjustedPriority); // Increase priority for urgent pattern users
+        }
+
+        // Auto-suggest deadline if not provided and patterns indicate time sensitivity
+        let suggestedDeadline = deadline;
+        if (!deadline && patterns.urgencyPatterns?.timeSensitive) {
+            const tomorrow = new Date();
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            suggestedDeadline = tomorrow.toISOString().split('T')[0];
+        }
+
+        // Create enhanced task
+        const taskData = {
+            user_id: userId,
+            title,
+            description,
+            priority: adjustedPriority,
+            status: 'pending',
+            deadline: suggestedDeadline,
+            project_id,
+            ai_generated: true,
+            source: 'enhanced_creation',
+            source_data: {
+                pattern_enhancements: {
+                    priority_adjusted: adjustedPriority !== priority,
+                    deadline_suggested: !deadline && suggestedDeadline,
+                    patterns_considered: Object.keys(patterns)
+                }
+            },
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+        };
+
+        const { data: task, error } = await supabase
+            .from('tasks')
+            .insert([taskData])
+            .select()
+            .single();
+
+        if (error) throw error;
+
+        // Start daddy agent monitoring if appropriate
+        const daddyAgent = await getDaddyAgent(userId);
+        if (daddyAgent.monitoringLevel !== 'low') {
+            await daddyAgent.startTaskMonitoring(task.id, task);
+        }
+
+        res.json({
+            success: true,
+            task,
+            enhancements: {
+                priority_adjusted: adjustedPriority !== priority,
+                deadline_suggested: !deadline && suggestedDeadline,
+                daddy_monitoring_started: daddyAgent.monitoringLevel !== 'low',
+                patterns_applied: Object.keys(patterns).length
+            }
+        });
+
+    } catch (error) {
+        logger.error('Error creating enhanced task:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Failed to create enhanced task',
+            message: error.message
+        });
+    }
+});
+
+// ===========================================
+// CLEANUP AND MAINTENANCE
+// ===========================================
+
+// Cleanup function for inactive daddy agents
+function cleanupInactiveDaddyAgents() {
+    const now = new Date();
+    const timeoutMs = 24 * 60 * 60 * 1000; // 24 hours
+
+    for (const [userId, daddyAgent] of activeDaddyAgents) {
+        // Check if agent has been inactive
+        const lastActivity = daddyAgent.lastActivity || new Date(0);
+        if (now - lastActivity > timeoutMs) {
+            daddyAgent.shutdown();
+            activeDaddyAgents.delete(userId);
+            logger.info(`Cleaned up inactive daddy agent for user ${userId}`);
+        }
+    }
+}
+
+// Run cleanup every hour
+setInterval(cleanupInactiveDaddyAgents, 60 * 60 * 1000);
+
+// Graceful shutdown handler
+process.on('SIGINT', () => {
+    logger.info('Shutting down daddy agents...');
+    for (const [userId, daddyAgent] of activeDaddyAgents) {
+        daddyAgent.shutdown();
+    }
+    activeDaddyAgents.clear();
+    process.exit(0);
+});
+
 module.exports = router;

@@ -1357,7 +1357,9 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const SUPABASE_URL = "https://tugoaqoadsqbvgckkoqf.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR1Z29hcW9hZHNxYnZnY2trb3FmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY2NzkyMTAsImV4cCI6MjA3MjI1NTIxMH0.WU3b_pnTungZgPDcBhEVEzVugJYdIvMu_cE-zhGjvP4";
+// SECURITY NOTICE: This file contains hardcoded credentials and should not be used in production
+// Use environment variables instead for security
+const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY || "REPLACE_WITH_YOUR_ACTUAL_KEY";
 
 export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
