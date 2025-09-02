@@ -1352,19 +1352,16 @@ padding: 20px;
     <button class="preference-btn" onclick="showPreferenceModal()" title="Preference Settings">⚙️</button>
     <button class="logout-btn" onclick="logout()" title="Logout">🚪</button>
   </div>
-</header>
 
-
-
-<!-- Daddy Agent Controls -->
-<div class="daddy-controls" style="margin-top: 10px;">
+  <!-- Daddy Agent Controls -->
+  <div class="daddy-controls" style="margin-top: 10px;">
     <button class="btn btn-small" onclick="toggleDaddyMonitoring()" id="daddyToggle">
         👨‍👧 Toggle Daddy Mode
     </button>
     <button class="btn btn-small" onclick="showDaddyAnalytics()">
         📈 Analytics
     </button>
-</div>
+  </div>
 </header>
 
 <!-- Navigation -->
@@ -2301,7 +2298,6 @@ async function createTestApproval() {
         });
         const data = await response.json();
         if (data.success) {
-            console.log('Test approval created:', data);
             await loadApprovals(); // Reload approvals
             showToast('Test approval created! Check the bell icon.', 'success');
         } else {
@@ -2322,7 +2318,6 @@ const data = await response.json();
 
 if (data.success) {
 pendingApprovals = data.approvals;
-console.log('Loaded approvals:', data.approvals.length, data.approvals);
 displayApprovals(data.approvals);
 updateApprovalsBadge(data.approvals.length);
 }
@@ -2358,13 +2353,9 @@ approvalsList.innerHTML = approvalsHTML;
 }
 
 function updateApprovalsBadge(count) {
-console.log('Updating approvals badge with count:', count);
 const headerBadge = document.getElementById('approvalsHeaderBtn');
 if (headerBadge) {
-console.log('Found header badge element:', headerBadge);
 headerBadge.setAttribute('data-count', count);
-} else {
-console.log('Header badge element not found!');
 }
 }
 
