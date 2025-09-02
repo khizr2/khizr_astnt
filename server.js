@@ -89,6 +89,11 @@ app.get('/', (req, res) => {
     res.sendFile(__dirname + '/app.html');
 });
 
+// Serve test page
+app.get('/test', (req, res) => {
+    res.sendFile(__dirname + '/test-page.html');
+});
+
 // API health check endpoint
 app.get('/api', (req, res) => {
     res.json({
