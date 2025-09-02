@@ -861,13 +861,33 @@ placeholder="Share your thoughts, ideas, concerns..."
   <div class="ai-model-selector" style="margin-bottom: 8px; display: flex; align-items: center; gap: 8px;">
     <label for="aiModel" style="font-size: 11px; color: var(--text-secondary);">AI Model:</label>
     <select id="aiModel" style="padding: 4px 8px; border: 1px solid var(--border); border-radius: 4px; background: var(--bg-card); color: var(--text-primary); font-size: 12px;">
-      <option value="anthropic/claude-3.5-sonnet">Claude 3.5 Sonnet (Best)</option>
-      <option value="anthropic/claude-3-haiku">Claude 3 Haiku (Fast)</option>
-      <option value="openai/gpt-4o">GPT-4o (Latest)</option>
-      <option value="openai/gpt-4o-mini">GPT-4o Mini (Cheap)</option>
-      <option value="google/gemini-pro-1.5">Gemini Pro 1.5</option>
-      <option value="meta-llama/llama-3.1-70b-instruct">Llama 3.1 70B</option>
-      <option value="mistralai/mistral-large">Mistral Large</option>
+      <!-- Free Models - DeepSeek Family -->
+      <optgroup label="🔥 FREE - DeepSeek (Best Reasoning)">
+        <option value="deepseek/deepseek-r1:free">DeepSeek R1 0528 (Best Reasoning)</option>
+        <option value="deepseek/deepseek-v3-0324:free">DeepSeek V3 0324 (Balanced)</option>
+        <option value="tng/deepseek-r1t2-chimera:free">DeepSeek R1T2 Chimera (Fast Reasoning)</option>
+        <option value="deepseek/deepseek-r1">DeepSeek R1 (Open Source)</option>
+        <option value="deepseek/deepseek-v3.1">DeepSeek V3.1 (Hybrid)</option>
+      </optgroup>
+
+      <!-- Free Models - Other Providers -->
+      <optgroup label="🆓 FREE - Other Providers">
+        <option value="z-ai/glm-4.5-air:free">GLM 4.5 Air (Agent Focused)</option>
+        <option value="qwen/qwen3-coder-480b-a35b:free">Qwen3 Coder 480B (Code Expert)</option>
+        <option value="tng/deepseek-r1t-chimera:free">DeepSeek R1T Chimera (Efficient)</option>
+        <option value="moonshotai/kimi-k2:free">Kimi K2 (MoE Expert)</option>
+      </optgroup>
+
+      <!-- Premium Models -->
+      <optgroup label="💎 PREMIUM - Paid Models">
+        <option value="anthropic/claude-3.5-sonnet">Claude 3.5 Sonnet (Best Quality)</option>
+        <option value="anthropic/claude-3-haiku">Claude 3 Haiku (Fast & Cheap)</option>
+        <option value="openai/gpt-4o">GPT-4o (Latest OpenAI)</option>
+        <option value="openai/gpt-4o-mini">GPT-4o Mini (Cheapest)</option>
+        <option value="google/gemini-pro-1.5">Gemini Pro 1.5 (Google)</option>
+        <option value="meta-llama/llama-3.1-70b-instruct">Llama 3.1 70B (Open Source)</option>
+        <option value="mistralai/mistral-large">Mistral Large (Capable)</option>
+      </optgroup>
     </select>
   </div>
 
@@ -984,15 +1004,29 @@ let currentUser = null;
 let notifications = 0;
 let pendingApprovals = [];
 
-// Available AI models for display
+// Available AI models for display (updated with OpenRouter free models)
 const AVAILABLE_MODELS = {
+  // Premium Paid Models
   'anthropic/claude-3.5-sonnet': 'Claude 3.5 Sonnet',
   'anthropic/claude-3-haiku': 'Claude 3 Haiku',
   'openai/gpt-4o': 'GPT-4o',
   'openai/gpt-4o-mini': 'GPT-4o Mini',
   'google/gemini-pro-1.5': 'Gemini Pro 1.5',
   'meta-llama/llama-3.1-70b-instruct': 'Llama 3.1 70B',
-  'mistralai/mistral-large': 'Mistral Large'
+  'mistralai/mistral-large': 'Mistral Large',
+
+  // Free Models - DeepSeek Family
+  'deepseek/deepseek-r1:free': 'DeepSeek R1 0528 (Free)',
+  'deepseek/deepseek-v3-0324:free': 'DeepSeek V3 0324 (Free)',
+  'tng/deepseek-r1t2-chimera:free': 'DeepSeek R1T2 Chimera (Free)',
+  'deepseek/deepseek-r1': 'DeepSeek R1 (Free)',
+  'deepseek/deepseek-v3.1': 'DeepSeek V3.1 (Free)',
+
+  // Free Models - Other Providers
+  'z-ai/glm-4.5-air:free': 'GLM 4.5 Air (Free)',
+  'qwen/qwen3-coder-480b-a35b:free': 'Qwen3 Coder 480B (Free)',
+  'tng/deepseek-r1t-chimera:free': 'DeepSeek R1T Chimera (Free)',
+  'moonshotai/kimi-k2:free': 'Kimi K2 (Free)'
 };
 
 // Authentication helper
@@ -1245,7 +1279,9 @@ async function processChatMessage(message) {
       // Show which model was used
       if (data.model_used) {
         const modelName = AVAILABLE_MODELS[data.model_used] || data.model_used;
-        addChatMessage('system', `🤖 ${modelName}`);
+        const isFree = data.model_used.includes(':free') || data.model_used.includes('deepseek') || data.model_used.includes('glm') || data.model_used.includes('qwen') || data.model_used.includes('kimi');
+        const costIndicator = isFree ? '🆓' : '💎';
+        addChatMessage('system', `${costIndicator} ${modelName}`);
       }
 
       // Handle task/project creation based on message type

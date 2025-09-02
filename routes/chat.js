@@ -12,21 +12,35 @@ const openai = new OpenAI({
   baseURL: "https://openrouter.ai/api/v1"
 });
 
-// Available models on OpenRouter
+// Available models on OpenRouter (Free Models)
 const AVAILABLE_MODELS = {
+  // Premium Paid Models
   'anthropic/claude-3.5-sonnet': 'Claude 3.5 Sonnet (Best for quality)',
   'anthropic/claude-3-haiku': 'Claude 3 Haiku (Fast & cheap)',
   'openai/gpt-4o': 'GPT-4o (Latest OpenAI)',
   'openai/gpt-4o-mini': 'GPT-4o Mini (Cheapest option)',
   'google/gemini-pro-1.5': 'Gemini Pro 1.5 (Google\'s model)',
   'meta-llama/llama-3.1-70b-instruct': 'Llama 3.1 70B (Open source)',
-  'mistralai/mistral-large': 'Mistral Large (Fast & capable)'
+  'mistralai/mistral-large': 'Mistral Large (Fast & capable)',
+
+  // Free Models - DeepSeek Family
+  'deepseek/deepseek-r1:free': 'DeepSeek R1 0528 (Free - Best Reasoning)',
+  'deepseek/deepseek-v3-0324:free': 'DeepSeek V3 0324 (Free - Balanced)',
+  'tng/deepseek-r1t2-chimera:free': 'DeepSeek R1T2 Chimera (Free - Fast Reasoning)',
+  'deepseek/deepseek-r1': 'DeepSeek R1 (Free - Open Source Reasoning)',
+  'deepseek/deepseek-v3.1': 'DeepSeek V3.1 (Free - Hybrid Reasoning)',
+
+  // Free Models - Other Providers
+  'z-ai/glm-4.5-air:free': 'GLM 4.5 Air (Free - Agent Focused)',
+  'qwen/qwen3-coder-480b-a35b:free': 'Qwen3 Coder 480B (Free - Code Expert)',
+  'tng/deepseek-r1t-chimera:free': 'DeepSeek R1T Chimera (Free - Efficient)',
+  'moonshotai/kimi-k2:free': 'Kimi K2 (Free - MoE Expert)'
 };
 
 // Process chat messages
 router.post('/process', async (req, res) => {
   try {
-    const { message, model = 'anthropic/claude-3.5-sonnet' } = req.body;
+    const { message, model = 'deepseek/deepseek-r1:free' } = req.body;
 
     if (!message) {
       return res.status(400).json({ error: 'Message is required' });
@@ -121,15 +135,46 @@ Guidelines:
 // Get available models endpoint
 router.get('/models', async (req, res) => {
   try {
+    // Categorize models for better UX
+    const categorizedModels = {
+      free: {
+        'deepseek/deepseek-r1:free': 'DeepSeek R1 0528 (Free - Best Reasoning)',
+        'deepseek/deepseek-v3-0324:free': 'DeepSeek V3 0324 (Free - Balanced)',
+        'tng/deepseek-r1t2-chimera:free': 'DeepSeek R1T2 Chimera (Free - Fast Reasoning)',
+        'deepseek/deepseek-r1': 'DeepSeek R1 (Free - Open Source Reasoning)',
+        'deepseek/deepseek-v3.1': 'DeepSeek V3.1 (Free - Hybrid Reasoning)',
+        'z-ai/glm-4.5-air:free': 'GLM 4.5 Air (Free - Agent Focused)',
+        'qwen/qwen3-coder-480b-a35b:free': 'Qwen3 Coder 480B (Free - Code Expert)',
+        'tng/deepseek-r1t-chimera:free': 'DeepSeek R1T Chimera (Free - Efficient)',
+        'moonshotai/kimi-k2:free': 'Kimi K2 (Free - MoE Expert)'
+      },
+      premium: {
+        'anthropic/claude-3.5-sonnet': 'Claude 3.5 Sonnet (Best for quality)',
+        'anthropic/claude-3-haiku': 'Claude 3 Haiku (Fast & cheap)',
+        'openai/gpt-4o': 'GPT-4o (Latest OpenAI)',
+        'openai/gpt-4o-mini': 'GPT-4o Mini (Cheapest option)',
+        'google/gemini-pro-1.5': 'Gemini Pro 1.5 (Google\'s model)',
+        'meta-llama/llama-3.1-70b-instruct': 'Llama 3.1 70B (Open source)',
+        'mistralai/mistral-large': 'Mistral Large (Fast & capable)'
+      }
+    };
+
     res.json({
       success: true,
       models: AVAILABLE_MODELS,
-      default_model: 'anthropic/claude-3.5-sonnet',
+      categorized_models: categorizedModels,
+      default_model: 'deepseek/deepseek-r1:free',
       recommended_models: {
-        quality: 'anthropic/claude-3.5-sonnet',
-        speed: 'anthropic/claude-3-haiku',
-        cost: 'openai/gpt-4o-mini'
-      }
+        free_reasoning: 'deepseek/deepseek-r1:free',
+        free_balanced: 'deepseek/deepseek-v3-0324:free',
+        free_fast: 'tng/deepseek-r1t2-chimera:free',
+        free_coding: 'qwen/qwen3-coder-480b-a35b:free',
+        premium_quality: 'anthropic/claude-3.5-sonnet',
+        premium_speed: 'anthropic/claude-3-haiku',
+        premium_cost: 'openai/gpt-4o-mini'
+      },
+      free_models_available: Object.keys(categorizedModels.free).length,
+      total_models: Object.keys(AVAILABLE_MODELS).length
     });
   } catch (error) {
     logger.error('Error fetching models:', error);
