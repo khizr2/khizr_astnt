@@ -1,5 +1,5 @@
 const express = require('express');
-const { query } = require('../database/connection');
+const { supabase } = require('../database/connection');
 const { authenticateToken } = require('../middleware/auth');
 const { logger } = require('../utils/logger');
 
@@ -9,20 +9,50 @@ router.use(authenticateToken);
 // Get all tags
 router.get('/', async (req, res) => {
     try {
-        const result = await query(`
-            SELECT t.*, 
-                   COUNT(DISTINCT pt.project_id) as project_count,
-                   COUNT(DISTINCT tt.task_id) as task_count
-            FROM tags t
-            LEFT JOIN project_tags pt ON t.id = pt.tag_id
-            LEFT JOIN task_tags tt ON t.id = tt.tag_id
-            LEFT JOIN projects p ON pt.project_id = p.id AND p.user_id = $1
-            LEFT JOIN tasks task ON tt.task_id = task.id AND task.user_id = $1
-            GROUP BY t.id
-            ORDER BY t.name ASC
-        `, [req.user.id]);
+        // Get all tags
+        const { data: tags, error: tagsError } = await supabase
+            .from('tags')
+            .select('*')
+            .order('name', { ascending: true });
 
-        res.json(result.rows);
+        if (tagsError) {
+            logger.error('Error getting tags:', tagsError);
+            throw tagsError;
+        }
+
+        // Get project and task counts for each tag
+        for (let tag of tags) {
+            // Get project count
+            const { count: projectCount } = await supabase
+                .from('project_tags')
+                .select('*', { count: 'exact', head: true })
+                .eq('tag_id', tag.id)
+                .in('project_id',
+                    (await supabase
+                        .from('projects')
+                        .select('id')
+                        .eq('user_id', req.user.id)
+                    ).data?.map(p => p.id) || []
+                );
+
+            // Get task count
+            const { count: taskCount } = await supabase
+                .from('task_tags')
+                .select('*', { count: 'exact', head: true })
+                .eq('tag_id', tag.id)
+                .in('task_id',
+                    (await supabase
+                        .from('tasks')
+                        .select('id')
+                        .eq('user_id', req.user.id)
+                    ).data?.map(t => t.id) || []
+                );
+
+            tag.project_count = projectCount || 0;
+            tag.task_count = taskCount || 0;
+        }
+
+        res.json(tags);
     } catch (error) {
         logger.error('Get tags error:', error);
         res.status(500).json({ error: 'Internal server error' });
@@ -38,12 +68,25 @@ router.post('/', async (req, res) => {
             return res.status(400).json({ error: 'Tag name is required' });
         }
 
-        const result = await query(
-            'INSERT INTO tags (name, color) VALUES ($1, $2) RETURNING *',
-            [name.toLowerCase().trim(), color]
-        );
+        const { data: tag, error } = await supabase
+            .from('tags')
+            .insert({
+                name: name.toLowerCase().trim(),
+                color: color,
+                created_at: new Date().toISOString()
+            })
+            .select()
+            .single();
 
-        res.status(201).json(result.rows[0]);
+        if (error) {
+            if (error.code === '23505') {
+                return res.status(409).json({ error: 'Tag already exists' });
+            }
+            logger.error('Error creating tag:', error);
+            throw error;
+        }
+
+        res.status(201).json(tag);
     } catch (error) {
         if (error.code === '23505') {
             return res.status(409).json({ error: 'Tag already exists' });
@@ -63,25 +106,61 @@ router.post('/project/:projectId', async (req, res) => {
             return res.status(400).json({ error: 'Tag name is required' });
         }
 
-        const projectCheck = await query(
-            'SELECT id FROM projects WHERE id = $1 AND user_id = $2',
-            [projectId, req.user.id]
-        );
+        // Check if project exists and belongs to user
+        const { data: project, error: projectError } = await supabase
+            .from('projects')
+            .select('id')
+            .eq('id', projectId)
+            .eq('user_id', req.user.id)
+            .single();
 
-        if (projectCheck.rows.length === 0) {
+        if (projectError && projectError.code !== 'PGRST116') {
+            logger.error('Error checking project:', projectError);
+            throw projectError;
+        }
+
+        if (!project) {
             return res.status(404).json({ error: 'Project not found' });
         }
 
-        await query(
-            'INSERT INTO tags (name) VALUES ($1) ON CONFLICT (name) DO NOTHING',
-            [tagName.toLowerCase().trim()]
-        );
+        // Upsert tag
+        const { error: tagError } = await supabase
+            .from('tags')
+            .upsert({
+                name: tagName.toLowerCase().trim(),
+                created_at: new Date().toISOString()
+            }, {
+                onConflict: 'name'
+            });
 
-        await query(`
-            INSERT INTO project_tags (project_id, tag_id)
-            SELECT $1, id FROM tags WHERE name = $2
-            ON CONFLICT DO NOTHING
-        `, [projectId, tagName.toLowerCase().trim()]);
+        if (tagError) {
+            logger.error('Error creating tag:', tagError);
+            throw tagError;
+        }
+
+        // Get tag ID and create project-tag relationship
+        const { data: tag } = await supabase
+            .from('tags')
+            .select('id')
+            .eq('name', tagName.toLowerCase().trim())
+            .single();
+
+        if (tag) {
+            const { error: relationError } = await supabase
+                .from('project_tags')
+                .upsert({
+                    project_id: projectId,
+                    tag_id: tag.id,
+                    created_at: new Date().toISOString()
+                }, {
+                    onConflict: 'project_id,tag_id'
+                });
+
+            if (relationError) {
+                logger.error('Error creating project-tag relation:', relationError);
+                throw relationError;
+            }
+        }
 
         res.status(201).json({ message: 'Tag added to project' });
     } catch (error) {
@@ -100,25 +179,61 @@ router.post('/task/:taskId', async (req, res) => {
             return res.status(400).json({ error: 'Tag name is required' });
         }
 
-        const taskCheck = await query(
-            'SELECT id FROM tasks WHERE id = $1 AND user_id = $2',
-            [taskId, req.user.id]
-        );
+        // Check if task exists and belongs to user
+        const { data: task, error: taskError } = await supabase
+            .from('tasks')
+            .select('id')
+            .eq('id', taskId)
+            .eq('user_id', req.user.id)
+            .single();
 
-        if (taskCheck.rows.length === 0) {
+        if (taskError && taskError.code !== 'PGRST116') {
+            logger.error('Error checking task:', taskError);
+            throw taskError;
+        }
+
+        if (!task) {
             return res.status(404).json({ error: 'Task not found' });
         }
 
-        await query(
-            'INSERT INTO tags (name) VALUES ($1) ON CONFLICT (name) DO NOTHING',
-            [tagName.toLowerCase().trim()]
-        );
+        // Upsert tag
+        const { error: tagError } = await supabase
+            .from('tags')
+            .upsert({
+                name: tagName.toLowerCase().trim(),
+                created_at: new Date().toISOString()
+            }, {
+                onConflict: 'name'
+            });
 
-        await query(`
-            INSERT INTO task_tags (task_id, tag_id)
-            SELECT $1, id FROM tags WHERE name = $2
-            ON CONFLICT DO NOTHING
-        `, [taskId, tagName.toLowerCase().trim()]);
+        if (tagError) {
+            logger.error('Error creating tag:', tagError);
+            throw tagError;
+        }
+
+        // Get tag ID and create task-tag relationship
+        const { data: tag } = await supabase
+            .from('tags')
+            .select('id')
+            .eq('name', tagName.toLowerCase().trim())
+            .single();
+
+        if (tag) {
+            const { error: relationError } = await supabase
+                .from('task_tags')
+                .upsert({
+                    task_id: taskId,
+                    tag_id: tag.id,
+                    created_at: new Date().toISOString()
+                }, {
+                    onConflict: 'task_id,tag_id'
+                });
+
+            if (relationError) {
+                logger.error('Error creating task-tag relation:', relationError);
+                throw relationError;
+            }
+        }
 
         res.status(201).json({ message: 'Tag added to task' });
     } catch (error) {

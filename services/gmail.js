@@ -1,5 +1,5 @@
 const { google } = require('googleapis');
-const { query } = require('../database/connection');
+const { supabase } = require('../database/connection');
 const { logger } = require('../utils/logger');
 
 class GmailService {
@@ -33,23 +33,23 @@ class GmailService {
             const { tokens } = await this.oauth2Client.getToken(code);
             
             // Store tokens in database
-            await query(
-                `INSERT INTO gmail_tokens (user_id, access_token, refresh_token, token_type, expires_at)
-                 VALUES ($1, $2, $3, $4, $5)
-                 ON CONFLICT (user_id) DO UPDATE SET
-                 access_token = EXCLUDED.access_token,
-                 refresh_token = EXCLUDED.refresh_token,
-                 token_type = EXCLUDED.token_type,
-                 expires_at = EXCLUDED.expires_at,
-                 updated_at = CURRENT_TIMESTAMP`,
-                [
-                    userId,
-                    tokens.access_token,
-                    tokens.refresh_token,
-                    tokens.token_type,
-                    tokens.expiry_date ? new Date(tokens.expiry_date) : null
-                ]
-            );
+            const { error } = await supabase
+                .from('gmail_tokens')
+                .upsert({
+                    user_id: userId,
+                    access_token: tokens.access_token,
+                    refresh_token: tokens.refresh_token,
+                    token_type: tokens.token_type,
+                    expires_at: tokens.expiry_date ? new Date(tokens.expiry_date).toISOString() : null,
+                    updated_at: new Date().toISOString()
+                }, {
+                    onConflict: 'user_id'
+                });
+
+            if (error) {
+                logger.error('Error storing Gmail tokens:', error);
+                throw error;
+            }
 
             logger.info(`Gmail tokens stored for user ${userId}`);
             return { success: true };
@@ -62,16 +62,20 @@ class GmailService {
     // Get user's Gmail tokens
     async getTokens(userId) {
         try {
-            const result = await query(
-                'SELECT access_token, refresh_token, expires_at FROM gmail_tokens WHERE user_id = $1',
-                [userId]
-            );
+            const { data: tokens, error } = await supabase
+                .from('gmail_tokens')
+                .select('access_token, refresh_token, expires_at')
+                .eq('user_id', userId)
+                .single();
 
-            if (result.rows.length === 0) {
-                return null;
+            if (error && error.code !== 'PGRST116') { // PGRST116 is "not found" error
+                logger.error('Error getting Gmail tokens:', error);
+                throw error;
             }
 
-            const tokens = result.rows[0];
+            if (!tokens) {
+                return null;
+            }
             
             // Check if token is expired and refresh if needed
             if (tokens.expires_at && new Date() > new Date(tokens.expires_at)) {
@@ -95,16 +99,19 @@ class GmailService {
             const { tokens } = await this.oauth2Client.refreshAccessToken();
             
             // Update tokens in database
-            await query(
-                `UPDATE gmail_tokens 
-                 SET access_token = $1, expires_at = $2, updated_at = CURRENT_TIMESTAMP
-                 WHERE user_id = $3`,
-                [
-                    tokens.access_token,
-                    tokens.expiry_date ? new Date(tokens.expiry_date) : null,
-                    userId
-                ]
-            );
+            const { error: updateError } = await supabase
+                .from('gmail_tokens')
+                .update({
+                    access_token: tokens.access_token,
+                    expires_at: tokens.expiry_date ? new Date(tokens.expiry_date).toISOString() : null,
+                    updated_at: new Date().toISOString()
+                })
+                .eq('user_id', userId);
+
+            if (updateError) {
+                logger.error('Error updating Gmail tokens:', updateError);
+                throw updateError;
+            }
 
             return {
                 access_token: tokens.access_token,

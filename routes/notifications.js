@@ -1,6 +1,6 @@
 const express = require('express');
 const { authenticateToken } = require('../middleware/auth');
-const { query } = require('../database/connection');
+const { supabase } = require('../database/connection');
 const { logger } = require('../utils/logger');
 
 const router = express.Router();
@@ -11,25 +11,37 @@ router.get('/', async (req, res) => {
     try {
         const { status, limit = 50 } = req.query;
         
-        let queryText = `
-            SELECT n.*, e.subject as email_subject, e.sender as email_sender
-            FROM notifications n
-            LEFT JOIN emails e ON n.email_id = e.id
-            WHERE n.user_id = $1
-        `;
-        let queryParams = [req.user.id];
-        let paramCount = 1;
+        let queryBuilder = supabase
+            .from('notifications')
+            .select(`
+                *,
+                emails!notifications_email_id_fkey(subject, sender)
+            `)
+            .eq('user_id', req.user.id)
+            .order('priority', { ascending: true })
+            .order('created_at', { ascending: false })
+            .limit(parseInt(limit));
 
         if (status) {
-            queryText += ` AND n.status = $${++paramCount}`;
-            queryParams.push(status);
+            queryBuilder = queryBuilder.eq('status', status);
         }
 
-        queryText += ` ORDER BY n.priority ASC, n.created_at DESC LIMIT $${++paramCount}`;
-        queryParams.push(limit);
+        const { data: notifications, error } = await queryBuilder;
 
-        const result = await query(queryText, queryParams);
-        res.json(result.rows);
+        if (error) {
+            logger.error('Error getting notifications:', error);
+            throw error;
+        }
+
+        // Transform the nested email data to flat structure
+        const transformedNotifications = notifications.map(notification => ({
+            ...notification,
+            email_subject: notification.emails?.subject || null,
+            email_sender: notification.emails?.sender || null,
+            emails: undefined // Remove the nested object
+        }));
+
+        res.json(transformedNotifications);
     } catch (error) {
         logger.error('Error getting notifications:', error);
         res.status(500).json({ error: 'Failed to get notifications' });
@@ -39,13 +51,18 @@ router.get('/', async (req, res) => {
 // Get unread notification count
 router.get('/count', async (req, res) => {
     try {
-        const result = await query(
-            `SELECT COUNT(*) as count FROM notifications 
-             WHERE user_id = $1 AND status = 'pending'`,
-            [req.user.id]
-        );
+        const { count, error } = await supabase
+            .from('notifications')
+            .select('*', { count: 'exact', head: true })
+            .eq('user_id', req.user.id)
+            .eq('status', 'pending');
 
-        res.json({ count: parseInt(result.rows[0].count) });
+        if (error) {
+            logger.error('Error getting notification count:', error);
+            throw error;
+        }
+
+        res.json({ count: count || 0 });
     } catch (error) {
         logger.error('Error getting notification count:', error);
         res.status(500).json({ error: 'Failed to get notification count' });
@@ -57,27 +74,44 @@ router.put('/:id', async (req, res) => {
     try {
         const { status, action } = req.body;
         
-        const result = await query(
-            `UPDATE notifications 
-             SET status = $1, updated_at = CURRENT_TIMESTAMP 
-             WHERE id = $2 AND user_id = $3 
-             RETURNING *`,
-            [status, req.params.id, req.user.id]
-        );
+        const { data: notification, error } = await supabase
+            .from('notifications')
+            .update({
+                status: status,
+                updated_at: new Date().toISOString()
+            })
+            .eq('id', req.params.id)
+            .eq('user_id', req.user.id)
+            .select()
+            .single();
 
-        if (result.rows.length === 0) {
+        if (error && error.code !== 'PGRST116') {
+            logger.error('Error updating notification:', error);
+            throw error;
+        }
+
+        if (!notification) {
             return res.status(404).json({ error: 'Notification not found' });
         }
 
         // If notification is approved and it's an email notification, mark email as read
-        if (status === 'approved' && result.rows[0].email_id) {
-            await query(
-                'UPDATE emails SET status = $1 WHERE id = $2 AND user_id = $3',
-                ['read', result.rows[0].email_id, req.user.id]
-            );
+        if (status === 'approved' && notification.email_id) {
+            const { error: emailError } = await supabase
+                .from('emails')
+                .update({
+                    status: 'read',
+                    updated_at: new Date().toISOString()
+                })
+                .eq('id', notification.email_id)
+                .eq('user_id', req.user.id);
+
+            if (emailError) {
+                logger.error('Error updating email status:', emailError);
+                // Don't throw here as the notification was already updated
+            }
         }
 
-        res.json(result.rows[0]);
+        res.json(notification);
     } catch (error) {
         logger.error('Error updating notification:', error);
         res.status(500).json({ error: 'Failed to update notification' });
@@ -87,12 +121,19 @@ router.put('/:id', async (req, res) => {
 // Mark all notifications as read
 router.put('/read-all', async (req, res) => {
     try {
-        await query(
-            `UPDATE notifications 
-             SET status = 'read', updated_at = CURRENT_TIMESTAMP 
-             WHERE user_id = $1 AND status = 'pending'`,
-            [req.user.id]
-        );
+        const { error } = await supabase
+            .from('notifications')
+            .update({
+                status: 'read',
+                updated_at: new Date().toISOString()
+            })
+            .eq('user_id', req.user.id)
+            .eq('status', 'pending');
+
+        if (error) {
+            logger.error('Error marking notifications as read:', error);
+            throw error;
+        }
 
         res.json({ success: true });
     } catch (error) {
@@ -104,12 +145,20 @@ router.put('/read-all', async (req, res) => {
 // Delete notification
 router.delete('/:id', async (req, res) => {
     try {
-        const result = await query(
-            'DELETE FROM notifications WHERE id = $1 AND user_id = $2 RETURNING id',
-            [req.params.id, req.user.id]
-        );
+        const { data: deletedNotification, error } = await supabase
+            .from('notifications')
+            .delete()
+            .eq('id', req.params.id)
+            .eq('user_id', req.user.id)
+            .select('id')
+            .single();
 
-        if (result.rows.length === 0) {
+        if (error && error.code !== 'PGRST116') {
+            logger.error('Error deleting notification:', error);
+            throw error;
+        }
+
+        if (!deletedNotification) {
             return res.status(404).json({ error: 'Notification not found' });
         }
 
@@ -123,20 +172,27 @@ router.delete('/:id', async (req, res) => {
 // Get notification statistics
 router.get('/stats', async (req, res) => {
     try {
-        const stats = await query(
-            `SELECT 
-                COUNT(*) as total_notifications,
-                COUNT(CASE WHEN status = 'pending' THEN 1 END) as pending_count,
-                COUNT(CASE WHEN status = 'approved' THEN 1 END) as approved_count,
-                COUNT(CASE WHEN status = 'denied' THEN 1 END) as denied_count,
-                COUNT(CASE WHEN priority = 1 THEN 1 END) as urgent_count,
-                COUNT(CASE WHEN type = 'email' THEN 1 END) as email_notifications
-             FROM notifications 
-             WHERE user_id = $1`,
-            [req.user.id]
-        );
+        const { data: notifications, error } = await supabase
+            .from('notifications')
+            .select('status, priority, type')
+            .eq('user_id', req.user.id);
 
-        res.json(stats.rows[0]);
+        if (error) {
+            logger.error('Error getting notification stats:', error);
+            throw error;
+        }
+
+        // Calculate statistics
+        const stats = {
+            total_notifications: notifications.length,
+            pending_count: notifications.filter(n => n.status === 'pending').length,
+            approved_count: notifications.filter(n => n.status === 'approved').length,
+            denied_count: notifications.filter(n => n.status === 'denied').length,
+            urgent_count: notifications.filter(n => n.priority === 1).length,
+            email_notifications: notifications.filter(n => n.type === 'email').length
+        };
+
+        res.json(stats);
     } catch (error) {
         logger.error('Error getting notification stats:', error);
         res.status(500).json({ error: 'Failed to get notification statistics' });

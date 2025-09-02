@@ -39,21 +39,10 @@ const testConnection = async () => {
 // Initialize connection test
 testConnection();
 
-// Supabase-compatible query function
-const query = async (text, params) => {
-    try {
-        // For now, return a mock response to prevent errors
-        // This should be replaced with proper Supabase client calls in each route
-        logger.warn('Using mock query response - implement proper Supabase calls');
-        return { rows: [] };
-    } catch (error) {
-        logger.error('Query error:', error);
-        throw error;
-    }
-};
+// Note: The mock query function has been removed.
+// All database operations should now use the Supabase client directly.
 
 module.exports = {
     supabase,
-    query,
     pool: null // Keep for backward compatibility
 };

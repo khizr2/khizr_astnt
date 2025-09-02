@@ -1,6 +1,6 @@
 const express = require('express');
 const { authenticateToken } = require('../middleware/auth');
-const { query } = require('../database/connection');
+const { supabase } = require('../database/connection');
 const { logger } = require('../utils/logger');
 const gmailService = require('../services/gmail');
 const emailAI = require('../services/emailAI');
@@ -64,79 +64,96 @@ router.get('/emails', authenticateToken, async (req, res) => {
 
             // Store processed emails in database
             for (const email of processedEmails) {
-                await query(
-                    `INSERT INTO emails (
-                        user_id, gmail_id, sender, sender_email, subject, content,
-                        content_snippet, priority, is_automated, is_important,
-                        summary, suggested_response, status, labels, thread_id, received_at
-                    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
-                    ON CONFLICT (gmail_id) DO UPDATE SET
-                        updated_at = CURRENT_TIMESTAMP,
-                        priority = EXCLUDED.priority,
-                        is_important = EXCLUDED.is_important,
-                        summary = EXCLUDED.summary,
-                        suggested_response = EXCLUDED.suggested_response`,
-                    [
-                        req.user.id, email.gmail_id, email.sender, email.sender_email,
-                        email.subject, email.content, email.content_snippet, email.priority,
-                        email.is_automated, email.is_important, email.word_tree_summary || email.summary,
-                        email.suggested_response, 'unread', JSON.stringify(email.labels),
-                        email.thread_id, email.received_at
-                    ]
-                );
+                const { error } = await supabase
+                    .from('emails')
+                    .upsert({
+                        user_id: req.user.id,
+                        gmail_id: email.gmail_id,
+                        sender: email.sender,
+                        sender_email: email.sender_email,
+                        subject: email.subject,
+                        content: email.content,
+                        content_snippet: email.content_snippet,
+                        priority: email.priority,
+                        is_automated: email.is_automated,
+                        is_important: email.is_important,
+                        summary: email.word_tree_summary || email.summary,
+                        suggested_response: email.suggested_response,
+                        status: 'unread',
+                        labels: JSON.stringify(email.labels),
+                        thread_id: email.thread_id,
+                        received_at: email.received_at,
+                        updated_at: new Date().toISOString()
+                    }, {
+                        onConflict: 'gmail_id'
+                    });
+
+                if (error) {
+                    logger.error('Error storing email:', error);
+                    throw error;
+                }
             }
 
             // Create notifications for important emails
             for (const notification of notifications) {
-                await query(
-                    `INSERT INTO notifications (
-                        user_id, type, title, message, priority, action_required
-                    ) VALUES ($1, $2, $3, $4, $5, $6)`,
-                    [
-                        req.user.id, notification.type, notification.title,
-                        notification.message, notification.priority, true
-                    ]
-                );
+                const { error } = await supabase
+                    .from('notifications')
+                    .insert({
+                        user_id: req.user.id,
+                        type: notification.type,
+                        title: notification.title,
+                        message: notification.message,
+                        priority: notification.priority,
+                        action_required: true,
+                        created_at: new Date().toISOString()
+                    });
+
+                if (error) {
+                    logger.error('Error creating notification:', error);
+                    throw error;
+                }
             }
 
             logger.info(`Processed ${processedEmails.length} emails for user ${req.user.id}`);
         }
 
         // Build dynamic query with sorting and filtering
-        let whereClause = 'WHERE user_id = $1';
-        let orderByClause = 'ORDER BY received_at DESC';
-        let params = [req.user.id];
-        let paramIndex = 2;
+        let queryBuilder = supabase
+            .from('emails')
+            .select('*')
+            .eq('user_id', req.user.id);
 
         // Add priority filter if specified
         if (priority_filter) {
             if (priority_filter === 'high') {
-                whereClause += ` AND priority <= 2`;
+                queryBuilder = queryBuilder.lte('priority', 2);
             } else if (priority_filter === 'medium') {
-                whereClause += ` AND priority BETWEEN 3 AND 4`;
+                queryBuilder = queryBuilder.gte('priority', 3).lte('priority', 4);
             } else if (priority_filter === 'low') {
-                whereClause += ` AND priority >= 5`;
+                queryBuilder = queryBuilder.gte('priority', 5);
             }
         }
 
         // Add sorting
         if (sort === 'priority') {
-            orderByClause = `ORDER BY priority ${order === 'asc' ? 'ASC' : 'DESC'}, received_at DESC`;
+            queryBuilder = queryBuilder.order('priority', { ascending: order === 'asc' }).order('received_at', { ascending: false });
         } else if (sort === 'subject') {
-            orderByClause = `ORDER BY subject ${order === 'asc' ? 'ASC' : 'DESC'}, received_at DESC`;
+            queryBuilder = queryBuilder.order('subject', { ascending: order === 'asc' }).order('received_at', { ascending: false });
         } else if (sort === 'sender') {
-            orderByClause = `ORDER BY sender ${order === 'asc' ? 'ASC' : 'DESC'}, received_at DESC`;
+            queryBuilder = queryBuilder.order('sender', { ascending: order === 'asc' }).order('received_at', { ascending: false });
         } else {
-            orderByClause = `ORDER BY received_at ${order === 'asc' ? 'ASC' : 'DESC'}`;
+            queryBuilder = queryBuilder.order('received_at', { ascending: order === 'asc' ? true : false });
         }
 
-        // Get emails from database
-        const result = await query(
-            `SELECT * FROM emails ${whereClause} ${orderByClause} LIMIT $${paramIndex}`,
-            [...params, parseInt(limit)]
-        );
+        // Add limit and execute query
+        const { data: emails, error } = await queryBuilder.limit(parseInt(limit));
 
-        res.json(result.rows);
+        if (error) {
+            logger.error('Error fetching emails:', error);
+            throw error;
+        }
+
+        res.json(emails);
     } catch (error) {
         logger.error('Error fetching emails:', error);
         res.status(500).json({ error: 'Failed to fetch emails' });
@@ -146,16 +163,23 @@ router.get('/emails', authenticateToken, async (req, res) => {
 // Get email by ID
 router.get('/emails/:id', async (req, res) => {
     try {
-        const result = await query(
-            'SELECT * FROM emails WHERE id = $1 AND user_id = $2',
-            [req.params.id, req.user.id]
-        );
+        const { data: email, error } = await supabase
+            .from('emails')
+            .select('*')
+            .eq('id', req.params.id)
+            .eq('user_id', req.user.id)
+            .single();
 
-        if (result.rows.length === 0) {
+        if (error && error.code !== 'PGRST116') { // PGRST116 is "not found" error
+            logger.error('Error getting email:', error);
+            throw error;
+        }
+
+        if (!email) {
             return res.status(404).json({ error: 'Email not found' });
         }
 
-        res.json(result.rows[0]);
+        res.json(email);
     } catch (error) {
         logger.error('Error getting email:', error);
         res.status(500).json({ error: 'Failed to get email' });
@@ -166,17 +190,28 @@ router.get('/emails/:id', async (req, res) => {
 router.put('/emails/:id', async (req, res) => {
     try {
         const { status } = req.body;
-        
-        const result = await query(
-            'UPDATE emails SET status = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2 AND user_id = $3 RETURNING *',
-            [status, req.params.id, req.user.id]
-        );
 
-        if (result.rows.length === 0) {
+        const { data: email, error } = await supabase
+            .from('emails')
+            .update({
+                status: status,
+                updated_at: new Date().toISOString()
+            })
+            .eq('id', req.params.id)
+            .eq('user_id', req.user.id)
+            .select()
+            .single();
+
+        if (error && error.code !== 'PGRST116') { // PGRST116 is "not found" error
+            logger.error('Error updating email:', error);
+            throw error;
+        }
+
+        if (!email) {
             return res.status(404).json({ error: 'Email not found' });
         }
 
-        res.json(result.rows[0]);
+        res.json(email);
     } catch (error) {
         logger.error('Error updating email:', error);
         res.status(500).json({ error: 'Failed to update email' });
@@ -206,16 +241,21 @@ router.post('/emails/:id/respond', async (req, res) => {
         const { context } = req.body;
 
         // Get email details
-        const emailResult = await query(
-            'SELECT * FROM emails WHERE id = $1 AND user_id = $2',
-            [req.params.id, req.user.id]
-        );
+        const { data: email, error } = await supabase
+            .from('emails')
+            .select('*')
+            .eq('id', req.params.id)
+            .eq('user_id', req.user.id)
+            .single();
 
-        if (emailResult.rows.length === 0) {
-            return res.status(404).json({ error: 'Email not found' });
+        if (error && error.code !== 'PGRST116') { // PGRST116 is "not found" error
+            logger.error('Error getting email for response:', error);
+            throw error;
         }
 
-        const email = emailResult.rows[0];
+        if (!email) {
+            return res.status(404).json({ error: 'Email not found' });
+        }
         const response = await emailAI.generateResponse(email, context);
 
         res.json({ response });
@@ -228,20 +268,28 @@ router.post('/emails/:id/respond', async (req, res) => {
 // Get email statistics
 router.get('/stats', async (req, res) => {
     try {
-        const stats = await query(
-            `SELECT
-                COUNT(*) as total_emails,
-                COUNT(CASE WHEN status = 'unread' THEN 1 END) as unread_count,
-                COUNT(CASE WHEN is_important = true THEN 1 END) as important_count,
-                COUNT(CASE WHEN priority <= 2 THEN 1 END) as high_priority_count,
-                COUNT(CASE WHEN priority BETWEEN 3 AND 4 THEN 1 END) as medium_priority_count,
-                COUNT(CASE WHEN is_automated = true THEN 1 END) as automated_count
-             FROM emails
-             WHERE user_id = $1`,
-            [req.user.id]
-        );
+        // Get all emails for this user to calculate statistics
+        const { data: emails, error } = await supabase
+            .from('emails')
+            .select('status, is_important, priority, is_automated')
+            .eq('user_id', req.user.id);
 
-        res.json(stats.rows[0]);
+        if (error) {
+            logger.error('Error getting email stats:', error);
+            throw error;
+        }
+
+        // Calculate statistics
+        const stats = {
+            total_emails: emails.length,
+            unread_count: emails.filter(email => email.status === 'unread').length,
+            important_count: emails.filter(email => email.is_important).length,
+            high_priority_count: emails.filter(email => email.priority <= 2).length,
+            medium_priority_count: emails.filter(email => email.priority >= 3 && email.priority <= 4).length,
+            automated_count: emails.filter(email => email.is_automated).length
+        };
+
+        res.json(stats);
     } catch (error) {
         logger.error('Error getting email stats:', error);
         res.status(500).json({ error: 'Failed to get email statistics' });
@@ -253,33 +301,39 @@ router.get('/digest', authenticateToken, async (req, res) => {
     try {
         const { limit = 10, priority_filter } = req.query;
 
-        let whereClause = 'WHERE user_id = $1 AND is_important = true';
-        let params = [req.user.id];
+        let queryBuilder = supabase
+            .from('emails')
+            .select('*')
+            .eq('user_id', req.user.id)
+            .eq('is_important', true);
 
         if (priority_filter) {
             if (priority_filter === 'high') {
-                whereClause += ' AND priority <= 2';
+                queryBuilder = queryBuilder.lte('priority', 2);
             } else if (priority_filter === 'medium') {
-                whereClause += ' AND priority BETWEEN 3 AND 4';
+                queryBuilder = queryBuilder.gte('priority', 3).lte('priority', 4);
             }
         }
 
-        const result = await query(
-            `SELECT * FROM emails ${whereClause}
-             ORDER BY priority ASC, received_at DESC
-             LIMIT $${params.length + 1}`,
-            [...params, parseInt(limit)]
-        );
+        const { data: emails, error } = await queryBuilder
+            .order('priority', { ascending: true })
+            .order('received_at', { ascending: false })
+            .limit(parseInt(limit));
+
+        if (error) {
+            logger.error('Error getting email digest:', error);
+            throw error;
+        }
 
         // Generate word tree digest
         const digest = {
-            total_count: result.rows.length,
+            total_count: emails.length,
             high_priority_responses: [],
             medium_priority_summaries: [],
             generated_at: new Date().toISOString()
         };
 
-        for (const email of result.rows) {
+        for (const email of emails) {
             const emailData = {
                 id: email.id,
                 from: email.sender,
@@ -307,15 +361,22 @@ router.get('/digest', authenticateToken, async (req, res) => {
 // Get summary reports for medium importance emails
 router.get('/reports', authenticateToken, async (req, res) => {
     try {
-        const result = await query(
-            `SELECT * FROM emails
-             WHERE user_id = $1 AND is_important = true AND priority BETWEEN 3 AND 4
-             ORDER BY received_at DESC
-             LIMIT 20`,
-            [req.user.id]
-        );
+        const { data: emails, error } = await supabase
+            .from('emails')
+            .select('*')
+            .eq('user_id', req.user.id)
+            .eq('is_important', true)
+            .gte('priority', 3)
+            .lte('priority', 4)
+            .order('received_at', { ascending: false })
+            .limit(20);
 
-        const reports = result.rows.map(email => ({
+        if (error) {
+            logger.error('Error getting email reports:', error);
+            throw error;
+        }
+
+        const reports = emails.map(email => ({
             id: email.id,
             gmail_id: email.gmail_id,
             from: email.sender,
@@ -341,16 +402,23 @@ router.get('/reports', authenticateToken, async (req, res) => {
 // Get high-priority emails requiring responses
 router.get('/responses-required', authenticateToken, async (req, res) => {
     try {
-        const result = await query(
-            `SELECT * FROM emails
-             WHERE user_id = $1 AND is_important = true AND priority <= 2
-             AND suggested_response IS NOT NULL
-             ORDER BY priority ASC, received_at DESC
-             LIMIT 10`,
-            [req.user.id]
-        );
+        const { data: emails, error } = await supabase
+            .from('emails')
+            .select('*')
+            .eq('user_id', req.user.id)
+            .eq('is_important', true)
+            .lte('priority', 2)
+            .not('suggested_response', 'is', null)
+            .order('priority', { ascending: true })
+            .order('received_at', { ascending: false })
+            .limit(10);
 
-        const responseEmails = result.rows.map(email => ({
+        if (error) {
+            logger.error('Error getting response-required emails:', error);
+            throw error;
+        }
+
+        const responseEmails = emails.map(email => ({
             id: email.id,
             gmail_id: email.gmail_id,
             from: email.sender,

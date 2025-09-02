@@ -1,6 +1,6 @@
 // Comprehensive Gmail debugging script
 require('dotenv').config();
-const { query } = require('./database/connection');
+const { supabase } = require('./database/connection');
 const gmailService = require('./services/gmail');
 const emailAI = require('./services/emailAI');
 const { logger } = require('./utils/logger');
@@ -26,23 +26,43 @@ async function debugGmailIntegration() {
         });
 
         console.log('\n2️⃣ Testing Database Connection...');
-        const dbTest = await query('SELECT NOW()');
+        const { data: dbTest, error: dbError } = await supabase
+            .from('users')
+            .select('count')
+            .limit(1);
+
+        if (dbError) {
+            throw new Error(`Database connection failed: ${dbError.message}`);
+        }
+
         console.log('✅ Database connection successful');
 
         console.log('\n3️⃣ Checking Gmail Tokens Table...');
         try {
-            const tokenCheck = await query('SELECT COUNT(*) FROM gmail_tokens');
-            const tokenCount = tokenCheck.rows && tokenCheck.rows[0] ? tokenCheck.rows[0].count : 0;
-            console.log(`✅ Gmail tokens table exists (${tokenCount} records)`);
+            const { count: tokenCount, error: tokenError } = await supabase
+                .from('gmail_tokens')
+                .select('*', { count: 'exact', head: true });
+
+            if (tokenError) {
+                throw tokenError;
+            }
+
+            console.log(`✅ Gmail tokens table exists (${tokenCount || 0} records)`);
         } catch (error) {
             console.log('❌ Gmail tokens table check failed:', error.message);
         }
 
         console.log('\n4️⃣ Checking Emails Table...');
         try {
-            const emailCheck = await query('SELECT COUNT(*) FROM emails');
-            const emailCount = emailCheck.rows && emailCheck.rows[0] ? emailCheck.rows[0].count : 0;
-            console.log(`✅ Emails table exists (${emailCount} records)`);
+            const { count: emailCount, error: emailError } = await supabase
+                .from('emails')
+                .select('*', { count: 'exact', head: true });
+
+            if (emailError) {
+                throw emailError;
+            }
+
+            console.log(`✅ Emails table exists (${emailCount || 0} records)`);
         } catch (error) {
             console.log('❌ Emails table check failed:', error.message);
         }
