@@ -83,6 +83,8 @@ Guidelines:
 - When users mention tasks (zz prefix), acknowledge you'll help create them
 - When users ask questions (?), provide informative answers
 - When users mark urgent (!!), acknowledge the priority
+- When users mention projects (pp prefix), acknowledge you'll help create them
+- When users say "create project" or similar, offer to create the project for them
 - Reference their existing tasks/projects when relevant
 - Suggest improvements based on their current workload
 - Format responses with clear sections and bullet points when appropriate`;
@@ -134,6 +136,12 @@ Guidelines:
       taskResult = await createTaskFromChat(message, req.user.id);
     }
 
+    // Handle project creation for 'pp' prefix or project-related keywords
+    let projectResult = null;
+    if (messageType === 'project_created' || messageType === 'project_related') {
+      projectResult = await createProjectFromChat(message, req.user.id);
+    }
+
     // Prepare response
     const response = {
       success: true,
@@ -154,6 +162,19 @@ Guidelines:
       }
       if (taskResult.error) {
         response.task_error = taskResult.error;
+      }
+    }
+
+    // Add project creation result if applicable
+    if (projectResult) {
+      response.project_created = projectResult.success;
+      response.project_message = projectResult.message;
+      if (projectResult.project) {
+        response.project_id = projectResult.project.id;
+        response.project_title = projectResult.project.title;
+      }
+      if (projectResult.error) {
+        response.project_error = projectResult.error;
       }
     }
 
@@ -362,9 +383,95 @@ async function createTaskFromChat(chatMessage, userId) {
   }
 }
 
+// Create project from chat message
+async function createProjectFromChat(chatMessage, userId) {
+  try {
+    const { supabase } = require('../database/connection');
+
+    // Extract project content by removing prefix
+    let fullContent = chatMessage.trim();
+    let projectType = 'project';
+    let category = 'personal';
+
+    if (chatMessage.toLowerCase().startsWith('pp ')) {
+      fullContent = chatMessage.substring(3).trim();
+    } else if (chatMessage.toLowerCase().startsWith('pp')) {
+      fullContent = chatMessage.substring(2).trim();
+    }
+
+    // Don't create empty projects
+    if (!fullContent) {
+      return { success: false, error: 'Project name cannot be empty' };
+    }
+
+    // Try to extract project details from the message
+    let title = fullContent;
+    let description = null;
+
+    // Simple parsing to extract title and description
+    if (fullContent.includes(' - ') || fullContent.includes(': ')) {
+      const parts = fullContent.split(/ - |: /);
+      title = parts[0].trim();
+      description = parts.slice(1).join(' ').trim();
+    }
+
+    // Detect project type from keywords
+    if (title.toLowerCase().includes('goal') || title.toLowerCase().includes('objective')) {
+      projectType = 'goal';
+    }
+
+    // Detect category from keywords
+    if (title.toLowerCase().includes('work') || title.toLowerCase().includes('business')) {
+      category = 'work';
+    } else if (title.toLowerCase().includes('personal') || title.toLowerCase().includes('home')) {
+      category = 'personal';
+    } else if (title.toLowerCase().includes('learning') || title.toLowerCase().includes('study')) {
+      category = 'learning';
+    }
+
+    // Insert project into database
+    const { data, error } = await supabase
+      .from('projects')
+      .insert({
+        user_id: userId,
+        title: title,
+        description: description,
+        priority: 3, // Default priority
+        category: category,
+        project_type: projectType,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      })
+      .select()
+      .single();
+
+    if (error) {
+      logger.error('Error creating project from chat:', error);
+      return { success: false, error: 'Failed to create project' };
+    }
+
+    logger.info(`Created project from chat: "${title}" (${category}) for user: ${userId}`);
+
+    return {
+      success: true,
+      project: data,
+      message: `Project "${title}" created successfully in ${category} category.`
+    };
+
+  } catch (error) {
+    logger.error('Error in createProjectFromChat:', error);
+    return { success: false, error: 'Internal server error creating project' };
+  }
+}
+
 // Detect message type based on prefixes and content
 function detectMessageType(message) {
   const msg = message.toLowerCase().trim();
+
+  // Project creation prefix
+  if (msg.startsWith('pp ') || msg.startsWith('pp')) {
+    return 'project_created';
+  }
 
   // Task creation prefixes
   if (msg.startsWith('zz ') || msg.startsWith('zz')) {
@@ -386,7 +493,14 @@ function detectMessageType(message) {
     return 'task_completion';
   }
 
-  // Project-related keywords
+  // Project-related keywords (only if not already handled by prefix)
+  if (msg.includes('create project') || msg.includes('new project') ||
+      msg.includes('start project') || msg.includes('project called') ||
+      msg.includes('project named')) {
+    return 'project_created';
+  }
+
+  // General project discussion
   if (msg.includes('project') || msg.includes('goal')) {
     return 'project_related';
   }
@@ -433,4 +547,5 @@ module.exports = router;
 
 // Export functions for testing
 module.exports.createTaskFromChat = createTaskFromChat;
+module.exports.createProjectFromChat = createProjectFromChat;
 module.exports.getUserContext = getUserContext;

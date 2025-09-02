@@ -91,10 +91,12 @@ async function debugGmailIntegration() {
             console.log('   ⚠️  Note: LMStudio integration needs to be added to emailAI.js');
         }
 
-        // Test OpenRouter if configured (but user said not to connect)
-        if (process.env.OPENROUTER_API_KEY) {
-            console.log('   OpenRouter API key configured');
-            console.log('   ⚠️  Note: OpenRouter integration structure ready but not connecting');
+        // Test OpenRouter if configured and enabled
+        if (process.env.OPENROUTER_API_KEY && process.env.ENABLE_OPENROUTER === 'true') {
+            console.log('   ✅ OpenRouter API key configured and enabled');
+            console.log('   ⚠️  Note: OpenRouter integration ready but may have API limits');
+        } else if (process.env.OPENROUTER_API_KEY) {
+            console.log('   OpenRouter API key configured but not enabled (set ENABLE_OPENROUTER=true)');
         }
 
         console.log('\n6️⃣ Testing Gmail Service Methods...');
