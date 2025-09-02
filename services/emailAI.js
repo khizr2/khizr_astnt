@@ -8,21 +8,27 @@ class EmailAIProcessor {
         });
     }
 
-    // Analyze email and determine priority, importance, and generate summary
+        // Analyze email and determine priority, importance, and generate word tree summary
     async analyzeEmail(email) {
         try {
             const prompt = `
-Analyze this email and provide a JSON response with the following structure:
+    Analyze this email and provide a JSON response with the following structure:
 {
-    "priority": 1-5 (1=urgent, 5=low),
+    "priority": 1-5 (1=urgent/high-importance, 5=low),
     "is_important": true/false,
     "is_from_person": true/false,
-    "summary": "2-3 sentence summary",
+    "word_tree": {
+        "main_topic": "single main topic",
+        "subtopics": ["subtopic1", "subtopic2"],
+        "key_points": ["point1", "point2"],
+        "action_items": ["action1", "action2"],
+        "deadlines": ["deadline1", "deadline2"],
+        "sentiment": "positive/negative/neutral"
+    },
     "action_required": true/false,
-    "suggested_response": "professional response draft if action_required is true",
-    "key_topics": ["topic1", "topic2"],
-    "deadlines": ["any deadlines mentioned"],
-    "urgency_reason": "why this is urgent/important"
+    "suggested_response": "professional response draft if action_required is true and priority <=2",
+    "urgency_reason": "why this is urgent/high-importance",
+    "response_needed": true/false
 }
 
 Email details:
@@ -32,10 +38,14 @@ Content: ${email.content.substring(0, 1000)}...
 
 Consider:
 - Is this from a real person or automated system?
-- Does it require immediate attention?
+- Does it require immediate attention or response?
 - Are there deadlines or urgent matters?
-- Is this business or personal communication?
-- Does it need a response?
+- Is this business-critical or personal?
+- What are the main topics and subtopics?
+- What actions are needed?
+- Priority 1-2 = High importance (needs response)
+- Priority 3-4 = Medium importance (needs summary report)
+- Priority 5 = Low importance (can be ignored)
 `;
 
             const response = await this.openai.chat.completions.create({
@@ -55,17 +65,24 @@ Consider:
             });
 
             const analysis = JSON.parse(response.choices[0].message.content);
-            
+
+            // Generate word tree formatted summary
+            const wordTreeSummary = this.formatWordTreeSummary(analysis.word_tree);
+
             return {
                 priority: analysis.priority || 3,
                 is_important: analysis.is_important || false,
                 is_from_person: analysis.is_from_person || false,
-                summary: analysis.summary || '',
+                word_tree: analysis.word_tree || {},
+                word_tree_summary: wordTreeSummary,
                 action_required: analysis.action_required || false,
-                suggested_response: analysis.suggested_response || '',
-                key_topics: analysis.key_topics || [],
-                deadlines: analysis.deadlines || [],
-                urgency_reason: analysis.urgency_reason || ''
+                suggested_response: analysis.priority <= 2 ? analysis.suggested_response || '' : '',
+                response_needed: analysis.response_needed || false,
+                urgency_reason: analysis.urgency_reason || '',
+                // For backward compatibility
+                summary: wordTreeSummary,
+                key_topics: analysis.word_tree?.subtopics || [],
+                deadlines: analysis.word_tree?.deadlines || []
             };
         } catch (error) {
             logger.error('Error analyzing email:', error);
@@ -74,14 +91,100 @@ Consider:
                 priority: 3,
                 is_important: email.is_important || false,
                 is_from_person: !email.is_automated,
-                summary: email.content_snippet || 'Email content unavailable',
+                word_tree: {
+                    main_topic: 'Email Communication',
+                    subtopics: ['General correspondence'],
+                    key_points: [email.content_snippet || 'Content unavailable'],
+                    action_items: [],
+                    deadlines: [],
+                    sentiment: 'neutral'
+                },
+                word_tree_summary: this.formatWordTreeSummary({
+                    main_topic: 'Email Communication',
+                    subtopics: ['General correspondence'],
+                    key_points: [email.content_snippet || 'Content unavailable'],
+                    action_items: [],
+                    deadlines: [],
+                    sentiment: 'neutral'
+                }),
                 action_required: false,
                 suggested_response: '',
+                response_needed: false,
+                urgency_reason: '',
+                // For backward compatibility
+                summary: email.content_snippet || 'Email content unavailable',
                 key_topics: [],
-                deadlines: [],
-                urgency_reason: ''
+                deadlines: []
             };
         }
+    }
+
+    // Format analysis into word tree structure for concise information display
+    formatWordTreeSummary(wordTree) {
+        if (!wordTree) return 'No analysis available';
+
+        let tree = `📧 ${wordTree.main_topic || 'Email'}\n`;
+
+        if (wordTree.subtopics && wordTree.subtopics.length > 0) {
+            tree += `├── ${wordTree.subtopics.join(', ')}\n`;
+        }
+
+        if (wordTree.key_points && wordTree.key_points.length > 0) {
+            tree += `├── Key Points:\n`;
+            wordTree.key_points.forEach(point => {
+                tree += `│   └── ${point}\n`;
+            });
+        }
+
+        if (wordTree.action_items && wordTree.action_items.length > 0) {
+            tree += `├── Actions:\n`;
+            wordTree.action_items.forEach(action => {
+                tree += `│   └── ${action}\n`;
+            });
+        }
+
+        if (wordTree.deadlines && wordTree.deadlines.length > 0) {
+            tree += `├── Deadlines:\n`;
+            wordTree.deadlines.forEach(deadline => {
+                tree += `│   └── ${deadline}\n`;
+            });
+        }
+
+        if (wordTree.sentiment) {
+            const sentimentEmoji = {
+                'positive': '😊',
+                'negative': '😟',
+                'neutral': '😐'
+            };
+            tree += `└── Sentiment: ${sentimentEmoji[wordTree.sentiment] || '😐'} ${wordTree.sentiment}\n`;
+        }
+
+        return tree;
+    }
+
+    // Generate summary report for medium-importance emails (priority 3-4)
+    generateSummaryReport(email, analysis) {
+        if (analysis.priority > 4) return null; // Skip low priority emails
+
+        const report = {
+            type: analysis.priority <= 2 ? 'high_importance_response' : 'medium_importance_summary',
+            priority: analysis.priority,
+            word_tree_summary: analysis.word_tree_summary,
+            email_details: {
+                from: email.sender,
+                subject: email.subject,
+                received: email.received_at
+            }
+        };
+
+        if (analysis.priority <= 2 && analysis.suggested_response) {
+            report.suggested_response = analysis.suggested_response;
+            report.action_type = 'response_required';
+        } else {
+            report.action_type = 'summary_only';
+        }
+
+        return report;
     }
 
     // Generate a more detailed response draft
@@ -131,41 +234,66 @@ Generate only the email body content (no subject line or headers):
         }
     }
 
-    // Process multiple emails and create notifications
+    // Process multiple emails and create notifications and reports
     async processEmails(emails) {
         const processedEmails = [];
         const notifications = [];
+        const reports = [];
 
         for (const email of emails) {
             try {
                 const analysis = await this.analyzeEmail(email);
-                
+
                 const processedEmail = {
                     ...email,
                     priority: analysis.priority,
                     is_important: analysis.is_important,
-                    summary: analysis.summary,
+                    summary: analysis.word_tree_summary,
                     suggested_response: analysis.suggested_response,
                     key_topics: analysis.key_topics,
                     deadlines: analysis.deadlines,
-                    urgency_reason: analysis.urgency_reason
+                    urgency_reason: analysis.urgency_reason,
+                    word_tree: analysis.word_tree,
+                    response_needed: analysis.response_needed
                 };
 
                 processedEmails.push(processedEmail);
 
-                // Create notification for important emails from real people
-                if (analysis.is_important && analysis.is_from_person && analysis.action_required) {
-                    notifications.push({
-                        type: 'email',
-                        title: `Important Email from ${email.sender}`,
-                        message: analysis.summary,
-                        priority: analysis.priority,
-                        email_data: {
-                            gmail_id: email.gmail_id,
-                            subject: email.subject,
-                            sender: email.sender
+                // Generate summary report for all important emails
+                if (analysis.is_important) {
+                    const report = this.generateSummaryReport(email, analysis);
+                    if (report) {
+                        reports.push(report);
+
+                        // Create notification for high-importance emails that need responses
+                        if (analysis.priority <= 2 && analysis.response_needed) {
+                            notifications.push({
+                                type: 'email_response_required',
+                                title: `🚨 Response Required: ${email.sender}`,
+                                message: analysis.word_tree_summary,
+                                priority: analysis.priority,
+                                email_data: {
+                                    gmail_id: email.gmail_id,
+                                    subject: email.subject,
+                                    sender: email.sender,
+                                    suggested_response: analysis.suggested_response
+                                }
+                            });
+                        } else if (analysis.priority <= 4) {
+                            // Notification for medium-importance emails (summary only)
+                            notifications.push({
+                                type: 'email_summary',
+                                title: `📋 Email Summary: ${email.sender}`,
+                                message: analysis.word_tree_summary,
+                                priority: analysis.priority,
+                                email_data: {
+                                    gmail_id: email.gmail_id,
+                                    subject: email.subject,
+                                    sender: email.sender
+                                }
+                            });
                         }
-                    });
+                    }
                 }
             } catch (error) {
                 logger.error(`Error processing email ${email.gmail_id}:`, error);
@@ -174,7 +302,7 @@ Generate only the email body content (no subject line or headers):
             }
         }
 
-        return { processedEmails, notifications };
+        return { processedEmails, notifications, reports };
     }
 }
 

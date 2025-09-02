@@ -131,11 +131,11 @@ class GmailService {
 
             const gmail = google.gmail({ version: 'v1', auth: this.oauth2Client });
 
-            // Fetch emails with specific query to filter out spam/promotions
+            // Fetch emails with enhanced filtering for truly important emails only
             const response = await gmail.users.messages.list({
                 userId: 'me',
                 maxResults: maxResults,
-                q: 'is:important OR from:me OR (in:inbox -category:promotions -category:social -category:updates)',
+                q: 'is:important -category:promotions -category:social -category:updates -category:forums -label:unread -older_than:30d',
                 labelIds: ['INBOX', 'IMPORTANT']
             });
 

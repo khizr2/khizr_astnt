@@ -60,14 +60,14 @@ router.get('/emails', authenticateToken, async (req, res) => {
         // If refresh is true, fetch from Gmail API
         if (refresh === 'true') {
             const gmailEmails = await gmailService.fetchEmails(req.user.id, parseInt(limit));
-            const { processedEmails, notifications } = await emailAI.processEmails(gmailEmails);
+            const { processedEmails, notifications, reports } = await emailAI.processEmails(gmailEmails);
 
             // Store processed emails in database
             for (const email of processedEmails) {
                 await query(
                     `INSERT INTO emails (
-                        user_id, gmail_id, sender, sender_email, subject, content, 
-                        content_snippet, priority, is_automated, is_important, 
+                        user_id, gmail_id, sender, sender_email, subject, content,
+                        content_snippet, priority, is_automated, is_important,
                         summary, suggested_response, status, labels, thread_id, received_at
                     ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
                     ON CONFLICT (gmail_id) DO UPDATE SET
@@ -79,7 +79,7 @@ router.get('/emails', authenticateToken, async (req, res) => {
                     [
                         req.user.id, email.gmail_id, email.sender, email.sender_email,
                         email.subject, email.content, email.content_snippet, email.priority,
-                        email.is_automated, email.is_important, email.summary,
+                        email.is_automated, email.is_important, email.word_tree_summary || email.summary,
                         email.suggested_response, 'unread', JSON.stringify(email.labels),
                         email.thread_id, email.received_at
                     ]
@@ -204,13 +204,14 @@ router.post('/emails/:id/respond', async (req, res) => {
 router.get('/stats', async (req, res) => {
     try {
         const stats = await query(
-            `SELECT 
+            `SELECT
                 COUNT(*) as total_emails,
                 COUNT(CASE WHEN status = 'unread' THEN 1 END) as unread_count,
                 COUNT(CASE WHEN is_important = true THEN 1 END) as important_count,
-                COUNT(CASE WHEN priority = 1 THEN 1 END) as urgent_count,
+                COUNT(CASE WHEN priority <= 2 THEN 1 END) as high_priority_count,
+                COUNT(CASE WHEN priority BETWEEN 3 AND 4 THEN 1 END) as medium_priority_count,
                 COUNT(CASE WHEN is_automated = true THEN 1 END) as automated_count
-             FROM emails 
+             FROM emails
              WHERE user_id = $1`,
             [req.user.id]
         );
@@ -219,6 +220,132 @@ router.get('/stats', async (req, res) => {
     } catch (error) {
         logger.error('Error getting email stats:', error);
         res.status(500).json({ error: 'Failed to get email statistics' });
+    }
+});
+
+// Get word tree formatted email digest
+router.get('/digest', authenticateToken, async (req, res) => {
+    try {
+        const { limit = 10, priority_filter } = req.query;
+
+        let whereClause = 'WHERE user_id = $1 AND is_important = true';
+        let params = [req.user.id];
+
+        if (priority_filter) {
+            if (priority_filter === 'high') {
+                whereClause += ' AND priority <= 2';
+            } else if (priority_filter === 'medium') {
+                whereClause += ' AND priority BETWEEN 3 AND 4';
+            }
+        }
+
+        const result = await query(
+            `SELECT * FROM emails ${whereClause}
+             ORDER BY priority ASC, received_at DESC
+             LIMIT $${params.length + 1}`,
+            [...params, parseInt(limit)]
+        );
+
+        // Generate word tree digest
+        const digest = {
+            total_count: result.rows.length,
+            high_priority_responses: [],
+            medium_priority_summaries: [],
+            generated_at: new Date().toISOString()
+        };
+
+        for (const email of result.rows) {
+            const emailData = {
+                id: email.id,
+                from: email.sender,
+                subject: email.subject,
+                received_at: email.received_at,
+                priority: email.priority,
+                word_tree_summary: email.summary // This now contains the word tree format
+            };
+
+            if (email.priority <= 2 && email.suggested_response) {
+                emailData.suggested_response = email.suggested_response;
+                digest.high_priority_responses.push(emailData);
+            } else if (email.priority <= 4) {
+                digest.medium_priority_summaries.push(emailData);
+            }
+        }
+
+        res.json(digest);
+    } catch (error) {
+        logger.error('Error getting email digest:', error);
+        res.status(500).json({ error: 'Failed to get email digest' });
+    }
+});
+
+// Get summary reports for medium importance emails
+router.get('/reports', authenticateToken, async (req, res) => {
+    try {
+        const result = await query(
+            `SELECT * FROM emails
+             WHERE user_id = $1 AND is_important = true AND priority BETWEEN 3 AND 4
+             ORDER BY received_at DESC
+             LIMIT 20`,
+            [req.user.id]
+        );
+
+        const reports = result.rows.map(email => ({
+            id: email.id,
+            gmail_id: email.gmail_id,
+            from: email.sender,
+            subject: email.subject,
+            received_at: email.received_at,
+            priority: email.priority,
+            type: 'medium_importance_summary',
+            word_tree_summary: email.summary,
+            action_type: 'summary_only'
+        }));
+
+        res.json({
+            reports,
+            count: reports.length,
+            message: 'Summary reports for medium-importance emails'
+        });
+    } catch (error) {
+        logger.error('Error getting email reports:', error);
+        res.status(500).json({ error: 'Failed to get email reports' });
+    }
+});
+
+// Get high-priority emails requiring responses
+router.get('/responses-required', authenticateToken, async (req, res) => {
+    try {
+        const result = await query(
+            `SELECT * FROM emails
+             WHERE user_id = $1 AND is_important = true AND priority <= 2
+             AND suggested_response IS NOT NULL
+             ORDER BY priority ASC, received_at DESC
+             LIMIT 10`,
+            [req.user.id]
+        );
+
+        const responseEmails = result.rows.map(email => ({
+            id: email.id,
+            gmail_id: email.gmail_id,
+            from: email.sender,
+            subject: email.subject,
+            received_at: email.received_at,
+            priority: email.priority,
+            type: 'high_importance_response',
+            word_tree_summary: email.summary,
+            suggested_response: email.suggested_response,
+            action_type: 'response_required'
+        }));
+
+        res.json({
+            emails: responseEmails,
+            count: responseEmails.length,
+            message: 'High-priority emails requiring responses'
+        });
+    } catch (error) {
+        logger.error('Error getting response-required emails:', error);
+        res.status(500).json({ error: 'Failed to get response-required emails' });
     }
 });
 
