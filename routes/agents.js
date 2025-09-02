@@ -2183,13 +2183,10 @@ router.get('/', async (req, res) => {
     try {
         const { type, is_active, limit = 50, offset = 0 } = req.query;
 
+        // Start with simple query first
         let query = supabase
             .from('agents')
-            .select(`
-                *,
-                agent_profiles (*),
-                agent_status (*)
-            `)
+            .select('*')
             .eq('user_id', req.user.id)
             .order('created_at', { ascending: false })
             .range(offset, offset + limit - 1);
@@ -2206,18 +2203,49 @@ router.get('/', async (req, res) => {
 
         if (error) {
             logger.error('Get agents error:', error);
-            return res.status(500).json({ error: 'Failed to fetch agents' });
+            return res.status(500).json({ error: 'Failed to fetch agents', details: error.message });
+        }
+
+        // If we have agents, try to get their profiles and status
+        let agentsWithDetails = agents || [];
+
+        if (agentsWithDetails.length > 0) {
+            try {
+                const agentIds = agentsWithDetails.map(a => a.id);
+
+                // Get profiles
+                const { data: profiles } = await supabase
+                    .from('agent_profiles')
+                    .select('*')
+                    .in('agent_id', agentIds);
+
+                // Get status
+                const { data: statuses } = await supabase
+                    .from('agent_status')
+                    .select('*')
+                    .in('agent_id', agentIds);
+
+                // Merge data
+                agentsWithDetails = agentsWithDetails.map(agent => ({
+                    ...agent,
+                    agent_profiles: profiles?.filter(p => p.agent_id === agent.id) || [],
+                    agent_status: statuses?.filter(s => s.agent_id === agent.id) || []
+                }));
+            } catch (joinError) {
+                logger.warn('Failed to fetch agent details:', joinError);
+                // Continue without details - basic agent data is still useful
+            }
         }
 
         res.json({
             success: true,
-            agents: agents || [],
-            count: agents?.length || 0
+            agents: agentsWithDetails,
+            count: agentsWithDetails.length
         });
 
     } catch (error) {
         logger.error('Get agents error:', error);
-        res.status(500).json({ error: 'Internal server error' });
+        res.status(500).json({ error: 'Internal server error', details: error.message });
     }
 });
 

@@ -1,3 +1,44 @@
+-- ===========================================
+-- AGENTS TABLE MIGRATION - Drop and Recreate
+-- ===========================================
+
+-- IMPORTANT: This will DELETE ALL existing agent data!
+-- Backup any important agent data before running this script.
+
+-- Drop existing agents table if it exists (to fix schema mismatch)
+DROP TABLE IF EXISTS agents CASCADE;
+
+-- Create the agents table with correct schema
+CREATE TABLE agents (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    name VARCHAR(255) NOT NULL,
+    type VARCHAR(100) NOT NULL, -- 'task_manager', 'email_assistant', 'project_coordinator', etc.
+    model VARCHAR(100) DEFAULT 'gpt-4', -- AI model being used
+    description TEXT,
+    is_active BOOLEAN DEFAULT TRUE,
+    capabilities JSONB DEFAULT '{}', -- JSON array of agent capabilities
+    configuration JSONB DEFAULT '{}', -- Agent-specific configuration
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- ===========================================
+-- AGENT PROFILES AND OTHER TABLES
+-- ===========================================
+
+-- Drop related tables if they exist (due to CASCADE from agents drop)
+DROP TABLE IF EXISTS agent_profiles CASCADE;
+DROP TABLE IF EXISTS agent_tasks CASCADE;
+DROP TABLE IF EXISTS agent_status CASCADE;
+DROP TABLE IF EXISTS agent_conversations CASCADE;
+DROP TABLE IF EXISTS agent_tools CASCADE;
+DROP TABLE IF EXISTS agent_permissions CASCADE;
+DROP TABLE IF EXISTS agent_logs CASCADE;
+DROP TABLE IF EXISTS agent_analytics CASCADE;
+DROP TABLE IF EXISTS approvals_queue CASCADE;
+DROP TABLE IF EXISTS approval_history CASCADE;
+DROP TABLE IF EXISTS agent_metrics CASCADE;
 CREATE TABLE agent_profiles (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     agent_id UUID NOT NULL REFERENCES agents(id) ON DELETE CASCADE,
