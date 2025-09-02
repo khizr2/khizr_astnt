@@ -41,6 +41,9 @@ const limiter = rateLimit({
 });
 app.use('/api/', limiter);
 
+// Static file serving
+app.use(express.static('public'));
+
 // Body parsing middleware
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
@@ -65,12 +68,17 @@ app.use('/api/agents', agentRoutes);
 app.use('/api/messaging', messagingRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/api/user/preferences', preferencesRoutes);
-// Health check endpoint
+// Serve main application
 app.get('/', (req, res) => {
-    res.json({ 
-        status: 'OK', 
+    res.sendFile(__dirname + '/app.html');
+});
+
+// API health check endpoint
+app.get('/api', (req, res) => {
+    res.json({
+        status: 'OK',
         message: 'Khizr Personal Assistant API',
-        timestamp: new Date().toISOString() 
+        timestamp: new Date().toISOString()
     });
 });
 
