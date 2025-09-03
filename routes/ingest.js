@@ -1,7 +1,7 @@
 // routes/ingest.js
 const express = require('express');
 const router = express.Router();
-const pool = require('../database/connection'); // your existing pg pool
+const { supabase } = require('../database/connection'); // Supabase client
 
 // allowed categories
 const CATS = new Set(['task','idea','topic','health','life','home','spirituality']);
@@ -48,20 +48,33 @@ router.post('/', async (req, res) => {
     const inserted = [];
 
     for (const it of items) {
-      const { rows } = await pool.query(
-        `INSERT INTO notes (user_id, prefix, category, title, body, tags)
-         VALUES ($1,$2,$3,$4,$5,$6) RETURNING *`,
-        [userId, it.prefix, it.category, it.title, it.body, it.tags]
-      );
-      inserted.push(rows[0]);
+      const { data, error } = await supabase
+        .from('notes')
+        .insert({
+          user_id: userId,
+          prefix: it.prefix,
+          category: it.category,
+          title: it.title,
+          body: it.body,
+          tags: it.tags
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+      inserted.push(data);
 
       // auto-create a task for 'zz'
       if (it.prefix === 'zz') {
-        await pool.query(
-          `INSERT INTO tasks (user_id, source_note_id, priority)
-           VALUES ($1,$2,$3)`,
-          [userId, rows[0].id, 0]
-        );
+        const { error: taskError } = await supabase
+          .from('tasks')
+          .insert({
+            user_id: userId,
+            source_note_id: data.id,
+            priority: 0
+          });
+
+        if (taskError) throw taskError;
       }
     }
 
