@@ -65,7 +65,6 @@ const limiter = rateLimit({
 app.use('/api/', limiter);
 
 // Static file serving
-app.use('/public', express.static('public'));
 app.use(express.static('public'));
 
 // Body parsing middleware

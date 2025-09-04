@@ -1,9 +1,8 @@
 // KHIZR FRONTEND CONTINUATION - Gmail and remaining functions
 
-// Gmail functionality (simplified with error handling)
+// Gmail functionality (OAuth flow)
 async function connectGmail() {
     const connectBtn = safeGetElement('gmailConnectBtn');
-    const refreshBtn = safeGetElement('refreshEmailsBtn');
     const status = safeGetElement('emailStatus');
 
     if (connectBtn) {
@@ -12,22 +11,24 @@ async function connectGmail() {
     }
     
     if (status) {
-        status.textContent = 'Authenticating with Gmail...';
+        status.textContent = 'Getting authorization URL...';
     }
 
     try {
-        const response = await fetch(`${API_URL}/gmail/connect`, {
-            method: 'POST',
+        // First, get the OAuth authorization URL from the server
+        const response = await fetch(`${API_URL}/api/gmail/auth`, {
+            method: 'GET',
             headers: getAuthHeaders()
         });
 
         if (response.ok) {
-            if (connectBtn) connectBtn.style.display = 'none';
-            if (refreshBtn) refreshBtn.style.display = 'inline-block';
-            if (status) status.textContent = 'Connected to Gmail ✓';
-            await loadEmails();
+            const data = await response.json();
+            if (status) status.textContent = 'Redirecting to Google for authorization...';
+            
+            // Redirect user to Google OAuth page
+            window.location.href = data.authUrl;
         } else {
-            throw new Error('Failed to connect');
+            throw new Error('Failed to get authorization URL');
         }
     } catch (error) {
         console.warn('Gmail connection failed:', error);
@@ -39,19 +40,72 @@ async function connectGmail() {
     }
 }
 
-async function loadEmails() {
-    const status = safeGetElement('emailStatus');
-    if (status) status.textContent = 'Loading emails...';
+// Handle Gmail OAuth callback
+function handleGmailCallback() {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('gmail') === 'connected') {
+        const status = safeGetElement('emailStatus');
+        if (status) status.textContent = 'Gmail connected successfully! ✓';
+        
+        // Remove the parameter from URL
+        const url = new URL(window.location);
+        url.searchParams.delete('gmail');
+        window.history.replaceState({}, '', url);
+        
+        // Show success message
+        showSuccessMessage('Gmail connected successfully! Your emails will be loaded shortly.');
+    } else if (urlParams.get('gmail') === 'error') {
+        const status = safeGetElement('emailStatus');
+        if (status) status.textContent = 'Gmail connection failed. Please try again.';
+        
+        // Remove the parameter from URL
+        const url = new URL(window.location);
+        url.searchParams.delete('gmail');
+        window.history.replaceState({}, '', url);
+        
+        // Show error message
+        showErrorMessage('Gmail connection failed. Please check your credentials and try again.');
+    }
+}
 
+// Check Gmail connection status on page load
+async function checkGmailStatus() {
     try {
-        const response = await fetch(`${API_URL}/gmail/messages`, {
+        const response = await fetch(`${API_URL}/api/gmail/status`, {
             headers: getAuthHeaders()
         });
 
         if (response.ok) {
             const data = await response.json();
-            displayEmails(data.messages || []);
-            if (status) status.textContent = `Loaded ${data.messages?.length || 0} emails`;
+            const connectBtn = safeGetElement('gmailConnectBtn');
+            const refreshBtn = safeGetElement('refreshEmailsBtn');
+            const status = safeGetElement('emailStatus');
+
+            if (data.connected) {
+                if (connectBtn) connectBtn.style.display = 'none';
+                if (refreshBtn) refreshBtn.style.display = 'inline-block';
+                if (status) status.textContent = 'Connected to Gmail ✓';
+                await loadEmails();
+            }
+        }
+    } catch (error) {
+        console.warn('Failed to check Gmail status:', error);
+    }
+}
+
+async function loadEmails() {
+    const status = safeGetElement('emailStatus');
+    if (status) status.textContent = 'Loading emails...';
+
+    try {
+        const response = await fetch(`${API_URL}/api/gmail/emails?refresh=true&limit=20`, {
+            headers: getAuthHeaders()
+        });
+
+        if (response.ok) {
+            const emails = await response.json();
+            displayEmails(emails || []);
+            if (status) status.textContent = `Loaded ${emails?.length || 0} emails`;
         } else {
             throw new Error('Failed to load emails');
         }
@@ -76,13 +130,14 @@ function displayEmails(emails) {
     }
 
     const emailsHTML = emails.map(email => `
-        <div class="email-item ${email.unread ? 'unread' : ''}" onclick="openEmail('${email.id}')">
+        <div class="email-item ${email.status === 'unread' ? 'unread' : ''}" onclick="openEmail('${email.id}')">
             <div class="email-header">
-                <div class="email-from">${escapeHtml(email.from || 'Unknown Sender')}</div>
-                <div class="email-date">${formatEmailDate(email.date)}</div>
+                <div class="email-from">${escapeHtml(email.sender || 'Unknown Sender')}</div>
+                <div class="email-date">${formatEmailDate(email.received_at)}</div>
             </div>
             <div class="email-subject">${escapeHtml(email.subject || 'No Subject')}</div>
-            <div class="email-snippet">${escapeHtml(email.snippet || '')}</div>
+            <div class="email-snippet">${escapeHtml(email.content_snippet || '')}</div>
+            ${email.priority <= 2 ? '<div class="email-priority">High Priority</div>' : ''}
         </div>
     `).join('');
 
@@ -239,6 +294,10 @@ function initializeKhizrApp() {
         
         // Initialize the main app
         initializeApp();
+        
+        // Check Gmail connection status and handle OAuth callback
+        handleGmailCallback();
+        checkGmailStatus();
         
         // Sync any local data
         syncLocalData();

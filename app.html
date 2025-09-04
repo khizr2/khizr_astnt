@@ -6,15 +6,22 @@
 <title>Khizr Assistant</title>
 
 <!-- External Stylesheets -->
-<link rel="stylesheet" href="public/css/main.css">
-<link rel="stylesheet" href="public/css/components.css">
-<link rel="stylesheet" href="public/css/animations.css">
+<link rel="stylesheet" href="/css/main.css">
+<link rel="stylesheet" href="/css/components.css">
+<link rel="stylesheet" href="/css/animations.css">
 
 <!-- Environment Configuration -->
 <script>
     // Environment configuration - can be overridden by server
     window.API_BASE_URL = window.API_BASE_URL || (window.location.hostname === 'localhost' ? 'http://localhost:10000' : '');
 </script>
+
+<!-- External JavaScript Modules -->
+<script src="/js/config.js"></script>
+<script src="/js/api.js"></script>
+<script src="/js/auth.js"></script>
+<script src="/js/ui.js"></script>
+<script src="/js/app.js"></script>
 
 </head>
 <body class="theme-purple">
@@ -36,22 +43,22 @@
 
   <div class="header-controls">
     <div class="theme-toggle">
-      <button class="theme-btn purple active" onclick="setTheme('purple')"></button>
-      <button class="theme-btn red" onclick="setTheme('red')"></button>
+      <button class="theme-btn purple active" onclick="typeof setTheme === 'function' && setTheme('purple')"></button>
+      <button class="theme-btn red" onclick="typeof setTheme === 'function' && setTheme('red')"></button>
     </div>
-    <button class="approvals-btn notification-badge" data-count="0" onclick="showView('approvals')" id="approvalsHeaderBtn" title="Approvals">
+    <button class="approvals-btn notification-badge" data-count="0" onclick="typeof showView === 'function' && showView('approvals')" id="approvalsHeaderBtn" title="Approvals">
       🔔
     </button>
-    <button class="preference-btn" onclick="showPreferenceModal()" title="Preference Settings">⚙️</button>
-    <button class="logout-btn" onclick="logout()" title="Logout">🚪</button>
+    <button class="preference-btn" onclick="typeof showPreferenceModal === 'function' && showPreferenceModal()" title="Preference Settings">⚙️</button>
+    <button class="logout-btn" onclick="typeof logout === 'function' && logout()" title="Logout">🚪</button>
   </div>
 
   <!-- Daddy Agent Controls -->
   <div class="daddy-controls" style="margin-top: 10px;">
-    <button class="btn btn-small" onclick="toggleDaddyMonitoring()" id="daddyToggle">
+    <button class="btn btn-small" onclick="typeof toggleDaddyMonitoring === 'function' && toggleDaddyMonitoring()" id="daddyToggle">
         👨‍👧 Toggle Daddy Mode
     </button>
-    <button class="btn btn-small" onclick="showDaddyAnalytics()">
+    <button class="btn btn-small" onclick="typeof showDaddyAnalytics === 'function' && showDaddyAnalytics()">
         📈 Analytics
     </button>
   </div>
@@ -59,12 +66,12 @@
 
 <!-- Navigation -->
 <nav class="nav">
-<button class="nav-btn active" onclick="showView('today')">today</button>
-<button class="nav-btn" onclick="showView('projects')">projects</button>
-<button class="nav-btn" onclick="showView('goals')">goals</button>
-<button class="nav-btn" onclick="showView('agents')">agents</button>
-<button class="nav-btn" onclick="showView('chat')">ai chat</button>
-<button class="nav-btn" onclick="showView('emails')">emails</button>
+    <button class="nav-btn active" onclick="typeof showView === 'function' && showView('today')">today</button>
+<button class="nav-btn" onclick="typeof showView === 'function' && showView('projects')">projects</button>
+<button class="nav-btn" onclick="typeof showView === 'function' && showView('goals')">goals</button>
+<button class="nav-btn" onclick="typeof showView === 'function' && showView('agents')">agents</button>
+<button class="nav-btn" onclick="typeof showView === 'function' && showView('chat')">ai chat</button>
+<button class="nav-btn" onclick="typeof showView === 'function' && showView('emails')">emails</button>
 </nav>
 
 <!-- Today View -->
@@ -80,7 +87,7 @@
 <div class="code-card" id="tasksContainer">
 <div class="section-header">
 tasks
-<button class="add-btn" onclick="showAddTaskModal()">+ add</button>
+<button class="add-btn" onclick="typeof showAddTaskModal === 'function' && showAddTaskModal()">+ add</button>
 </div>
 <ul class="task-list" id="tasksList">
 <!-- Tasks will be loaded dynamically -->
@@ -98,7 +105,7 @@ placeholder="? research question | zz task | !! urgent | og preserve note"
 id="aiNote"
 style="border: 1px solid var(--border); background: var(--bg);"
 ></textarea>
-<button class="ai-send-btn" onclick="processAINote()" style="background: var(--primary); color: white; border: none; font-size: 12px;">run</button>
+<button class="ai-send-btn" onclick="typeof processAINote === 'function' && processAINote()" style="background: var(--primary); color: white; border: none; font-size: 12px;">run</button>
 </div>
 </div>
 </div>
@@ -130,8 +137,8 @@ style="border: 1px solid var(--border); background: var(--bg);"
 
 <!-- Quick Actions -->
 <div style="margin-top: 20px;">
-<button class="mind-btn" onclick="showMindPage()" style="background: transparent; border: 1px solid var(--border); color: var(--text-primary); font-size: 13px; padding: 8px 16px; border-radius: 4px;">
- on my mind
+<button class="mind-btn" onclick="typeof showMindPage === 'function' && showMindPage()" style="background: transparent; border: 1px solid var(--border); color: var(--text-primary); font-size: 13px; padding: 8px 16px; border-radius: 4px;">
+   on my mind
 </button>
 </div>
 </div>
@@ -145,12 +152,12 @@ style="border: 1px solid var(--border); background: var(--bg);"
 <span>projects</span>
 <!-- Sort Controls -->
 <div class="sort-controls" style="display: flex; gap: 4px;">
-<button class="sort-btn" onclick="sortProjects('name')" title="Sort by name" id="sortName">📝</button>
-<button class="sort-btn" onclick="sortProjects('date')" title="Sort by date" id="sortDate">📅</button>
-<button class="sort-btn" onclick="sortProjects('priority')" title="Sort by priority" id="sortPriority">⭐</button>
+<button class="sort-btn" onclick="typeof sortProjects === 'function' && sortProjects('name')" title="Sort by name" id="sortName">📝</button>
+<button class="sort-btn" onclick="typeof sortProjects === 'function' && sortProjects('date')" title="Sort by date" id="sortDate">📅</button>
+<button class="sort-btn" onclick="typeof sortProjects === 'function' && sortProjects('priority')" title="Sort by priority" id="sortPriority">⭐</button>
 </div>
 </div>
-<button class="add-btn" onclick="showAddProjectModal()" title="New Project" style="background: var(--primary); border: none; border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; font-size: 16px; cursor: pointer;">+</button>
+<button class="add-btn" onclick="typeof showAddProjectModal === 'function' && showAddProjectModal()" title="New Project" style="background: var(--primary); border: none; border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; font-size: 16px; cursor: pointer;">+</button>
 </div>
 <div class="project-list" id="projectList">
 <!-- Projects will be loaded dynamically -->
@@ -215,9 +222,9 @@ style="border: 1px solid var(--border); background: var(--bg);"
 <div class="agent-controls">
 <h3>Agent Controls</h3>
 <div class="control-buttons">
-<button class="btn-primary" onclick="refreshAgentStatus()">🔄 Refresh Status</button>
-<button class="btn-secondary" onclick="showAgentAnalytics()">📊 Analytics</button>
-<button class="btn-secondary" onclick="showDaddyControls()">👨‍👧 Daddy Controls</button>
+<button class="btn-primary" onclick="typeof refreshAgentStatus === 'function' && refreshAgentStatus()">🔄 Refresh Status</button>
+<button class="btn-secondary" onclick="typeof showAgentAnalytics === 'function' && showAgentAnalytics()">📊 Analytics</button>
+<button class="btn-secondary" onclick="typeof showDaddyControls === 'function' && showDaddyControls()">👨‍👧 Daddy Controls</button>
 </div>
 </div>
 </div>
@@ -231,7 +238,7 @@ id="mindInput"
 class="mind-textarea"
 placeholder="Share your thoughts, ideas, concerns..."
 ></textarea>
-<button class="mind-save-btn" onclick="saveMindNote()">save thought</button>
+<button class="mind-save-btn" onclick="typeof saveMindNote === 'function' && saveMindNote()">save thought</button>
 </div>
 </div>
 
@@ -291,7 +298,7 @@ placeholder="Type your message or use prefixes: ? zz og !!"
 onkeypress="handleChatKeyPress(event)"
 oninput="autoResizeTextarea(this)"
 ></textarea>
-<button class="chat-send-btn" id="chatSendBtn" onclick="sendChatMessage()">Send</button>
+<button class="chat-send-btn" id="chatSendBtn" onclick="typeof sendChatMessage === 'function' && sendChatMessage()">Send</button>
 </div>
 </div>
 </div>
@@ -302,10 +309,10 @@ oninput="autoResizeTextarea(this)"
 <div class="code-card boxed">
 <div class="section-header">emails</div>
 <div class="emails-controls" style="margin-bottom: 20px;">
-<button class="btn-primary" onclick="connectGmail()" id="gmailConnectBtn">
+<button class="btn-primary" onclick="typeof connectGmail === 'function' && connectGmail()" id="gmailConnectBtn">
 Connect Gmail
 </button>
-<button class="btn-secondary" onclick="refreshEmails()" id="refreshEmailsBtn" style="display:none;">
+<button class="btn-secondary" onclick="typeof refreshEmails === 'function' && refreshEmails()" id="refreshEmailsBtn" style="display:none;">
 Refresh
 </button>
 <span id="emailStatus" style="margin-left: 12px; font-size: 11px; color: var(--text-secondary);"></span>
@@ -416,7 +423,7 @@ Refresh
         <span class="metric-value" id="daddyStatus">Active</span>
     </div>
 </div>
-<button class="btn-secondary" style="margin-top: 12px;" onclick="showPatternInsights()" title="View detailed patterns">📊 View Detailed Patterns</button>
+<button class="btn-secondary" style="margin-top: 12px;" onclick="typeof showPatternInsights === 'function' && showPatternInsights()" title="View detailed patterns">📊 View Detailed Patterns</button>
 </div>
 
 <div class="preference-section">
@@ -439,21 +446,14 @@ Refresh
 Your preferences are automatically learned from your feedback and interaction patterns.
 </p>
 <div class="preference-controls">
-<button class="btn-secondary" onclick="resetPreferences()">Reset All Preferences</button>
-<button class="btn-primary" onclick="updatePreferences()">Update Preferences</button>
+<button class="btn-secondary" onclick="typeof resetPreferences === 'function' && resetPreferences()">Reset All Preferences</button>
+<button class="btn-primary" onclick="typeof updatePreferences === 'function' && updatePreferences()">Update Preferences</button>
 </div>
 </div>
 </div>
 </div>
 </div>
 
-
-<!-- External JavaScript Modules -->
-<script src="public/js/config.js"></script>
-<script src="public/js/api.js"></script>
-<script src="public/js/auth.js"></script>
-<script src="public/js/ui.js"></script>
-<script src="public/js/app.js"></script>
 
 </body>
 </html>
