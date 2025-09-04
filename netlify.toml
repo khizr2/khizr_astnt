@@ -6,10 +6,11 @@
 
 # Environment Variables for Netlify
 # These need to be set in Netlify dashboard under Site Settings > Environment Variables
+# The values below are defaults - actual values should be set in Netlify dashboard
 [build.environment]
   # Supabase Configuration
   VITE_SUPABASE_URL = "https://tugoaqoadsqbvgckkoqf.supabase.co"
-  VITE_SUPABASE_ANON_KEY = "your_supabase_anon_key_here"
+  VITE_SUPABASE_ANON_KEY = "your_actual_supabase_anon_key_here"
 
   # Backend API Configuration
   VITE_RENDER_API_URL = "https://khizr-assistant-api.onrender.com"

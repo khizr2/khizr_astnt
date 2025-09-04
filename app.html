@@ -285,10 +285,37 @@
         // Initialize Supabase client for the main app
         (async function initApp() {
             try {
-                // Get configuration from environment variables
-                const SUPABASE_URL = window.VITE_SUPABASE_URL || 'https://tugoaqoadsqbvgckkoqf.supabase.co';
-                const SUPABASE_ANON_KEY = window.VITE_SUPABASE_ANON_KEY;
-                const API_BASE_URL = window.VITE_RENDER_API_URL || 'https://khizr-assistant-api.onrender.com';
+                // Multiple fallback methods for environment variables
+                let SUPABASE_URL = 'https://tugoaqoadsqbvgckkoqf.supabase.co';
+                let SUPABASE_ANON_KEY = null;
+                let API_BASE_URL = 'https://khizr-assistant-api.onrender.com';
+
+                // Try different methods to get environment variables
+                if (window.VITE_SUPABASE_URL) {
+                    SUPABASE_URL = window.VITE_SUPABASE_URL;
+                }
+                if (window.VITE_SUPABASE_ANON_KEY) {
+                    SUPABASE_ANON_KEY = window.VITE_SUPABASE_ANON_KEY;
+                }
+                if (window.VITE_RENDER_API_URL) {
+                    API_BASE_URL = window.VITE_RENDER_API_URL;
+                }
+
+                // If still not found, try to get from API endpoint as backup
+                if (!SUPABASE_ANON_KEY) {
+                    console.log('Trying to get environment variables from API...');
+                    try {
+                        const response = await fetch('/api/config/env');
+                        if (response.ok) {
+                            const envData = await response.json();
+                            SUPABASE_URL = envData.SUPABASE_URL || SUPABASE_URL;
+                            SUPABASE_ANON_KEY = envData.SUPABASE_ANON_KEY;
+                            console.log('Got environment variables from API');
+                        }
+                    } catch (apiError) {
+                        console.warn('API fallback failed:', apiError.message);
+                    }
+                }
 
                 if (!SUPABASE_ANON_KEY) {
                     throw new Error('SUPABASE_ANON_KEY environment variable is required');
