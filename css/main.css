@@ -1,0 +1,101 @@
+/* Main Styles - Core Variables and Base Styles */
+
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&display=swap');
+
+:root {
+  /* Modern Neumorphism Color System */
+  --primary: #8B5CF6;
+  --secondary: #EF4444;
+  --bg: #0F0F23;
+  --bg-card: #1A1A2E;
+  --bg-glass: rgba(26, 26, 46, 0.85);
+  --bg-glass-light: rgba(26, 26, 46, 0.6);
+  --text-primary: #E4E4E7;
+  --text-secondary: #71717A;
+  --text-accent: #A855F7;
+  --border: #27272A;
+  --border-accent: #3F3F46;
+  --border-glass: rgba(255, 255, 255, 0.1);
+  --success: #10B981;
+  --warning: #F59E0B;
+  --error: #EF4444;
+  --info: #3B82F6;
+
+  /* Neumorphism Shadow System */
+  --shadow-light: 0 8px 32px rgba(31, 38, 135, 0.37);
+  --shadow-neumorph: 8px 8px 16px rgba(0, 0, 0, 0.3), -8px -8px 16px rgba(255, 255, 255, 0.05);
+  --shadow-neumorph-inset: inset 8px 8px 16px rgba(0, 0, 0, 0.3), inset -8px -8px 16px rgba(255, 255, 255, 0.05);
+  --shadow-neumorph-pressed: inset 4px 4px 8px rgba(0, 0, 0, 0.4), inset -4px -4px 8px rgba(255, 255, 255, 0.05);
+  --shadow-glass: 0 8px 32px rgba(31, 38, 135, 0.37), 0 0 0 1px rgba(255, 255, 255, 0.1);
+  --shadow-soft: 0 2px 8px rgba(0, 0, 0, 0.15), 0 1px 3px rgba(0, 0, 0, 0.1);
+
+  /* Animation Variables */
+  --transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-normal: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  --bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.theme-red {
+  --primary: #EF4444;
+  --text-accent: #F87171;
+}
+
+.theme-purple {
+  --primary: #8B5CF6;
+  --text-accent: #A855F7;
+}
+
+/* Base Styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'JetBrains Mono', monospace;
+  background:
+    radial-gradient(ellipse at top, rgba(139, 92, 246, 0.15) 0%, transparent 50%),
+    radial-gradient(ellipse at bottom, rgba(239, 68, 68, 0.15) 0%, transparent 50%),
+    linear-gradient(135deg, var(--bg) 0%, #0A0A0B 100%);
+  color: var(--text-primary);
+  line-height: 1.6;
+  font-weight: 400;
+  min-height: 100vh;
+  font-size: 14px;
+  backdrop-filter: blur(1px);
+}
+
+.container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 40px 20px;
+}
+
+/* Header */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 60px;
+  padding-bottom: 20px;
+}
+
+.agent-status {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.agent-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--success);
+}
+
+.agent-indicator.busy {
+  background: var(--warning);
+  animation: pulse 2s infinite;
+}

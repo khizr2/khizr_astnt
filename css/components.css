@@ -1,0 +1,494 @@
+/* Component Styles - UI Components and Elements */
+
+.agent-indicator.offline {
+  background: var(--text-secondary);
+}
+
+.theme-toggle {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.theme-btn {
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  opacity: 0.6;
+}
+
+.theme-btn.purple { background: #8B5CF6; }
+.theme-btn.red { background: #EF4444; }
+
+.theme-btn:hover {
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+.theme-btn.active {
+  opacity: 1;
+}
+
+.logout-btn {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: 16px;
+  padding: 4px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  margin-left: 16px;
+}
+
+.logout-btn:hover {
+  color: var(--primary);
+  background: rgba(139, 92, 246, 0.1);
+}
+
+/* Preference Indicators */
+.preference-indicators {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-left: 20px;
+}
+
+.preference-badge {
+  background: rgba(139, 92, 246, 0.1);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 4px 8px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.preference-badge:hover {
+  background: rgba(139, 92, 246, 0.2);
+  border-color: var(--primary);
+}
+
+.preference-btn {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: 16px;
+  padding: 4px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  margin-right: 8px;
+}
+
+.preference-btn:hover {
+  color: var(--primary);
+  background: rgba(139, 92, 246, 0.1);
+}
+
+.approvals-btn {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: 16px;
+  padding: 4px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  margin-left: 8px;
+  position: relative;
+}
+
+.approvals-btn:hover {
+  color: var(--primary);
+  background: rgba(139, 92, 246, 0.1);
+}
+
+.approvals-btn[data-count="0"]::after {
+  display: none;
+}
+
+.approvals-btn::after {
+  content: attr(data-count);
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  background: var(--secondary);
+  color: white;
+  border-radius: 50%;
+  width: 16px;
+  height: 16px;
+  font-size: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 500;
+}
+
+/* Modern Neumorphic Navigation */
+.nav {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 40px;
+  font-size: 13px;
+  font-weight: 500;
+  flex-wrap: wrap;
+}
+
+.nav-btn {
+  background: var(--bg-glass);
+  border: 1px solid var(--border-glass);
+  border-radius: 12px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-normal);
+  position: relative;
+  padding: 8px 16px;
+  font-family: inherit;
+  font-size: inherit;
+  backdrop-filter: blur(10px);
+  box-shadow: var(--shadow-soft);
+  overflow: hidden;
+}
+
+.nav-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(139, 92, 246, 0.1), transparent);
+  transition: left var(--transition-normal);
+}
+
+.nav-btn:hover {
+  color: var(--text-primary);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-neumorph);
+  border-color: rgba(139, 92, 246, 0.3);
+}
+
+.nav-btn:hover::before {
+  left: 100%;
+}
+
+.nav-btn.active {
+  color: white;
+  background: linear-gradient(135deg, var(--primary) 0%, #7C3AED 100%);
+  border-color: var(--primary);
+  box-shadow: var(--shadow-soft), 0 0 20px rgba(139, 92, 246, 0.2);
+  transform: translateY(-2px);
+}
+
+.nav-btn.active::after {
+  display: none;
+}
+
+/* Notification Badge */
+.notification-badge {
+  position: relative;
+}
+
+.notification-badge::after {
+  content: attr(data-count);
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: var(--secondary);
+  color: white;
+  border-radius: 50%;
+  width: 16px;
+  height: 16px;
+  font-size: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 500;
+}
+
+.notification-badge[data-count="0"]::after {
+  display: none;
+}
+
+/* Main Layout */
+.today-view {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr;
+  gap: 60px;
+}
+
+/* Modern Neumorphic Cards */
+.code-card {
+  padding: 0;
+  margin-bottom: 48px;
+  font-size: 13px;
+  animation: fadeInUp 0.6s ease-out;
+}
+
+.code-card.boxed {
+  background: var(--bg-card);
+  border: none;
+  border-radius: 16px;
+  padding: 32px;
+  box-shadow: var(--shadow-neumorph);
+  transition: all var(--transition-normal);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--border-glass);
+  position: relative;
+  overflow: hidden;
+}
+
+.code-card.boxed::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+  pointer-events: none;
+  border-radius: 16px;
+}
+
+.code-card.boxed:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-neumorph), 0 20px 40px rgba(139, 92, 246, 0.1);
+}
+
+.section-header {
+  color: var(--text-accent);
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+  z-index: 2;
+}
+
+.add-btn {
+  background: linear-gradient(135deg, var(--primary) 0%, #7C3AED 100%);
+  border: none;
+  border-radius: 12px;
+  padding: 10px 16px;
+  color: white;
+  cursor: pointer;
+  font-size: 12px;
+  font-family: inherit;
+  font-weight: 500;
+  transition: all var(--transition-normal);
+  box-shadow: var(--shadow-soft);
+  position: relative;
+  z-index: 2;
+  overflow: hidden;
+}
+
+.add-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s;
+}
+
+.add-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(139, 92, 246, 0.3);
+}
+
+.add-btn:hover::before {
+  left: 100%;
+}
+
+.add-btn:active {
+  transform: translateY(0);
+  box-shadow: var(--shadow-soft);
+}
+
+/* Modern Neumorphic Tasks */
+.task-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.task-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  background: var(--bg-card);
+  border-radius: 12px;
+  transition: all var(--transition-normal);
+  cursor: pointer;
+  box-shadow: var(--shadow-soft);
+  border: 1px solid var(--border-glass);
+  position: relative;
+  overflow: hidden;
+  animation: fadeInUp 0.4s ease-out;
+}
+
+.task-item::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, transparent 50%);
+  pointer-events: none;
+  border-radius: 12px;
+}
+
+.task-item:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: var(--shadow-neumorph);
+  color: var(--primary);
+}
+
+.task-item:active {
+  transform: translateY(0) scale(0.98);
+  box-shadow: var(--shadow-neumorph-pressed);
+}
+
+.task-item.urgent {
+  border-left: 3px solid var(--secondary);
+  box-shadow: var(--shadow-soft), 0 0 0 1px var(--secondary);
+}
+
+.task-item.urgent::after {
+  content: '🔥';
+  position: absolute;
+  right: 12px;
+  top: 12px;
+  font-size: 12px;
+  animation: pulse 2s infinite;
+}
+
+.task-title {
+  font-weight: 400;
+  flex: 1;
+}
+
+.task-priority {
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 3px;
+  margin-right: 8px;
+  font-weight: 500;
+}
+
+.task-priority.urgent {
+  background: var(--secondary);
+  color: white;
+}
+
+.task-priority.research {
+  background: var(--primary);
+  color: white;
+}
+
+.task-actions {
+  display: flex;
+  gap: 4px;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.task-item:hover .task-actions {
+  opacity: 1;
+}
+
+.task-action-btn {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: 12px;
+  padding: 2px;
+  border-radius: 2px;
+  transition: all 0.2s ease;
+}
+
+.task-action-btn:hover {
+  color: var(--primary);
+  background: rgba(139, 92, 246, 0.1);
+}
+
+/* Modern Neumorphic Agent Cards */
+.agent-card {
+  background: var(--bg-glass);
+  border: 1px solid var(--border-glass);
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 16px;
+  backdrop-filter: blur(20px);
+  box-shadow: var(--shadow-glass);
+  transition: all var(--transition-normal);
+  position: relative;
+  overflow: hidden;
+  animation: scaleIn 0.5s ease-out;
+  cursor: pointer;
+}
+
+.agent-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, transparent 70%);
+  pointer-events: none;
+  border-radius: 16px;
+}
+
+.agent-card:hover {
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: var(--shadow-glass), 0 20px 40px rgba(139, 92, 246, 0.2);
+}
+
+.agent-card:active {
+  transform: translateY(0) scale(0.98);
+  box-shadow: var(--shadow-neumorph-pressed);
+}
+
+.agent-card.busy {
+  border-color: rgba(245, 158, 11, 0.3);
+  background: rgba(245, 158, 11, 0.1);
+  box-shadow: var(--shadow-glass), 0 0 20px rgba(245, 158, 11, 0.2);
+}
+
+.agent-card.offline {
+  opacity: 0.6;
+  filter: grayscale(50%);
+}
+
+.agent-name {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--primary);
+  margin-bottom: 4px;
+}
+
+.agent-task {
+  font-size: 10px;
+  color: var(--text-secondary);
+}
