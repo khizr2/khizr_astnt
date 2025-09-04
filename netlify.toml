@@ -21,6 +21,23 @@
   to = "https://khizr-assistant-api.onrender.com/api/:splat"
   status = 200
 
+# Static assets - serve from public directory
+[[redirects]]
+  from = "/css/*"
+  to = "/public/css/:splat"
+  status = 200
+
+[[redirects]]
+  from = "/js/*"
+  to = "/public/js/:splat"
+  status = 200
+
+# SPA fallback - serve app.html for all other requests
+[[redirects]]
+  from = "/*"
+  to = "/app.html"
+  status = 200
+
 [[headers]]
   for = "/*"
   [headers.values]
