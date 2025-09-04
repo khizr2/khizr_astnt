@@ -1,9 +1,0 @@
-# API redirects
-/api/*  https://khizr-assistant-api.onrender.com/api/:splat  200
-
-# Static assets - serve from public directory
-/css/*  /public/css/:splat  200
-/js/*   /public/js/:splat  200
-
-# SPA fallback - serve app.html for all other requests
-/*      /app.html   200
