@@ -111,4 +111,56 @@ router.post('/login', async (req, res) => {
     }
 });
 
+// Logout
+router.post('/logout', async (req, res) => {
+    try {
+        // For JWT-based auth, logout is handled client-side by removing token
+        // This endpoint exists for consistency and future session management
+        res.json({ message: 'Logout successful' });
+    } catch (error) {
+        logger.error('Logout error:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+// Refresh token
+router.post('/refresh', async (req, res) => {
+    try {
+        const token = req.headers.authorization?.split(' ')[1];
+        if (!token) {
+            return res.status(401).json({ error: 'No token provided' });
+        }
+
+        // Verify current token
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        
+        // Generate new token
+        const newToken = jwt.sign(
+            { userId: decoded.userId, email: decoded.email },
+            process.env.JWT_SECRET,
+            { expiresIn: '30d' }
+        );
+
+        res.json({ token: newToken });
+    } catch (error) {
+        logger.error('Token refresh error:', error);
+        res.status(401).json({ error: 'Invalid token' });
+    }
+});
+
+// Validate token
+router.post('/validate', async (req, res) => {
+    try {
+        const token = req.headers.authorization?.split(' ')[1];
+        if (!token) {
+            return res.status(401).json({ error: 'No token provided' });
+        }
+
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        res.json({ valid: true, userId: decoded.userId, email: decoded.email });
+    } catch (error) {
+        res.status(401).json({ valid: false, error: 'Invalid token' });
+    }
+});
+
 module.exports = router;
