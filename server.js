@@ -17,6 +17,7 @@ const agentRoutes = require('./routes/agents');
 const messagingRoutes = require('./routes/messaging');
 const chatRoutes = require('./routes/chat');
 const preferencesRoutes = require('./routes/preferences');
+const configRoutes = require('./routes/config');
 
 const { logger } = require('./utils/logger');
 
@@ -91,6 +92,7 @@ app.use('/api/agents', agentRoutes);
 app.use('/api/messaging', messagingRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/api/user/preferences', preferencesRoutes);
+app.use('/api/config', configRoutes);
 
 // Serve main application
 app.get('/', (req, res) => {

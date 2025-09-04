@@ -1,10 +1,13 @@
 // Supabase Authentication and Integration
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-const SUPABASE_URL = "https://tugoaqoadsqbvgckkoqf.supabase.co";
-// SECURITY NOTICE: This file contains hardcoded credentials and should not be used in production
-// Use environment variables instead for security
-const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY || "REPLACE_WITH_YOUR_ACTUAL_KEY";
+// Environment variables will be loaded by env-loader.js
+const SUPABASE_URL = window.ENV?.SUPABASE_URL || "https://tugoaqoadsqbvgckkoqf.supabase.co";
+const SUPABASE_ANON_KEY = window.ENV?.SUPABASE_ANON_KEY;
+
+if (!SUPABASE_ANON_KEY) {
+  throw new Error('SUPABASE_ANON_KEY environment variable is required. Please set it in your environment configuration.');
+}
 
 export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 

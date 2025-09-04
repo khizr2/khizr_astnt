@@ -196,10 +196,10 @@
         // Load configuration from server
         async function loadConfig() {
             try {
-                const response = await fetch('/api/config');
+                const response = await fetch('/api/config/env');
                 const config = await response.json();
-                SUPABASE_URL = config.supabaseUrl;
-                SUPABASE_ANON_KEY = config.supabaseAnonKey;
+                SUPABASE_URL = config.SUPABASE_URL;
+                SUPABASE_ANON_KEY = config.SUPABASE_ANON_KEY;
                 
                 console.log('Configuration loaded:', { SUPABASE_URL, SUPABASE_ANON_KEY: SUPABASE_ANON_KEY.substring(0, 20) + '...' });
                 
@@ -207,41 +207,71 @@
                 try {
                     supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
                     console.log('Supabase client initialized successfully');
+
+                    // Clear the initialization timeout
+                    if (initTimeout) {
+                        clearTimeout(initTimeout);
+                        initTimeout = null;
+                    }
+
+                    // Set up auth state listener
+                    supabase.auth.onAuthStateChange((event, session) => {
+                        if (event === 'SIGNED_IN' && session) {
+                            // User signed in, redirect to main app
+                            window.location.href = '/app.html';
+                        } else if (event === 'SIGNED_OUT') {
+                            // User signed out, show login form
+                            showLoginForm();
+                        }
+                    });
+
+                    // Start authentication check only after client is initialized
+                    checkAuthentication();
                 } catch (error) {
                     console.error('Failed to initialize Supabase client:', error);
+                    if (initTimeout) {
+                        clearTimeout(initTimeout);
+                        initTimeout = null;
+                    }
                     showLoginForm();
                 }
-                
-                // Start authentication check
-                checkAuthentication();
             } catch (error) {
                 console.error('Failed to load configuration:', error);
+                if (initTimeout) {
+                    clearTimeout(initTimeout);
+                    initTimeout = null;
+                }
                 showLoginForm();
             }
         }
 
         // Auth state
         let isCheckingAuth = true;
+        let initTimeout;
 
         // Initialize authentication check
         document.addEventListener('DOMContentLoaded', function() {
             console.log('DOM loaded, starting auth check...');
-            
+
             // Check if Supabase client loaded
             if (!window.supabase) {
                 console.error('Supabase client not loaded!');
+                if (initTimeout) {
+                    clearTimeout(initTimeout);
+                    initTimeout = null;
+                }
                 showLoginForm();
                 return;
             }
-            
+
             // Add a timeout to prevent infinite loading
-            setTimeout(() => {
+            initTimeout = setTimeout(() => {
                 if (isCheckingAuth) {
-                    console.log('Timeout reached, showing login form');
+                    console.log('Initialization timeout reached, showing login form');
                     showLoginForm();
                 }
-            }, 3000); // Reduced to 3 seconds
-            
+            }, 5000); // Increased to 5 seconds for config loading
+
             loadConfig();
         });
 
@@ -260,6 +290,7 @@
 
                 if (error) {
                     console.error('Session check error:', error);
+                    isCheckingAuth = false;
                     showLoginForm();
                     return;
                 }
@@ -267,14 +298,17 @@
                 if (session) {
                     console.log('User is authenticated, redirecting...');
                     // User is authenticated, redirect to main app
+                    isCheckingAuth = false;
                     window.location.href = '/app.html';
                 } else {
                     console.log('No session found, showing login form');
                     // No session, show login form
+                    isCheckingAuth = false;
                     showLoginForm();
                 }
             } catch (error) {
                 console.error('Auth check error:', error);
+                isCheckingAuth = false;
                 showLoginForm();
             }
         }
@@ -387,16 +421,6 @@
             }
         });
 
-        // Listen for auth state changes
-        supabase.auth.onAuthStateChange((event, session) => {
-            if (event === 'SIGNED_IN' && session) {
-                // User signed in, redirect to main app
-                window.location.href = '/app.html';
-            } else if (event === 'SIGNED_OUT') {
-                // User signed out, show login form
-                showLoginForm();
-            }
-        });
     </script>
 </body>
 </html>
