@@ -74,7 +74,7 @@ class APIClient {
         // Clear invalid token and redirect to login
         localStorage.removeItem('khizr_assistant_auth');
         localStorage.removeItem('user_data');
-        window.location.href = '/login.html';
+        window.location.href = '/';
     }
 
     // Agent endpoints

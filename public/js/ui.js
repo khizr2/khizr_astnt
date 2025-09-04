@@ -248,7 +248,7 @@ class UIManager {
                 type = 'warning';
                 // Redirect to login after a delay
                 setTimeout(() => {
-                    window.location.href = '/login.html';
+                    window.location.href = '/';
                 }, 3000);
             } else if (error.message.includes('404')) {
                 userMessage = 'The requested resource was not found.';

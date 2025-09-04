@@ -109,7 +109,7 @@ class AuthManager {
             console.error('Logout error:', error);
         } finally {
             this.clearAuth();
-            window.location.href = '/login.html';
+            window.location.href = '/';
         }
     }
 
@@ -227,7 +227,7 @@ class AuthManager {
     // Check authentication on app initialization
     async checkAppAuth() {
         if (!this.isLoggedIn()) {
-            window.location.href = '/login.html';
+            window.location.href = '/';
             return false;
         }
 
@@ -235,7 +235,7 @@ class AuthManager {
         const isValid = await this.validateToken();
         if (!isValid) {
             this.clearAuth();
-            window.location.href = '/login.html';
+            window.location.href = '/';
             return false;
         }
 
