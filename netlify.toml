@@ -1,49 +1,16 @@
 [build]
   publish = "."
-  command = "echo 'Static site ready for deployment'"
-
-[build.processing]
-  skip_processing = false
-
-[build.processing.css]
-  bundle = false
-  minify = true
-
-[build.processing.js]
-  bundle = false
-  minify = true
-
-[build.processing.html]
-  pretty_urls = false
 
 [[redirects]]
   from = "/api/*"
   to = "https://khizr-assistant-api.onrender.com/api/:splat"
   status = 200
 
-# Static assets - serve from public directory
-[[redirects]]
-  from = "/css/*"
-  to = "/public/css/:splat"
-  status = 200
-
-[[redirects]]
-  from = "/js/*"
-  to = "/public/js/:splat"
-  status = 200
-
-# SPA fallback - serve app.html for all other requests
 [[redirects]]
   from = "/*"
   to = "/app.html"
   status = 200
-
-[[headers]]
-  for = "/*"
-  [headers.values]
-    X-Frame-Options = "DENY"
-    X-XSS-Protection = "1; mode=block"
-    Referrer-Policy = "strict-origin-when-cross-origin"
+  force = false
 
 [[headers]]
   for = "*.js"
