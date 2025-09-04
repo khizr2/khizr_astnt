@@ -56,21 +56,28 @@ class ConfigManager {
         const hostname = window.location.hostname;
         const protocol = window.location.protocol;
 
+        // Development
         if (hostname === 'localhost' || hostname === '127.0.0.1') {
             return 'http://localhost:10000';
         }
 
-        // Production domains
-        if (hostname.includes('khizr-assistant-api.onrender.com')) {
+        // Render deployment
+        if (hostname.includes('khizr-assistant-api.onrender.com') ||
+            hostname === 'khizr-assistant-api.onrender.com') {
             return 'https://khizr-assistant-api.onrender.com';
         }
 
-        // Staging domains
-        if (hostname.includes('staging') || hostname.includes('dev')) {
+        // Netlify functions (if using Netlify)
+        if (hostname.includes('netlify') || hostname.includes('.netlify.app')) {
+            return '/.netlify/functions';
+        }
+
+        // Supabase edge functions (if migrating to Supabase)
+        if (hostname.includes('supabase')) {
             return `${protocol}//${hostname}`;
         }
 
-        // Default to same origin
+        // Default to same origin for other deployments
         return `${protocol}//${hostname}`;
     }
 
