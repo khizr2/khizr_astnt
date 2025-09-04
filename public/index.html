@@ -1,15 +1,366 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Redirecting...</title>
-    <script>
-        // Immediate redirect to app.html
-        window.location.replace('/app.html');
-    </script>
-    <meta http-equiv="refresh" content="0; url=/app.html">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Khizr Assistant - Authentication</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .auth-container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            padding: 40px;
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+        
+        .logo {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 20px;
+        }
+        
+        .loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .login-form {
+            display: none;
+            text-align: left;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+            font-weight: 500;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e1e5e9;
+            border-radius: 6px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+            box-sizing: border-box;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .btn {
+            width: 100%;
+            padding: 12px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        .btn:hover {
+            background: #5a6fd8;
+        }
+        
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        
+        .error {
+            color: #e74c3c;
+            font-size: 14px;
+            margin-top: 10px;
+            display: none;
+        }
+        
+        .register-link {
+            margin-top: 20px;
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .register-link a {
+            color: #667eea;
+            text-decoration: none;
+        }
+        
+        .register-link a:hover {
+            text-decoration: underline;
+        }
+    </style>
 </head>
 <body>
-    <p>If you are not redirected automatically, <a href="/app.html">click here</a>.</p>
+    <div class="auth-container">
+        <div class="logo">Khizr Assistant</div>
+        
+        <!-- Loading State -->
+        <div class="loading" id="loadingState">
+            <div class="spinner"></div>
+            <p>Checking authentication...</p>
+        </div>
+        
+        <!-- Login Form -->
+        <div class="login-form" id="loginForm">
+            <h2>Welcome Back</h2>
+            <form id="authForm">
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+                <button type="submit" class="btn" id="loginBtn">Sign In</button>
+                <div class="error" id="errorMessage"></div>
+            </form>
+            <div class="register-link">
+                Don't have an account? <a href="#" onclick="showRegisterForm()">Sign up</a>
+            </div>
+        </div>
+        
+        <!-- Register Form -->
+        <div class="login-form" id="registerForm" style="display: none;">
+            <h2>Create Account</h2>
+            <form id="registerAuthForm">
+                <div class="form-group">
+                    <label for="regUsername">Username</label>
+                    <input type="text" id="regUsername" name="username" required>
+                </div>
+                <div class="form-group">
+                    <label for="regEmail">Email</label>
+                    <input type="email" id="regEmail" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="regPassword">Password</label>
+                    <input type="password" id="regPassword" name="password" required>
+                </div>
+                <button type="submit" class="btn" id="registerBtn">Create Account</button>
+                <div class="error" id="registerErrorMessage"></div>
+            </form>
+            <div class="register-link">
+                Already have an account? <a href="#" onclick="showLoginForm()">Sign in</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Supabase Client -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    
+    <script>
+        // Supabase Configuration
+        let SUPABASE_URL, SUPABASE_ANON_KEY;
+
+        // Environment detection and configuration
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+            // Local development
+            SUPABASE_URL = 'http://127.0.0.1:54321';
+            SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0';
+        } else {
+            // Production - check for environment variables
+            SUPABASE_URL = import.meta.env?.VITE_SUPABASE_URL || 
+                          process.env?.VITE_SUPABASE_URL || 
+                          'https://tugoaqoadsqbvgckkoqf.supabase.co';
+            
+            SUPABASE_ANON_KEY = import.meta.env?.VITE_SUPABASE_ANON_KEY || 
+                               process.env?.VITE_SUPABASE_ANON_KEY || 
+                               'your_production_anon_key_here';
+        }
+
+        // Initialize Supabase client
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        // Auth state
+        let isCheckingAuth = true;
+
+        // Initialize authentication check
+        document.addEventListener('DOMContentLoaded', function() {
+            checkAuthentication();
+        });
+
+        async function checkAuthentication() {
+            try {
+                // Get current session from Supabase
+                const { data: { session }, error } = await supabase.auth.getSession();
+
+                if (error) {
+                    console.error('Session check error:', error);
+                    showLoginForm();
+                    return;
+                }
+
+                if (session) {
+                    // User is authenticated, redirect to main app
+                    window.location.href = '/app.html';
+                } else {
+                    // No session, show login form
+                    showLoginForm();
+                }
+            } catch (error) {
+                console.error('Auth check error:', error);
+                showLoginForm();
+            }
+        }
+
+        function showLoginForm() {
+            document.getElementById('loadingState').style.display = 'none';
+            document.getElementById('loginForm').style.display = 'block';
+            document.getElementById('registerForm').style.display = 'none';
+            isCheckingAuth = false;
+        }
+
+        function showRegisterForm() {
+            document.getElementById('loginForm').style.display = 'none';
+            document.getElementById('registerForm').style.display = 'block';
+        }
+
+        // Login form submission
+        document.getElementById('authForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const loginBtn = document.getElementById('loginBtn');
+            const errorMessage = document.getElementById('errorMessage');
+
+            loginBtn.disabled = true;
+            loginBtn.textContent = 'Signing in...';
+            errorMessage.style.display = 'none';
+
+            try {
+                const { data, error } = await supabase.auth.signInWithPassword({
+                    email: email,
+                    password: password
+                });
+
+                if (error) {
+                    throw new Error(error.message);
+                }
+
+                if (data.session) {
+                    // Store session data for compatibility with your existing app
+                    localStorage.setItem('khizr_assistant_auth', data.session.access_token);
+                    localStorage.setItem('user_data', JSON.stringify(data.user));
+                    
+                    // Redirect to main app
+                    window.location.href = '/app.html';
+                } else {
+                    throw new Error('Login failed');
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                errorMessage.textContent = error.message || 'Login failed. Please try again.';
+                errorMessage.style.display = 'block';
+                loginBtn.disabled = false;
+                loginBtn.textContent = 'Sign In';
+            }
+        });
+
+        // Register form submission
+        document.getElementById('registerAuthForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('regUsername').value;
+            const email = document.getElementById('regEmail').value;
+            const password = document.getElementById('regPassword').value;
+            const registerBtn = document.getElementById('registerBtn');
+            const errorMessage = document.getElementById('registerErrorMessage');
+
+            registerBtn.disabled = true;
+            registerBtn.textContent = 'Creating account...';
+            errorMessage.style.display = 'none';
+
+            try {
+                const { data, error } = await supabase.auth.signUp({
+                    email: email,
+                    password: password,
+                    options: {
+                        data: {
+                            username: username
+                        }
+                    }
+                });
+
+                if (error) {
+                    throw new Error(error.message);
+                }
+
+                if (data.session) {
+                    // Store session data for compatibility with your existing app
+                    localStorage.setItem('khizr_assistant_auth', data.session.access_token);
+                    localStorage.setItem('user_data', JSON.stringify(data.user));
+                    
+                    // Redirect to main app
+                    window.location.href = '/app.html';
+                } else if (data.user && !data.session) {
+                    // Email confirmation required
+                    errorMessage.textContent = 'Please check your email to confirm your account before signing in.';
+                    errorMessage.style.display = 'block';
+                    registerBtn.disabled = false;
+                    registerBtn.textContent = 'Create Account';
+                } else {
+                    throw new Error('Registration failed');
+                }
+            } catch (error) {
+                console.error('Registration error:', error);
+                errorMessage.textContent = error.message || 'Registration failed. Please try again.';
+                errorMessage.style.display = 'block';
+                registerBtn.disabled = false;
+                registerBtn.textContent = 'Create Account';
+            }
+        });
+
+        // Listen for auth state changes
+        supabase.auth.onAuthStateChange((event, session) => {
+            if (event === 'SIGNED_IN' && session) {
+                // User signed in, redirect to main app
+                window.location.href = '/app.html';
+            } else if (event === 'SIGNED_OUT') {
+                // User signed out, show login form
+                showLoginForm();
+            }
+        });
+    </script>
 </body>
 </html>
