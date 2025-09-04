@@ -1,25 +1,15 @@
 [build]
-  # Build command - since this is primarily a Node.js app, we'll copy static assets
-  command = "echo 'Static site build completed'"
-  
-  # Publish directory - where the static files are located
   publish = "."
-  
-  # Functions directory (if you want to use Netlify Functions)
-  functions = "netlify/functions"
+  command = "echo 'Build completed'"
 
 [build.environment]
-  # Node.js version
   NODE_VERSION = "18"
 
-# Redirects configuration
 [[redirects]]
   from = "/api/*"
   to = "https://khizr-assistant-api.onrender.com/api/:splat"
   status = 200
-  force = true
 
-# Static assets redirects
 [[redirects]]
   from = "/css/*"
   to = "/public/css/:splat"
@@ -30,79 +20,8 @@
   to = "/public/js/:splat"
   status = 200
 
-# SPA fallback - serve app.html for all other requests
 [[redirects]]
   from = "/*"
   to = "/app.html"
   status = 200
 
-# Headers for security and performance
-[[headers]]
-  for = "/*"
-  [headers.values]
-    X-Frame-Options = "DENY"
-    X-XSS-Protection = "1; mode=block"
-    X-Content-Type-Options = "nosniff"
-    Referrer-Policy = "strict-origin-when-cross-origin"
-    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://khizr-assistant-api.onrender.com https://api.openai.com https://api.openrouter.ai wss: ws:;"
-
-# Cache static assets
-[[headers]]
-  for = "/css/*"
-  [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
-
-[[headers]]
-  for = "/js/*"
-  [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
-
-[[headers]]
-  for = "/public/*"
-  [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
-
-# Environment variables (these will need to be set in Netlify dashboard)
-[context.production.environment]
-  NODE_ENV = "production"
-  FRONTEND_URL = "https://your-netlify-site.netlify.app"
-
-[context.deploy-preview.environment]
-  NODE_ENV = "preview"
-  FRONTEND_URL = "https://deploy-preview-url.netlify.app"
-
-[context.branch-deploy.environment]
-  NODE_ENV = "development"
-  FRONTEND_URL = "https://branch-deploy-url.netlify.app"
-
-# Plugin configuration
-[[plugins]]
-  package = "@netlify/plugin-lighthouse"
-
-# Edge functions (optional - for advanced functionality)
-[functions]
-  directory = "netlify/functions"
-  node_bundler = "esbuild"
-
-# Form handling
-[forms]
-  # Enable form detection
-  enabled = true
-
-# Processing
-[processing]
-  # Enable asset optimization
-  skip_processing = false
-
-# Dev settings
-[dev]
-  # Local development settings
-  command = "npm run dev"
-  port = 3000
-  publish = "."
-  targetPort = 3000
-
-# Edge functions configuration
-[edge_functions]
-  # Directory for edge functions
-  directory = "netlify/edge-functions"
