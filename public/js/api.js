@@ -9,22 +9,23 @@ class APIClient {
     }
 
     getAPIURL() {
-        // Check for environment variable first, then fallback to current origin
+        // Check for environment variables from deployment platforms
         if (window.API_BASE_URL) {
             return window.API_BASE_URL;
         }
 
-        // In development, use localhost
-        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-            return 'http://localhost:3000';
+        // Check for Netlify environment variable
+        if (window.VITE_RENDER_API_URL) {
+            return window.VITE_RENDER_API_URL;
         }
 
-        // In production, construct from current origin
-        const protocol = window.location.protocol;
-        const hostname = window.location.hostname;
-        const port = window.location.port ? `:${window.location.port}` : '';
+        // In development, use localhost
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+            return 'http://localhost:10000';
+        }
 
-        return `${protocol}//${hostname}${port}`;
+        // In production, use the Render API URL as default
+        return 'https://khizr-assistant-api.onrender.com';
     }
 
     getAuthHeaders() {

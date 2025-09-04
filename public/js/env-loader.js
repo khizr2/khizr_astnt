@@ -123,4 +123,5 @@ envLoader.loadEnvironment().then(() => {
     console.error('Failed to initialize environment:', error);
 });
 
-export default envLoader;
+// Make envLoader available globally (no ES6 export)
+window.envLoader = envLoader;

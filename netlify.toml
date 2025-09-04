@@ -1,0 +1,49 @@
+# Netlify Configuration for Khizr Assistant Frontend
+[build]
+  # Since this is a static frontend, we don't need a build command
+  # The HTML, CSS, and JS files are served as-is
+  publish = "."
+
+# Environment Variables for Netlify
+# These need to be set in Netlify dashboard under Site Settings > Environment Variables
+[build.environment]
+  # Supabase Configuration
+  VITE_SUPABASE_URL = "https://tugoaqoadsqbvgckkoqf.supabase.co"
+  VITE_SUPABASE_ANON_KEY = "your_supabase_anon_key_here"
+
+  # Backend API Configuration
+  VITE_RENDER_API_URL = "https://khizr-assistant-api.onrender.com"
+
+  # Application Settings
+  VITE_NODE_ENV = "production"
+
+# Redirect rules for SPA
+[[redirects]]
+  from = "/api/*"
+  to = "https://khizr-assistant-api.onrender.com/api/:splat"
+  status = 200
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# Headers for security
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-XSS-Protection = "1; mode=block"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+
+# Cache static assets
+[[headers]]
+  for = "/css/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000"
+
+[[headers]]
+  for = "/js/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000"

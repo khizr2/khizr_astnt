@@ -185,56 +185,34 @@
         </div>
     </div>
 
-    <!-- Supabase Client -->
-    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-    
-    <script>
-        // Supabase Configuration - Load from server
-        let SUPABASE_URL, SUPABASE_ANON_KEY;
-        let supabase;
+    <!-- Load Supabase CDN for authentication -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-        // Load configuration from server
+    <script>
+        // Load configuration and initialize Supabase
         async function loadConfig() {
             try {
-                const response = await fetch('/api/config/env');
-                const config = await response.json();
-                SUPABASE_URL = config.SUPABASE_URL;
-                SUPABASE_ANON_KEY = config.SUPABASE_ANON_KEY;
-                
-                console.log('Configuration loaded:', { SUPABASE_URL, SUPABASE_ANON_KEY: SUPABASE_ANON_KEY.substring(0, 20) + '...' });
-                
-                // Initialize Supabase client
-                try {
-                    supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-                    console.log('Supabase client initialized successfully');
+                // Get configuration from environment variables (set in deployment platform)
+                const SUPABASE_URL = window.VITE_SUPABASE_URL || 'https://tugoaqoadsqbvgckkoqf.supabase.co';
+                const SUPABASE_ANON_KEY = window.VITE_SUPABASE_ANON_KEY;
 
-                    // Clear the initialization timeout
-                    if (initTimeout) {
-                        clearTimeout(initTimeout);
-                        initTimeout = null;
-                    }
-
-                    // Set up auth state listener
-                    supabase.auth.onAuthStateChange((event, session) => {
-                        if (event === 'SIGNED_IN' && session) {
-                            // User signed in, redirect to main app
-                            window.location.href = '/app.html';
-                        } else if (event === 'SIGNED_OUT') {
-                            // User signed out, show login form
-                            showLoginForm();
-                        }
-                    });
-
-                    // Start authentication check only after client is initialized
-                    checkAuthentication();
-                } catch (error) {
-                    console.error('Failed to initialize Supabase client:', error);
-                    if (initTimeout) {
-                        clearTimeout(initTimeout);
-                        initTimeout = null;
-                    }
-                    showLoginForm();
+                if (!SUPABASE_ANON_KEY) {
+                    throw new Error('SUPABASE_ANON_KEY environment variable is required. Please set VITE_SUPABASE_ANON_KEY in your deployment settings.');
                 }
+
+                // Initialize Supabase client
+                window.supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+                console.log('Configuration loaded successfully');
+
+                // Clear the initialization timeout
+                if (initTimeout) {
+                    clearTimeout(initTimeout);
+                    initTimeout = null;
+                }
+
+                // Start authentication check
+                checkAuthentication();
             } catch (error) {
                 console.error('Failed to load configuration:', error);
                 if (initTimeout) {
@@ -253,24 +231,13 @@
         document.addEventListener('DOMContentLoaded', function() {
             console.log('DOM loaded, starting auth check...');
 
-            // Check if Supabase client loaded
-            if (!window.supabase) {
-                console.error('Supabase client not loaded!');
-                if (initTimeout) {
-                    clearTimeout(initTimeout);
-                    initTimeout = null;
-                }
-                showLoginForm();
-                return;
-            }
-
             // Add a timeout to prevent infinite loading
             initTimeout = setTimeout(() => {
                 if (isCheckingAuth) {
                     console.log('Initialization timeout reached, showing login form');
                     showLoginForm();
                 }
-            }, 5000); // Increased to 5 seconds for config loading
+            }, 5000); // 5 seconds for config loading
 
             loadConfig();
         });
@@ -278,15 +245,9 @@
         async function checkAuthentication() {
             try {
                 console.log('Checking authentication...');
-                
-                if (!supabase) {
-                    console.error('Supabase client not available');
-                    showLoginForm();
-                    return;
-                }
-                
-                // Get current session from Supabase
-                const { data: { session }, error } = await supabase.auth.getSession();
+
+                // Check Supabase session
+                const { data: { session }, error } = await window.supabase.auth.getSession();
 
                 if (error) {
                     console.error('Session check error:', error);
@@ -295,14 +256,17 @@
                     return;
                 }
 
-                if (session) {
-                    console.log('User is authenticated, redirecting...');
-                    // User is authenticated, redirect to main app
+                if (session?.user) {
+                    console.log('User is authenticated, redirecting to main app...');
+                    // Store session data for the app
+                    localStorage.setItem('khizr_assistant_auth', JSON.stringify({
+                        token: session.access_token,
+                        user: session.user
+                    }));
                     isCheckingAuth = false;
                     window.location.href = '/app.html';
                 } else {
-                    console.log('No session found, showing login form');
-                    // No session, show login form
+                    console.log('No active session, showing login form');
                     isCheckingAuth = false;
                     showLoginForm();
                 }
@@ -328,7 +292,7 @@
         // Login form submission
         document.getElementById('authForm').addEventListener('submit', async function(e) {
             e.preventDefault();
-            
+
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
             const loginBtn = document.getElementById('loginBtn');
@@ -339,7 +303,8 @@
             errorMessage.style.display = 'none';
 
             try {
-                const { data, error } = await supabase.auth.signInWithPassword({
+                // Use Supabase authentication
+                const { data, error } = await window.supabase.auth.signInWithPassword({
                     email: email,
                     password: password
                 });
@@ -348,15 +313,18 @@
                     throw new Error(error.message);
                 }
 
-                if (data.session) {
-                    // Store session data for compatibility with your existing app
-                    localStorage.setItem('khizr_assistant_auth', data.session.access_token);
-                    localStorage.setItem('user_data', JSON.stringify(data.user));
-                    
+                if (data.session && data.user) {
+                    // Store session data for the app
+                    localStorage.setItem('khizr_assistant_auth', JSON.stringify({
+                        token: data.session.access_token,
+                        user: data.user
+                    }));
+
+                    console.log('Login successful, redirecting to main app...');
                     // Redirect to main app
                     window.location.href = '/app.html';
                 } else {
-                    throw new Error('Login failed');
+                    throw new Error('Login failed - no session created');
                 }
             } catch (error) {
                 console.error('Login error:', error);
@@ -370,7 +338,7 @@
         // Register form submission
         document.getElementById('registerAuthForm').addEventListener('submit', async function(e) {
             e.preventDefault();
-            
+
             const username = document.getElementById('regUsername').value;
             const email = document.getElementById('regEmail').value;
             const password = document.getElementById('regPassword').value;
@@ -382,12 +350,13 @@
             errorMessage.style.display = 'none';
 
             try {
-                const { data, error } = await supabase.auth.signUp({
+                // Use Supabase authentication for registration
+                const { data, error } = await window.supabase.auth.signUp({
                     email: email,
                     password: password,
                     options: {
                         data: {
-                            username: username
+                            name: username
                         }
                     }
                 });
@@ -396,26 +365,31 @@
                     throw new Error(error.message);
                 }
 
-                if (data.session) {
-                    // Store session data for compatibility with your existing app
-                    localStorage.setItem('khizr_assistant_auth', data.session.access_token);
-                    localStorage.setItem('user_data', JSON.stringify(data.user));
-                    
+                if (data.session && data.user) {
+                    // Store session data for the app
+                    localStorage.setItem('khizr_assistant_auth', JSON.stringify({
+                        token: data.session.access_token,
+                        user: data.user
+                    }));
+
+                    console.log('Registration successful, redirecting to main app...');
                     // Redirect to main app
                     window.location.href = '/app.html';
                 } else if (data.user && !data.session) {
-                    // Email confirmation required
-                    errorMessage.textContent = 'Please check your email to confirm your account before signing in.';
+                    // Email confirmation might be required
+                    errorMessage.textContent = 'Registration successful! Please check your email to confirm your account.';
                     errorMessage.style.display = 'block';
+                    errorMessage.style.color = '#28a745';
                     registerBtn.disabled = false;
                     registerBtn.textContent = 'Create Account';
                 } else {
-                    throw new Error('Registration failed');
+                    throw new Error('Registration failed - please try again');
                 }
             } catch (error) {
                 console.error('Registration error:', error);
                 errorMessage.textContent = error.message || 'Registration failed. Please try again.';
                 errorMessage.style.display = 'block';
+                errorMessage.style.color = '#e74c3c';
                 registerBtn.disabled = false;
                 registerBtn.textContent = 'Create Account';
             }

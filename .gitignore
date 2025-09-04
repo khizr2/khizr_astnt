@@ -106,6 +106,18 @@ test-report-*.html
 test-report-*.json
 deployment-checklist.json
 
+# Deployment test files (temporary - used for troubleshooting)
+test-deployment.js
+test-frontend.js
+test-simple-flow.js
+test-browser-fix.js
+test-login-flow.js
+configure-deployment.js
+DEPLOYMENT_FIX_README.md
+
+# Test environment files
+.env.test
+
 # Supabase
 supabase/.branches
 supabase/.temp

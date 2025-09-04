@@ -278,9 +278,41 @@
         </div>
     </div>
 
-    <!-- JavaScript Files -->
+    <!-- Load Supabase CDN and JavaScript Files -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <script>
+        // Initialize Supabase client for the main app
+        (async function initApp() {
+            try {
+                // Get configuration from environment variables
+                const SUPABASE_URL = window.VITE_SUPABASE_URL || 'https://tugoaqoadsqbvgckkoqf.supabase.co';
+                const SUPABASE_ANON_KEY = window.VITE_SUPABASE_ANON_KEY;
+                const API_BASE_URL = window.VITE_RENDER_API_URL || 'https://khizr-assistant-api.onrender.com';
+
+                if (!SUPABASE_ANON_KEY) {
+                    throw new Error('SUPABASE_ANON_KEY environment variable is required');
+                }
+
+                // Initialize Supabase client
+                window.supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+                // Set API base URL for API client
+                window.API_BASE_URL = API_BASE_URL;
+                window.SUPABASE_URL = SUPABASE_URL;
+                window.SUPABASE_ANON_KEY = SUPABASE_ANON_KEY;
+
+                console.log('✅ App initialized successfully');
+            } catch (error) {
+                console.error('❌ Failed to initialize app:', error);
+                // Show error and redirect to login
+                alert('Failed to initialize application. Please check your configuration.');
+                window.location.href = '/index.html';
+            }
+        })();
+    </script>
+
     <script src="js/env-loader.js"></script>
-    <script type="module" src="js/supabase.js"></script>
     <script src="js/config.js"></script>
     <script src="js/auth.js"></script>
     <script src="js/api.js"></script>

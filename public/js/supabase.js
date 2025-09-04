@@ -1,17 +1,17 @@
 // Supabase Authentication and Integration
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+// Note: Supabase client is now initialized in app.html to avoid module issues
+// This file contains helper functions for Supabase operations
 
-// Environment variables will be loaded by env-loader.js
-const SUPABASE_URL = window.ENV?.SUPABASE_URL || "https://tugoaqoadsqbvgckkoqf.supabase.co";
-const SUPABASE_ANON_KEY = window.ENV?.SUPABASE_ANON_KEY;
-
-if (!SUPABASE_ANON_KEY) {
-  throw new Error('SUPABASE_ANON_KEY environment variable is required. Please set it in your environment configuration.');
+// Helper function to get the current Supabase client
+function getSupabaseClient() {
+  if (!window.supabase) {
+    throw new Error('Supabase client not initialized. Please check app initialization.');
+  }
+  return window.supabase;
 }
 
-export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
 async function saveTokenFromSession() {
+  const supabase = getSupabaseClient();
   const { data: { session } } = await supabase.auth.getSession();
   if (session?.access_token) {
     localStorage.setItem("khizr_assistant_auth", JSON.stringify({ token: session.access_token }));
@@ -20,6 +20,7 @@ async function saveTokenFromSession() {
 }
 
 async function initSupabaseAuth() {
+  const supabase = getSupabaseClient();
   // run once on load + keep in sync on changes
   await saveTokenFromSession();
   supabase.auth.onAuthStateChange((_event, session) => {
@@ -35,17 +36,19 @@ async function initSupabaseAuth() {
 
 // Quick helpers you can call from console or buttons
 window.supabaseSignIn = async (email, password) => {
+  const supabase = getSupabaseClient();
   const { error } = await supabase.auth.signInWithPassword({ email, password });
   if (error) alert(error.message);
   else await saveTokenFromSession();
 };
 
 window.supabaseSignOut = async () => {
+  const supabase = getSupabaseClient();
   await supabase.auth.signOut();
 };
 
 // Initialize Supabase auth on page load
 document.addEventListener('DOMContentLoaded', initSupabaseAuth);
 
-// Export for use in other modules
-window.Supabase = { supabase, initSupabaseAuth, saveTokenFromSession };
+// Export for use in other modules (no ES6 export)
+window.Supabase = { getSupabaseClient, initSupabaseAuth, saveTokenFromSession };

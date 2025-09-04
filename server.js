@@ -52,10 +52,47 @@ app.set('trust proxy', 1);
         crossOriginEmbedderPolicy: false
     }));
 // }
-app.use(cors({
-    origin: true,
-    credentials: true
-}));
+// CORS configuration for multiple deployment platforms
+const corsOptions = {
+    origin: function (origin, callback) {
+        // Allow requests with no origin (mobile apps, etc.)
+        if (!origin) return callback(null, true);
+
+        const allowedOrigins = [
+            // Netlify frontend
+            'https://euphonious-puppy-a1c1c7.netlify.app',
+            // Local development
+            'http://localhost:3000',
+            'http://localhost:10000',
+            'http://127.0.0.1:3000',
+            'http://127.0.0.1:10000',
+            // Add your custom domain if you have one
+            'https://www.khizrkazmi.com'
+        ];
+
+        // Allow all localhost and 127.0.0.1 for development
+        if (origin.includes('localhost') || origin.includes('127.0.0.1')) {
+            return callback(null, true);
+        }
+
+        if (allowedOrigins.includes(origin)) {
+            return callback(null, true);
+        }
+
+        // In development, allow all origins
+        if (process.env.NODE_ENV !== 'production') {
+            return callback(null, true);
+        }
+
+        console.warn(`CORS: Blocked origin: ${origin}`);
+        return callback(new Error('Not allowed by CORS'));
+    },
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
+};
+
+app.use(cors(corsOptions));
 
 // Rate limiting
 const limiter = rateLimit({
@@ -96,7 +133,7 @@ app.use('/api/config', configRoutes);
 
 // Serve main application
 app.get('/', (req, res) => {
-    res.sendFile(__dirname + '/app.html');
+    res.sendFile(__dirname + '/index.html');
 });
 
 // Serve login page
