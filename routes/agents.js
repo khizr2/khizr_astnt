@@ -1188,7 +1188,7 @@ async function handleGetStatus(connectionId, agentIds) {
         .from('agent_status')
         .select(`
             *,
-            agent:agents (
+            agents!inner (
                 id,
                 name,
                 type,
@@ -1953,7 +1953,7 @@ async function processApprovalEscalations() {
                 .from('approvals_queue')
                 .select(`
                     *,
-                    agent:agents (
+                    agents!inner (
                         id,
                         name,
                         type
@@ -1988,7 +1988,7 @@ async function processApprovalEscalations() {
                 }
 
                 // Create escalation notification
-                await createEscalationNotification(approval, approval.agent, threshold.level);
+                await createEscalationNotification(approval, approval.agents, threshold.level);
 
                 // Log escalation
                 await supabase
@@ -3709,7 +3709,7 @@ router.get('/status/poll', async (req, res) => {
             .from('agent_status')
             .select(`
                 *,
-                agent:agents (
+                agents!inner (
                     id,
                     name,
                     type,
@@ -4288,7 +4288,7 @@ router.get('/status/history', async (req, res) => {
             .from('agent_logs')
             .select(`
                 *,
-                agent:agents (
+                agents!inner (
                     id,
                     name,
                     type
@@ -4332,8 +4332,8 @@ router.get('/status/history', async (req, res) => {
                 if (!grouped[agentId]) {
                     grouped[agentId] = {
                         agent_id: agentId,
-                        agent_name: entry.agent.name,
-                        agent_type: entry.agent.type,
+                        agent_name: entry.agents.name,
+                        agent_type: entry.agents.type,
                         history: []
                     };
                 }
@@ -7454,7 +7454,7 @@ router.get('/approvals/pending', async (req, res) => {
             .from('approvals_queue')
             .select(`
                 *,
-                agent:agents (
+                agents!inner (
                     id,
                     name,
                     type
@@ -7541,7 +7541,7 @@ router.patch('/approvals/:id', async (req, res) => {
             .from('approvals_queue')
             .select(`
                 *,
-                agent:agents (
+                agents!inner (
                     id,
                     name,
                     type
@@ -7726,7 +7726,7 @@ router.get('/approvals/history', async (req, res) => {
             .from('approval_history')
             .select(`
                 *,
-                agent:agents (
+                agents!inner (
                     id,
                     name,
                     type
@@ -7928,7 +7928,7 @@ router.get('/approvals/analytics/agents', async (req, res) => {
             .from('approval_history')
             .select(`
                 *,
-                agent:agents (
+                agents!inner (
                     id,
                     name,
                     type
@@ -7959,8 +7959,8 @@ router.get('/approvals/analytics/agents', async (req, res) => {
             if (!agentStats[agentId]) {
                 agentStats[agentId] = {
                     agent_id: agentId,
-                    agent_name: record.agent.name,
-                    agent_type: record.agent.type,
+                    agent_name: record.agents.name,
+                    agent_type: record.agents.type,
                     total_approvals: 0,
                     approved: 0,
                     rejected: 0,
@@ -9127,7 +9127,7 @@ Response:`;
             .insert([conversationData])
             .select(`
                 *,
-                agent:agents(name, type),
+                agents!inner(name, type),
                 user:users(name, email)
             `)
             .single();
@@ -9200,7 +9200,7 @@ Response:`;
                     .insert([aiConversationData])
                     .select(`
                         *,
-                        agent:agents(name, type),
+                        agents!inner(name, type),
                         user:users(name, email)
                     `)
                     .single();
