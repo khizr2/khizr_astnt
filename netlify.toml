@@ -1,27 +1,57 @@
 [build]
   publish = "."
-  command = "echo 'Build completed'"
+  command = ""
 
 [build.environment]
   NODE_VERSION = "18"
 
+# API redirects to your Render backend
 [[redirects]]
   from = "/api/*"
   to = "https://khizr-assistant-api.onrender.com/api/:splat"
   status = 200
+  force = true
 
+# Static assets - serve from public directory with proper headers
 [[redirects]]
   from = "/css/*"
   to = "/public/css/:splat"
   status = 200
+  force = true
 
 [[redirects]]
   from = "/js/*"
   to = "/public/js/:splat"
   status = 200
+  force = true
 
+# SPA fallback - serve app.html for all other requests
 [[redirects]]
   from = "/*"
   to = "/app.html"
   status = 200
+
+# Security headers
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-XSS-Protection = "1; mode=block"
+    X-Content-Type-Options = "nosniff"
+
+# Cache static assets
+[[headers]]
+  for = "/css/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/js/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/public/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
 
