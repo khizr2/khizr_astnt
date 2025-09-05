@@ -102,6 +102,12 @@ const limiter = rateLimit({
 });
 app.use('/api/', limiter);
 
+// Add dynamic env.js route for frontend environment variables
+app.get('/env.js', (_req, res) => {
+    res.set('Content-Type', 'application/javascript');
+    res.send(`window.SUPABASE_URL = '${process.env.SUPABASE_URL}';\nwindow.SUPABASE_ANON_KEY = '${process.env.SUPABASE_ANON_KEY}';\nwindow.API_BASE_URL = '${process.env.API_BASE_URL || ''}';`);
+});
+
 // Static file serving
 app.use(express.static('public'));
 
