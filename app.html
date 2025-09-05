@@ -31,6 +31,7 @@
             <button class="nav-btn" onclick="window.App.switchView('projects')">projects</button>
             <button class="nav-btn" onclick="window.App.switchView('agents')">agents</button>
             <button class="nav-btn" onclick="window.App.switchView('chat')">chat</button>
+            <button class="nav-btn" onclick="window.App.switchView('email')">email</button>
             <button class="nav-btn" onclick="window.App.switchView('goals')">goals</button>
             <button class="nav-btn" onclick="window.App.switchView('insights')">insights</button>
             <button class="nav-btn" onclick="window.App.switchView('bigpage')">big page</button>
@@ -276,16 +277,87 @@
                 <div id="recentEntries">Loading recent entries...</div>
             </div>
         </div>
+
+        <!-- Projects View -->
+        <div id="projectsView" class="view projects-view" style="display:none">
+            <div class="section-header">projects</div>
+            <div id="projectsContainer" class="projects-container">
+                <div class="projects-list" id="projectsList">
+                    <!-- Projects will be dynamically loaded here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Email View -->
+        <div id="emailView" class="view email-view" style="display:none">
+            <div class="section-header">email</div>
+            <div id="emailContainer" class="email-container">
+                <div id="emailConnectionStatus">
+                    <!-- Email connection status will be shown here -->
+                </div>
+                <div id="emailCards" class="email-cards">
+                    <!-- Email summary cards will be shown here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Agents View -->
+        <div id="agentsView" class="view agents-view" style="display:none">
+            <div class="section-header">agents</div>
+            <div id="agentsContainer" class="agents-container">
+                <div id="agentsList" class="agents-list">
+                    <!-- Agent cards will be shown here -->
+                </div>
+                <div class="create-agentic-task-section">
+                    <button class="btn-primary" onclick="window.App.showCreateAgenticTaskModal()">create agentic task</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Goals View -->
+        <div id="goalsView" class="view goals-view" style="display:none">
+            <div class="section-header">goals</div>
+            <div id="goalsContainer" class="goals-container">
+                <div id="goalsList" class="goals-list">
+                    <!-- Goals will be shown here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Insights View -->
+        <div id="insightsView" class="view insights-view" style="display:none">
+            <div class="section-header">insights</div>
+            <div id="insightsContainer" class="insights-container">
+                <div id="insightsContent">
+                    <!-- Insights content will be shown here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Create Agentic Task Modal -->
+        <div id="createAgenticTaskModal" class="modal" style="display:none">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>create agentic task</h3>
+                    <button class="modal-close" onclick="window.App.closeModal('createAgenticTaskModal')">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div id="agenticTaskForm" class="agentic-task-form">
+                        <!-- Multi-step form will be shown here -->
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Load Supabase CDN and JavaScript Files -->
-    <script src="/env.js"></script>
+    <script src="/public/env.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="js/env-loader.js"></script>
-    <script src="js/config.js"></script>
-    <script src="js/auth.js"></script>
-    <script src="js/api.js"></script>
-    <script src="js/ui.js"></script>
+    <script src="/public/js/env-loader.js"></script>
+    <script src="/public/js/config.js"></script>
+    <script src="/public/js/auth.js"></script>
+    <script src="/public/js/api.js"></script>
+    <script src="/public/js/ui.js"></script>
 
     <script>
         // Initialize Supabase client for the main app
@@ -345,6 +417,6 @@
         })();
     </script>
 
-    <script src="js/app.js"></script>
+    <script src="public/js/app.js"></script>
 </body>
 </html>

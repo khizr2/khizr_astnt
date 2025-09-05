@@ -449,6 +449,22 @@ CREATE TABLE mind_notes (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Agentic Tasks table
+CREATE TABLE agentic_tasks (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    end_goal TEXT NOT NULL,
+    steps_identified BOOLEAN DEFAULT FALSE,
+    steps_description TEXT,
+    time_constraint VARCHAR(255),
+    money_constraint VARCHAR(255),
+    agents_requested INTEGER DEFAULT 1,
+    pm_agent_requested BOOLEAN DEFAULT FALSE,
+    status VARCHAR(50) DEFAULT 'pending',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 -- USER PREFERENCE INDEXES
 -- ===========================================
 
@@ -456,6 +472,11 @@ CREATE TABLE mind_notes (
 CREATE INDEX IF NOT EXISTS idx_mind_notes_user_id ON mind_notes(user_id);
 CREATE INDEX IF NOT EXISTS idx_mind_notes_created_at ON mind_notes(created_at);
 CREATE INDEX IF NOT EXISTS idx_mind_notes_processed ON mind_notes(processed);
+
+-- Agentic tasks indexes
+CREATE INDEX IF NOT EXISTS idx_agentic_tasks_user_id ON agentic_tasks(user_id);
+CREATE INDEX IF NOT EXISTS idx_agentic_tasks_status ON agentic_tasks(status);
+CREATE INDEX IF NOT EXISTS idx_agentic_tasks_created_at ON agentic_tasks(created_at);
 
 -- User preferences indexes
 CREATE INDEX IF NOT EXISTS idx_user_preferences_user_type_key ON user_preferences(user_id, preference_type, preference_key);

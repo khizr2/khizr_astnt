@@ -10123,6 +10123,61 @@ router.post('/patterns/feedback', async (req, res) => {
     }
 });
 
+// Create agentic task
+router.post('/agentic-task', async (req, res) => {
+    try {
+        const {
+            endGoal,
+            stepsIdentified,
+            stepsDescription,
+            timeConstraint,
+            moneyConstraint,
+            agentsRequested,
+            pmAgentRequested
+        } = req.body;
 
+        if (!endGoal) {
+            return res.status(400).json({ error: 'End goal is required' });
+        }
+
+        // Create the agentic task record
+        const { data: task, error: taskError } = await supabase
+            .from('agentic_tasks')
+            .insert([{
+                user_id: req.user.id,
+                end_goal: endGoal,
+                steps_identified: stepsIdentified,
+                steps_description: stepsDescription,
+                time_constraint: timeConstraint,
+                money_constraint: moneyConstraint,
+                agents_requested: agentsRequested || 1,
+                pm_agent_requested: pmAgentRequested || false,
+                status: 'pending'
+            }])
+            .select()
+            .single();
+
+        if (taskError) {
+            logger.error('Error creating agentic task:', taskError);
+            throw taskError;
+        }
+
+        // Here you would typically trigger agent creation and task assignment
+        // For now, we'll just acknowledge the creation
+
+        logger.info(`Agentic task created for user ${req.user.id}: ${endGoal.substring(0, 100)}...`);
+
+        res.status(201).json({
+            success: true,
+            message: 'Agentic task created successfully',
+            task_id: task.id,
+            agents_will_be_created: agentsRequested || 1
+        });
+
+    } catch (error) {
+        logger.error('Create agentic task error:', error);
+        res.status(500).json({ error: 'Failed to create agentic task' });
+    }
+});
 
 module.exports = router;

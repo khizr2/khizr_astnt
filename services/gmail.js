@@ -324,6 +324,76 @@ class GmailService {
             throw error;
         }
     }
+
+    // Get email summaries for dashboard
+    async getEmailSummaries(userId, limit = 10) {
+        try {
+            const tokens = await this.getTokens(userId);
+            if (!tokens) {
+                throw new Error('No Gmail tokens found');
+            }
+
+            this.oauth2Client.setCredentials({
+                access_token: tokens.access_token,
+                refresh_token: tokens.refresh_token,
+                token_type: tokens.token_type,
+                expiry_date: tokens.expires_at ? new Date(tokens.expires_at).getTime() : null
+            });
+
+            const gmail = google.gmail({ version: 'v1', auth: this.oauth2Client });
+
+            // Get list of messages
+            const response = await gmail.users.messages.list({
+                userId: 'me',
+                maxResults: limit,
+                q: 'in:inbox'
+            });
+
+            if (!response.data.messages) {
+                return [];
+            }
+
+            // Get full message details for each
+            const summaries = [];
+            for (const message of response.data.messages.slice(0, limit)) {
+                try {
+                    const messageResponse = await gmail.users.messages.get({
+                        userId: 'me',
+                        id: message.id,
+                        format: 'metadata',
+                        metadataHeaders: ['Subject', 'From', 'Date']
+                    });
+
+                    const headers = messageResponse.data.payload.headers;
+                    const subject = headers.find(h => h.name === 'Subject')?.value || 'No Subject';
+                    const from = headers.find(h => h.name === 'From')?.value || 'Unknown';
+                    const date = headers.find(h => h.name === 'Date')?.value || '';
+
+                    // Extract sender name and email
+                    const fromMatch = from.match(/^([^<]+)<(.+)>$/);
+                    const senderName = fromMatch ? fromMatch[1].trim() : from;
+                    const senderEmail = fromMatch ? fromMatch[2] : from;
+
+                    summaries.push({
+                        id: message.id,
+                        subject,
+                        sender: senderName,
+                        senderEmail,
+                        date,
+                        preview: messageResponse.data.snippet || 'No preview available'
+                    });
+                } catch (error) {
+                    logger.error(`Error getting message ${message.id}:`, error);
+                    // Continue with other messages
+                }
+            }
+
+            return summaries;
+        } catch (error) {
+            logger.error('Error getting email summaries:', error);
+            throw error;
+        }
+    }
 }
 
 module.exports = new GmailService();

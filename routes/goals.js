@@ -1,5 +1,5 @@
 const express = require('express');
-const { query } = require('../database/connection');
+const { supabase } = require('../database/connection');
 const { authenticateToken } = require('../middleware/auth');
 const { logger } = require('../utils/logger');
 
@@ -10,19 +10,24 @@ router.use(authenticateToken);
 router.get('/', async (req, res) => {
     try {
         const { type } = req.query;
-        
-        let queryText = 'SELECT * FROM goals WHERE user_id = $1';
-        const queryParams = [req.user.id];
-        
+
+        let query = supabase
+            .from('goals')
+            .select('*')
+            .eq('user_id', req.user.id)
+            .order('created_at', { ascending: false });
+
         if (type) {
-            queryText += ' AND type = $2';
-            queryParams.push(type);
+            query = query.eq('type', type);
         }
-        
-        queryText += ' ORDER BY created_at DESC';
-        
-        const result = await query(queryText, queryParams);
-        res.json(result.rows);
+
+        const { data: goals, error } = await query;
+
+        if (error) {
+            throw error;
+        }
+
+        res.json({ success: true, goals });
     } catch (error) {
         logger.error('Get goals error:', error);
         res.status(500).json({ error: 'Internal server error' });

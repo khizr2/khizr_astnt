@@ -135,6 +135,7 @@ app.use('/api/goals', goalRoutes);
 app.use('/api/ai', aiRoutes);
 app.use('/api/ingest', ingestRoutes);
 app.use('/api/gmail', gmailRoutes);
+app.use('/api/email', gmailRoutes); // Alias for email endpoints
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/debug', debugRoutes);
 app.use('/api/agents', agentRoutes);
@@ -142,6 +143,7 @@ app.use('/api/messaging', messagingRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/api/user/preferences', preferencesRoutes);
 app.use('/api/config', configRoutes);
+app.use('/api/insights', require('./routes/insights'));
 
 // Serve main application
 app.get('/', (req, res) => {

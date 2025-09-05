@@ -151,17 +151,32 @@ class KhizrAssistant {
     async loadViewData(view) {
         try {
             switch (view) {
-                case 'tasks':
+                case 'today':
                     await this.loadTasks();
                     break;
                 case 'projects':
-                    await this.loadProjects();
+                    await this.loadProjectsPage();
                     break;
                 case 'agents':
-                    await this.loadAgentStatus();
+                    await this.loadAgentsPage();
                     break;
                 case 'chat':
                     await this.loadChatHistory();
+                    break;
+                case 'email':
+                    await this.loadEmailPage();
+                    break;
+                case 'goals':
+                    await this.loadGoalsPage();
+                    break;
+                case 'insights':
+                    await this.loadInsightsPage();
+                    break;
+                case 'mind':
+                    // Mind page functionality
+                    break;
+                case 'bigpage':
+                    // Big page functionality
                     break;
             }
         } catch (error) {
@@ -958,6 +973,603 @@ class KhizrAssistant {
         const div = document.createElement('div');
         div.textContent = text;
         return div.innerHTML;
+    }
+
+    // Projects Page Methods
+    async loadProjectsPage() {
+        try {
+            window.UI.showLoading('projectsList', 'Loading projects...');
+            const response = await window.API.getProjects();
+
+            if (response.success) {
+                this.displayProjectsPage(response.projects || response);
+            }
+        } catch (error) {
+            window.UI.handleError(error, 'Loading Projects');
+        } finally {
+            window.UI.hideLoading('projectsList');
+        }
+    }
+
+    displayProjectsPage(projects) {
+        const container = document.getElementById('projectsList');
+        if (!container) return;
+
+        if (!projects || projects.length === 0) {
+            container.innerHTML = '<div style="color: var(--text-secondary); font-style: italic;">No projects yet. Create one!</div>';
+            return;
+        }
+
+        const projectsHTML = projects.map(project => `
+            <div class="project-item" data-project-id="${project.id}" onclick="window.App.toggleProjectExpansion('${project.id}')">
+                <div class="project-name">${this.escapeHtml(project.title)}</div>
+            </div>
+        `).join('');
+
+        container.innerHTML = projectsHTML;
+    }
+
+    async toggleProjectExpansion(projectId) {
+        const projectItem = document.querySelector(`[data-project-id="${projectId}"]`);
+        if (!projectItem) return;
+
+        const isExpanded = projectItem.classList.contains('project-expanded');
+
+        if (isExpanded) {
+            this.collapseProject(projectId);
+        } else {
+            await this.expandProject(projectId);
+        }
+    }
+
+    async expandProject(projectId) {
+        try {
+            const projectItem = document.querySelector(`[data-project-id="${projectId}"]`);
+            if (!projectItem) return;
+
+            projectItem.classList.add('project-expanded');
+
+            // Load subprojects and tasks
+            const [subprojectsResponse, tasksResponse] = await Promise.all([
+                window.API.getProjectById(projectId),
+                window.API.getTasks({ project_id: projectId })
+            ]);
+
+            let expansionHTML = '';
+
+            // Add subprojects (if any)
+            if (subprojectsResponse.success && subprojectsResponse.subprojects) {
+                expansionHTML += subprojectsResponse.subprojects.map(sub => `
+                    <div class="subproject-item" onclick="window.App.handleSubprojectClick('${sub.id}')">
+                        ${this.escapeHtml(sub.title)}
+                    </div>
+                `).join('');
+            }
+
+            // Add tasks
+            if (tasksResponse.success && tasksResponse.tasks) {
+                expansionHTML += tasksResponse.tasks.map(task => `
+                    <div class="task-item" onclick="window.App.handleTaskClick('${task.id}')">
+                        ${this.escapeHtml(task.title)}
+                    </div>
+                `).join('');
+            }
+
+            if (expansionHTML) {
+                projectItem.insertAdjacentHTML('afterend', expansionHTML);
+            }
+        } catch (error) {
+            window.UI.handleError(error, 'Expanding Project');
+        }
+    }
+
+    collapseProject(projectId) {
+        const projectItem = document.querySelector(`[data-project-id="${projectId}"]`);
+        if (!projectItem) return;
+
+        projectItem.classList.remove('project-expanded');
+
+        // Remove all expanded items after this project
+        let nextElement = projectItem.nextElementSibling;
+        while (nextElement && (nextElement.classList.contains('subproject-item') || nextElement.classList.contains('task-item'))) {
+            const elementToRemove = nextElement;
+            nextElement = nextElement.nextElementSibling;
+            elementToRemove.remove();
+        }
+    }
+
+    handleSubprojectClick(subprojectId) {
+        // Handle subproject click - could expand further or navigate
+        console.log('Subproject clicked:', subprojectId);
+    }
+
+    handleTaskClick(taskId) {
+        // Handle task click - could open task details
+        console.log('Task clicked:', taskId);
+    }
+
+    // Email Page Methods
+    async loadEmailPage() {
+        try {
+            const container = document.getElementById('emailContainer');
+            if (!container) return;
+
+            // Check email connection status
+            const connectionResponse = await window.API.getEmailConnectionStatus();
+
+            if (connectionResponse.success && connectionResponse.connected) {
+                // Load email summaries
+                await this.loadEmailSummaries();
+            } else {
+                // Show connection prompt
+                this.showEmailConnectionPrompt();
+            }
+        } catch (error) {
+            window.UI.handleError(error, 'Loading Email Page');
+        }
+    }
+
+    showEmailConnectionPrompt() {
+        const statusContainer = document.getElementById('emailConnectionStatus');
+        if (!statusContainer) return;
+
+        statusContainer.innerHTML = `
+            <div style="text-align: center;">
+                <div style="font-size: 16px; margin-bottom: 12px; color: var(--text-primary);">Email Not Connected</div>
+                <div style="font-size: 14px; margin-bottom: 16px; color: var(--text-secondary);">
+                    Connect your email to view summaries and manage communications.
+                </div>
+                <button class="btn-primary" onclick="window.App.connectEmail()">Connect Email</button>
+            </div>
+        `;
+
+        // Clear email cards
+        const cardsContainer = document.getElementById('emailCards');
+        if (cardsContainer) {
+            cardsContainer.innerHTML = '';
+        }
+    }
+
+    async loadEmailSummaries() {
+        try {
+            window.UI.showLoading('emailCards', 'Loading emails...');
+            const response = await window.API.getEmailSummaries();
+
+            if (response.success) {
+                this.displayEmailSummaries(response.emails);
+            }
+        } catch (error) {
+            window.UI.handleError(error, 'Loading Email Summaries');
+        } finally {
+            window.UI.hideLoading('emailCards');
+        }
+    }
+
+    displayEmailSummaries(emails) {
+        const statusContainer = document.getElementById('emailConnectionStatus');
+        const cardsContainer = document.getElementById('emailCards');
+
+        if (!statusContainer || !cardsContainer) return;
+
+        // Show connection status
+        statusContainer.innerHTML = `
+            <div style="font-size: 14px; color: var(--text-primary);">
+                📧 Connected • ${emails.length} recent emails
+            </div>
+        `;
+
+        if (!emails || emails.length === 0) {
+            cardsContainer.innerHTML = '<div style="color: var(--text-secondary); font-style: italic;">No emails found.</div>';
+            return;
+        }
+
+        const emailsHTML = emails.slice(0, 10).map(email => `
+            <div class="email-card" onclick="window.App.openEmail('${email.id}')">
+                <div class="email-subject">${this.escapeHtml(email.subject)}</div>
+                <div class="email-sender">From: ${this.escapeHtml(email.sender)}</div>
+                <div class="email-preview">${this.escapeHtml(email.preview || email.content?.substring(0, 100) || 'No preview available')}</div>
+            </div>
+        `).join('');
+
+        cardsContainer.innerHTML = emailsHTML;
+    }
+
+    async connectEmail() {
+        try {
+            const response = await window.API.connectEmail();
+            if (response.success) {
+                window.UI.showSuccess('Email connected successfully!');
+                await this.loadEmailPage(); // Reload the page
+            }
+        } catch (error) {
+            window.UI.handleError(error, 'Connecting Email');
+        }
+    }
+
+    openEmail(emailId) {
+        // Handle opening email - could open in new tab or modal
+        console.log('Opening email:', emailId);
+    }
+
+    // Agents Page Methods
+    async loadAgentsPage() {
+        try {
+            const container = document.getElementById('agentsContainer');
+            if (!container) return;
+
+            // Load current agents
+            const response = await window.API.getAgents();
+
+            if (response.success && response.agents && response.agents.length > 0) {
+                this.displayAgents(response.agents);
+            } else {
+                this.showNoAgentsMessage();
+            }
+        } catch (error) {
+            window.UI.handleError(error, 'Loading Agents Page');
+        }
+    }
+
+    displayAgents(agents) {
+        const container = document.getElementById('agentsList');
+        if (!container) return;
+
+        const agentsHTML = agents.map(agent => `
+            <div class="agent-card-large">
+                <div style="display: flex; align-items: center; margin-bottom: 12px;">
+                    <div class="agent-status-indicator ${agent.status}"></div>
+                    <div style="font-size: 16px; font-weight: 500; color: var(--text-primary);">
+                        ${this.escapeHtml(agent.display_name || agent.name)}
+                    </div>
+                </div>
+                <div style="font-size: 14px; color: var(--text-secondary); margin-bottom: 8px;">
+                    ${this.escapeHtml(agent.type)}
+                </div>
+                <div style="font-size: 12px; color: var(--text-secondary);">
+                    Status: ${agent.status} • Tasks: ${agent.tasks_completed || 0}
+                </div>
+            </div>
+        `).join('');
+
+        container.innerHTML = agentsHTML;
+    }
+
+    showNoAgentsMessage() {
+        const container = document.getElementById('agentsList');
+        if (!container) return;
+
+        container.innerHTML = `
+            <div class="agent-card-large" style="text-align: center;">
+                <div style="font-size: 16px; color: var(--text-primary); margin-bottom: 8px;">
+                    No Active Agents
+                </div>
+                <div style="font-size: 14px; color: var(--text-secondary);">
+                    Create an agentic task to get started with AI assistance.
+                </div>
+            </div>
+        `;
+    }
+
+    showCreateAgenticTaskModal() {
+        const modal = document.getElementById('createAgenticTaskModal');
+        if (!modal) return;
+
+        // Initialize the form
+        this.initializeAgenticTaskForm();
+        modal.style.display = 'flex';
+    }
+
+    initializeAgenticTaskForm() {
+        const formContainer = document.getElementById('agenticTaskForm');
+        if (!formContainer) return;
+
+        formContainer.innerHTML = `
+            <div class="step-indicator">
+                <div class="step-dot active" data-step="1"></div>
+                <div class="step-dot" data-step="2"></div>
+                <div class="step-dot" data-step="3"></div>
+                <div class="step-dot" data-step="4"></div>
+                <div class="step-dot" data-step="5"></div>
+            </div>
+
+            <div class="form-step active" data-step="1">
+                <div class="form-group">
+                    <label class="form-label">End Goal</label>
+                    <textarea class="form-textarea" id="endGoal" placeholder="What must you have done?" required></textarea>
+                </div>
+                <div class="form-navigation">
+                    <div></div>
+                    <button class="btn-primary" onclick="window.App.nextAgenticStep()">Next</button>
+                </div>
+            </div>
+
+            <div class="form-step" data-step="2">
+                <div class="form-group">
+                    <label class="form-label">Steps Identified?</label>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="stepsIdentified" onchange="window.App.toggleStepsField()">
+                        <label for="stepsIdentified">Yes, I have identified the steps</label>
+                    </div>
+                </div>
+                <div class="form-group" id="stepsField" style="display: none;">
+                    <label class="form-label">Steps to Achieve Goal</label>
+                    <textarea class="form-textarea" id="stepsDescription" placeholder="Describe the steps needed..."></textarea>
+                </div>
+                <div class="form-navigation">
+                    <button class="btn-secondary" onclick="window.App.prevAgenticStep()">Back</button>
+                    <button class="btn-primary" onclick="window.App.nextAgenticStep()">Next</button>
+                </div>
+            </div>
+
+            <div class="form-step" data-step="3">
+                <div class="form-group">
+                    <label class="form-label">Time Constraint</label>
+                    <input type="text" class="form-input" id="timeConstraint" placeholder="e.g., 2 weeks, 1 month, 3 days">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Money Constraint</label>
+                    <input type="text" class="form-input" id="moneyConstraint" placeholder="e.g., $500, $2000, budget-conscious">
+                </div>
+                <div class="form-navigation">
+                    <button class="btn-secondary" onclick="window.App.prevAgenticStep()">Back</button>
+                    <button class="btn-primary" onclick="window.App.nextAgenticStep()">Next</button>
+                </div>
+            </div>
+
+            <div class="form-step" data-step="4">
+                <div class="form-group">
+                    <label class="form-label">Number of Agents Requested</label>
+                    <input type="number" class="form-input" id="agentsRequested" min="1" max="5" value="1">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Project Management Agent</label>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="pmAgentRequested" checked>
+                        <label for="pmAgentRequested">Assign PM Agent for management</label>
+                    </div>
+                </div>
+                <div class="form-navigation">
+                    <button class="btn-secondary" onclick="window.App.prevAgenticStep()">Back</button>
+                    <button class="btn-primary" onclick="window.App.nextAgenticStep()">Next</button>
+                </div>
+            </div>
+
+            <div class="form-step" data-step="5">
+                <div style="text-align: center; margin-bottom: 20px;">
+                    <h3 style="color: var(--text-primary); margin-bottom: 8px;">Confirm Agentic Task</h3>
+                    <div id="taskSummary" style="font-size: 14px; color: var(--text-secondary);"></div>
+                </div>
+                <div class="form-navigation">
+                    <button class="btn-secondary" onclick="window.App.prevAgenticStep()">Back</button>
+                    <button class="btn-primary" onclick="window.App.submitAgenticTask()">Start Task</button>
+                </div>
+            </div>
+        `;
+
+        this.agenticFormData = {
+            step: 1,
+            endGoal: '',
+            stepsIdentified: false,
+            stepsDescription: '',
+            timeConstraint: '',
+            moneyConstraint: '',
+            agentsRequested: 1,
+            pmAgentRequested: true
+        };
+    }
+
+    nextAgenticStep() {
+        const currentStep = this.agenticFormData.step;
+        if (!this.validateCurrentStep(currentStep)) return;
+
+        this.saveCurrentStepData(currentStep);
+        this.moveToStep(currentStep + 1);
+    }
+
+    prevAgenticStep() {
+        const currentStep = this.agenticFormData.step;
+        this.moveToStep(currentStep - 1);
+    }
+
+    validateCurrentStep(step) {
+        switch (step) {
+            case 1:
+                const endGoal = document.getElementById('endGoal')?.value?.trim();
+                if (!endGoal) {
+                    window.UI.showWarning('Please describe your end goal');
+                    return false;
+                }
+                break;
+            case 3:
+                const timeConstraint = document.getElementById('timeConstraint')?.value?.trim();
+                const moneyConstraint = document.getElementById('moneyConstraint')?.value?.trim();
+                if (!timeConstraint || !moneyConstraint) {
+                    window.UI.showWarning('Please fill in both time and money constraints');
+                    return false;
+                }
+                break;
+        }
+        return true;
+    }
+
+    saveCurrentStepData(step) {
+        switch (step) {
+            case 1:
+                this.agenticFormData.endGoal = document.getElementById('endGoal')?.value?.trim() || '';
+                break;
+            case 2:
+                this.agenticFormData.stepsIdentified = document.getElementById('stepsIdentified')?.checked || false;
+                this.agenticFormData.stepsDescription = document.getElementById('stepsDescription')?.value?.trim() || '';
+                break;
+            case 3:
+                this.agenticFormData.timeConstraint = document.getElementById('timeConstraint')?.value?.trim() || '';
+                this.agenticFormData.moneyConstraint = document.getElementById('moneyConstraint')?.value?.trim() || '';
+                break;
+            case 4:
+                this.agenticFormData.agentsRequested = parseInt(document.getElementById('agentsRequested')?.value) || 1;
+                this.agenticFormData.pmAgentRequested = document.getElementById('pmAgentRequested')?.checked || false;
+                break;
+        }
+    }
+
+    moveToStep(step) {
+        // Update form data
+        this.agenticFormData.step = step;
+
+        // Update step indicators
+        document.querySelectorAll('.step-dot').forEach((dot, index) => {
+            const dotStep = index + 1;
+            dot.classList.remove('active', 'completed');
+            if (dotStep === step) {
+                dot.classList.add('active');
+            } else if (dotStep < step) {
+                dot.classList.add('completed');
+            }
+        });
+
+        // Show/hide form steps
+        document.querySelectorAll('.form-step').forEach((stepEl, index) => {
+            const stepNum = index + 1;
+            stepEl.classList.toggle('active', stepNum === step);
+        });
+
+        // Update summary on final step
+        if (step === 5) {
+            this.updateTaskSummary();
+        }
+    }
+
+    toggleStepsField() {
+        const checkbox = document.getElementById('stepsIdentified');
+        const field = document.getElementById('stepsField');
+        if (checkbox && field) {
+            field.style.display = checkbox.checked ? 'block' : 'none';
+        }
+    }
+
+    updateTaskSummary() {
+        const summary = document.getElementById('taskSummary');
+        if (!summary) return;
+
+        const data = this.agenticFormData;
+        summary.innerHTML = `
+            <div><strong>Goal:</strong> ${this.escapeHtml(data.endGoal)}</div>
+            <div><strong>Steps:</strong> ${data.stepsIdentified ? 'Identified' : 'Not identified'}</div>
+            <div><strong>Time:</strong> ${this.escapeHtml(data.timeConstraint)}</div>
+            <div><strong>Budget:</strong> ${this.escapeHtml(data.moneyConstraint)}</div>
+            <div><strong>Agents:</strong> ${data.agentsRequested}</div>
+            <div><strong>PM Agent:</strong> ${data.pmAgentRequested ? 'Yes' : 'No'}</div>
+        `;
+    }
+
+    async submitAgenticTask() {
+        try {
+            const response = await window.API.createAgenticTask(this.agenticFormData);
+
+            if (response.success) {
+                window.UI.showSuccess('Agentic task created successfully!');
+                this.closeModal('createAgenticTaskModal');
+                // Reload agents page to show new agents
+                await this.loadAgentsPage();
+            }
+        } catch (error) {
+            window.UI.handleError(error, 'Creating Agentic Task');
+        }
+    }
+
+    closeModal(modalId) {
+        const modal = document.getElementById(modalId);
+        if (modal) {
+            modal.style.display = 'none';
+        }
+    }
+
+    // Goals Page Methods
+    async loadGoalsPage() {
+        try {
+            const container = document.getElementById('goalsContainer');
+            if (!container) return;
+
+            window.UI.showLoading('goalsList', 'Loading goals...');
+            const response = await window.API.getGoals();
+
+            if (response.success) {
+                this.displayGoals(response.goals);
+            }
+        } catch (error) {
+            window.UI.handleError(error, 'Loading Goals');
+        } finally {
+            window.UI.hideLoading('goalsList');
+        }
+    }
+
+    displayGoals(goals) {
+        const container = document.getElementById('goalsList');
+        if (!container) return;
+
+        if (!goals || goals.length === 0) {
+            container.innerHTML = '<div style="color: var(--text-secondary); font-style: italic;">No goals set yet. Create your first goal!</div>';
+            return;
+        }
+
+        const goalsHTML = goals.map(goal => `
+            <div class="goal-item" onclick="window.App.viewGoal('${goal.id}')">
+                <div class="goal-title">${this.escapeHtml(goal.title)}</div>
+                <div class="goal-description">${this.escapeHtml(goal.description || '')}</div>
+                <div class="goal-progress">
+                    <span>${goal.progress || 0}%</span>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: ${goal.progress || 0}%"></div>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+
+        container.innerHTML = goalsHTML;
+    }
+
+    viewGoal(goalId) {
+        // Handle viewing goal details
+        console.log('Viewing goal:', goalId);
+    }
+
+    // Insights Page Methods
+    async loadInsightsPage() {
+        try {
+            const container = document.getElementById('insightsContainer');
+            if (!container) return;
+
+            window.UI.showLoading('insightsContent', 'Loading insights...');
+            const response = await window.API.getInsights();
+
+            if (response.success) {
+                this.displayInsights(response.insights);
+            }
+        } catch (error) {
+            window.UI.handleError(error, 'Loading Insights');
+        } finally {
+            window.UI.hideLoading('insightsContent');
+        }
+    }
+
+    displayInsights(insights) {
+        const container = document.getElementById('insightsContent');
+        if (!container) return;
+
+        if (!insights || insights.length === 0) {
+            container.innerHTML = '<div style="color: var(--text-secondary); font-style: italic;">No insights available yet.</div>';
+            return;
+        }
+
+        const insightsHTML = insights.map(insight => `
+            <div class="insight-card">
+                <div class="insight-title">${this.escapeHtml(insight.title)}</div>
+                <div class="insight-value">${insight.value}</div>
+                <div class="insight-description">${this.escapeHtml(insight.description)}</div>
+            </div>
+        `).join('');
+
+        container.innerHTML = insightsHTML;
     }
 }
 

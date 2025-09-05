@@ -256,6 +256,51 @@ class APIClient {
             body: JSON.stringify({ note })
         });
     }
+
+    // Projects
+    async getProjects(options = {}) {
+        const queryParams = new URLSearchParams(options).toString();
+        return this.request(`/api/projects?${queryParams}`);
+    }
+
+    async getProjectById(projectId) {
+        return this.request(`/api/projects/${projectId}`);
+    }
+
+    // Email
+    async getEmailConnectionStatus() {
+        return this.request('/api/email/connection-status');
+    }
+
+    async getEmailSummaries(limit = 10) {
+        return this.request(`/api/email/summaries?limit=${limit}`);
+    }
+
+    async connectEmail() {
+        return this.request('/api/email/connect', { method: 'POST' });
+    }
+
+    // Agents
+    async getAgents() {
+        return this.request('/api/agents');
+    }
+
+    async createAgenticTask(taskData) {
+        return this.request('/api/agents/agentic-task', {
+            method: 'POST',
+            body: JSON.stringify(taskData)
+        });
+    }
+
+    // Goals
+    async getGoals() {
+        return this.request('/api/goals');
+    }
+
+    // Insights
+    async getInsights() {
+        return this.request('/api/insights');
+    }
 }
 
 // Create and export singleton instance

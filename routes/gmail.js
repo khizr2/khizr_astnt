@@ -42,13 +42,40 @@ router.get('/callback', async (req, res) => {
 router.get('/status', authenticateToken, async (req, res) => {
     try {
         const tokens = await gmailService.getTokens(req.user.id);
-        res.json({ 
+        res.json({
             connected: !!tokens,
             hasTokens: !!tokens?.access_token
         });
     } catch (error) {
         logger.error('Error checking Gmail status:', error);
         res.status(500).json({ error: 'Failed to check Gmail status' });
+    }
+});
+
+// Get email summaries for dashboard
+router.get('/summaries', authenticateToken, async (req, res) => {
+    try {
+        const limit = parseInt(req.query.limit) || 10;
+        const emails = await gmailService.getEmailSummaries(req.user.id, limit);
+        res.json({ success: true, emails });
+    } catch (error) {
+        logger.error('Error getting email summaries:', error);
+        res.status(500).json({ error: 'Failed to get email summaries' });
+    }
+});
+
+// Connection status endpoint for frontend
+router.get('/connection-status', authenticateToken, async (req, res) => {
+    try {
+        const tokens = await gmailService.getTokens(req.user.id);
+        res.json({
+            success: true,
+            connected: !!tokens && !!tokens.access_token,
+            hasTokens: !!tokens?.access_token
+        });
+    } catch (error) {
+        logger.error('Error checking email connection:', error);
+        res.json({ success: false, connected: false, error: error.message });
     }
 });
 
