@@ -40,26 +40,31 @@ class AuthManager {
 
     async login(credentials) {
         try {
-            const response = await fetch('/api/auth/login', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(credentials)
+            // Use Supabase authentication directly (no API calls needed)
+            const { data, error } = await window.supabase.auth.signInWithPassword({
+                email: credentials.email,
+                password: credentials.password
             });
 
-            const data = await response.json();
-
-            if (!response.ok) {
-                throw new Error(data.error || 'Login failed');
+            if (error) {
+                throw new Error(error.message);
             }
 
-            if (data.success && data.token) {
-                this.setAuthToken(data.token);
-                if (data.user) {
-                    this.setUserData(data.user);
-                }
+            if (data.session && data.user) {
+                // Store authentication data
+                const authData = {
+                    token: data.session.access_token,
+                    refresh_token: data.session.refresh_token,
+                    user: data.user
+                };
+
+                this.setAuthToken(authData.token);
+                this.setUserData(data.user);
+
+                console.log('Login successful via Supabase');
                 return { success: true, user: data.user };
             } else {
-                throw new Error('Invalid login response');
+                throw new Error('Login failed - no session created');
             }
         } catch (error) {
             console.error('Login error:', error);
@@ -69,26 +74,46 @@ class AuthManager {
 
     async register(userData) {
         try {
-            const response = await fetch('/api/auth/register', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(userData)
+            // Use Supabase authentication directly (no API calls needed)
+            const { data, error } = await window.supabase.auth.signUp({
+                email: userData.email,
+                password: userData.password,
+                options: {
+                    data: {
+                        name: userData.name || userData.username,
+                        phone: userData.phone
+                    }
+                }
             });
 
-            const data = await response.json();
-
-            if (!response.ok) {
-                throw new Error(data.error || 'Registration failed');
+            if (error) {
+                throw new Error(error.message);
             }
 
-            if (data.success && data.token) {
-                this.setAuthToken(data.token);
-                if (data.user) {
-                    this.setUserData(data.user);
-                }
+            if (data.session && data.user) {
+                // User is immediately signed in
+                const authData = {
+                    token: data.session.access_token,
+                    refresh_token: data.session.refresh_token,
+                    user: data.user
+                };
+
+                this.setAuthToken(authData.token);
+                this.setUserData(data.user);
+
+                console.log('Registration successful via Supabase');
                 return { success: true, user: data.user };
+            } else if (data.user && !data.session) {
+                // Email confirmation required
+                console.log('Registration initiated - email confirmation required');
+                return {
+                    success: true,
+                    requiresConfirmation: true,
+                    user: data.user,
+                    message: 'Please check your email to confirm your account'
+                };
             } else {
-                throw new Error('Invalid registration response');
+                throw new Error('Registration failed');
             }
         } catch (error) {
             console.error('Registration error:', error);
@@ -98,35 +123,41 @@ class AuthManager {
 
     async logout() {
         try {
-            // Call logout endpoint if available
-            await fetch('/api/auth/logout', {
-                method: 'POST',
-                headers: this.getAuthHeaders()
-            }).catch(() => {
-                // Ignore logout endpoint errors
-            });
+            // Use Supabase logout directly
+            const { error } = await window.supabase.auth.signOut();
+
+            if (error) {
+                console.warn('Supabase logout warning:', error.message);
+            } else {
+                console.log('Logged out successfully');
+            }
         } catch (error) {
             console.error('Logout error:', error);
         } finally {
             this.clearAuth();
-            window.location.href = '/';
+            window.location.href = '/index.html';
         }
     }
 
     async refreshToken() {
         try {
-            const response = await fetch('/api/auth/refresh', {
-                method: 'POST',
-                headers: this.getAuthHeaders()
-            });
+            // Supabase handles token refresh automatically
+            // Just check if we have a valid session
+            const { data: { session }, error } = await window.supabase.auth.getSession();
 
-            const data = await response.json();
+            if (error) {
+                throw new Error('Session check failed: ' + error.message);
+            }
 
-            if (data.success && data.token) {
-                this.setAuthToken(data.token);
+            if (session && session.access_token) {
+                this.setAuthToken(session.access_token);
+                if (session.user) {
+                    this.setUserData(session.user);
+                }
+                console.log('Token refreshed successfully');
                 return { success: true };
             } else {
-                throw new Error('Token refresh failed');
+                throw new Error('No valid session found');
             }
         } catch (error) {
             console.error('Token refresh error:', error);
@@ -137,16 +168,34 @@ class AuthManager {
 
     async validateToken() {
         try {
-            const response = await fetch('/api/auth/validate', {
-                headers: this.getAuthHeaders()
-            });
+            // Use Supabase to validate the current session
+            const { data: { session }, error } = await window.supabase.auth.getSession();
 
-            const data = await response.json();
-            return data.success === true;
+            if (error) {
+                console.error('Session validation error:', error.message);
+                return false;
+            }
+
+            const isValid = session && session.access_token && !this.isTokenExpired(session);
+            console.log('Token validation result:', isValid);
+            return isValid;
         } catch (error) {
             console.error('Token validation error:', error);
             return false;
         }
+    }
+
+    isTokenExpired(session) {
+        if (!session || !session.expires_at) {
+            return true;
+        }
+
+        // Check if token expires within next 5 minutes
+        const expiresAt = new Date(session.expires_at * 1000);
+        const now = new Date();
+        const fiveMinutesFromNow = new Date(now.getTime() + 5 * 60 * 1000);
+
+        return expiresAt <= fiveMinutesFromNow;
     }
 
     setAuthToken(token) {
