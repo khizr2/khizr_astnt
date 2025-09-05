@@ -112,8 +112,11 @@ class KhizrAssistant {
             btn.classList.remove('active');
         });
 
-        const activeBtn = document.querySelector(`[data-view="${view}"]`) ||
-                         document.querySelector(`.nav-btn:contains("${view}")`);
+        const buttons = document.querySelectorAll('.nav-btn');
+        const activeBtn = Array.from(buttons).find(btn => {
+            const dataView = btn.dataset.view || btn.textContent.trim().toLowerCase().replace(/\s+/g, '');
+            return dataView === view;
+        });
         if (activeBtn) {
             activeBtn.classList.add('active');
         }
