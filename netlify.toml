@@ -2,7 +2,7 @@
 [build]
   # Since this is a static frontend, we don't need a build command
   # The HTML, CSS, and JS files are served as-is
-  publish = "."
+  publish = "public"
 
 # Environment Variables for Netlify
 # These need to be set in Netlify dashboard under Site Settings > Environment Variables
