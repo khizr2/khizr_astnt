@@ -1,56 +1,26 @@
-# Netlify Configuration for Khizr Assistant Frontend
 [build]
-  # Since this is a static frontend, we don't need a build command
-  # The HTML, CSS, and JS files are served as-is
   publish = "public"
 
-# Environment Variables for Netlify
-# These need to be set in Netlify dashboard under Site Settings > Environment Variables
-# The values below are defaults - actual values should be set in Netlify dashboard
 [build.environment]
-  # Supabase Configuration
   VITE_SUPABASE_URL = "https://tugoaqoadsqbvgckkoqf.supabase.co"
-  VITE_SUPABASE_ANON_KEY = "your_actual_supabase_anon_key_here"
-
-  # Backend API Configuration
+  VITE_SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR1Z29hcW9hZHNxYnZnY2trb3FmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY2NzkyMTAsImV4cCI6MjA3MjI1NTIxMH0.WU3b_pnTungZgPDcBhEVEzVugJYdIvMu_cE-zhGjvP4"
   VITE_RENDER_API_URL = "https://khizr-assistant-api.onrender.com"
 
-  # Application Settings
-  VITE_NODE_ENV = "production"
-
-# Redirect rules for SPA
-[[redirects]]
-  from = "/api/*"
-  to = "https://khizr-assistant-api.onrender.com/api/:splat"
-  status = 200
-
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
-
+# Redirect /env.js to Render backend
 [[redirects]]
   from = "/env.js"
   to = "https://khizr-assistant-api.onrender.com/env.js"
   status = 200
   force = true
 
-# Headers for security
-[[headers]]
-  for = "/*"
-  [headers.values]
-    X-Frame-Options = "DENY"
-    X-XSS-Protection = "1; mode=block"
-    X-Content-Type-Options = "nosniff"
-    Referrer-Policy = "strict-origin-when-cross-origin"
+# Redirect API calls to Render backend
+[[redirects]]
+  from = "/api/*"
+  to = "https://khizr-assistant-api.onrender.com/api/:splat"
+  status = 200
 
-# Cache static assets
-[[headers]]
-  for = "/css/*"
-  [headers.values]
-    Cache-Control = "public, max-age=31536000"
-
-[[headers]]
-  for = "/js/*"
-  [headers.values]
-    Cache-Control = "public, max-age=31536000"
+# SPA fallback - serve index.html for all other routes
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
