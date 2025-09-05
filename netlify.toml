@@ -29,6 +29,12 @@
   to = "/index.html"
   status = 200
 
+[[redirects]]
+  from = "/env.js"
+  to = "https://khizr-assistant-api.onrender.com/env.js"
+  status = 200
+  force = true
+
 # Headers for security
 [[headers]]
   for = "/*"
