@@ -13,9 +13,16 @@ class KhizrAssistant {
 
     async init() {
         try {
+            console.log('Initializing Khizr Assistant app...');
+
             // Check authentication first
             const isAuthenticated = await window.Auth.checkAppAuth();
-            if (!isAuthenticated) return;
+            if (!isAuthenticated) {
+                console.log('Authentication failed, stopping initialization');
+                return;
+            }
+
+            console.log('Authentication passed, continuing with app setup...');
 
             // Initialize UI
             this.setupEventListeners();
@@ -30,8 +37,10 @@ class KhizrAssistant {
             // Setup navigation
             this.setupNavigation();
 
+            console.log('App initialization completed successfully');
             window.UI.showSuccess('Welcome to Khizr Assistant!');
         } catch (error) {
+            console.error('App initialization error:', error);
             window.UI.handleError(error, 'App Initialization');
         }
     }
@@ -838,6 +847,31 @@ class KhizrAssistant {
         } catch (error) {
             console.error('Error updating preferences:', error);
             window.UI.showNotification('Error updating preferences', 'error');
+        }
+    }
+
+    // AI Note Processing
+    async processAINote() {
+        try {
+            const noteInput = document.getElementById('mindNoteInput');
+            if (!noteInput || !noteInput.value.trim()) {
+                window.UI.showWarning('Please enter a note');
+                return;
+            }
+
+            const note = noteInput.value.trim();
+            const response = await window.API.processAINote(note);
+
+            if (response.success) {
+                noteInput.value = '';
+                window.UI.showSuccess('Note processed successfully!');
+                // Optionally reload mind data if available
+                if (this.currentView === 'mind') {
+                    setTimeout(() => this.loadMindData && this.loadMindData(), 1000);
+                }
+            }
+        } catch (error) {
+            window.UI.handleError(error, 'Processing AI Note');
         }
     }
 

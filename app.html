@@ -279,19 +279,24 @@
     </div>
 
     <!-- Load Supabase CDN and JavaScript Files -->
-     <script src="/env.js"></script>
+    <script src="/env.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/env-loader.js"></script>
+    <script src="js/config.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/ui.js"></script>
 
     <script>
         // Initialize Supabase client for the main app
         (async function initApp() {
             try {
-                // Multiple fallback methods for environment variables
-                let SUPABASE_URL = 'https://tugoaqoadsqbvgckkoqf.supabase.co';
-                let SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR1Z29hcW9hZHNxYnZnY2trb3FmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY2NzkyMTAsImV4cCI6MjA3MjI1NTIxMH0.WU3b_pnTungZgPDcBhEVEzVugJYdIvMu_cE-zhGjvP4';
-                let API_BASE_URL = 'https://khizr-assistant-api.onrender.com';
+                // Use server-provided environment variables first
+                let SUPABASE_URL = window.SUPABASE_URL || 'https://tugoaqoadsqbvgckkoqf.supabase.co';
+                let SUPABASE_ANON_KEY = window.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR1Z29hcW9hZHNxYnZnY2trb3FmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY2NzkyMTAsImV4cCI6MjA3MjI1NTIxMH0.WU3b_pnTungZgPDcBhEVEzVugJYdIvMu_cE-zhGjvP4';
+                let API_BASE_URL = window.API_BASE_URL || 'http://localhost:10000';
 
-                // Try different methods to get environment variables
+                // Try different methods to get environment variables as fallback
                 if (window.VITE_SUPABASE_URL) {
                     SUPABASE_URL = window.VITE_SUPABASE_URL;
                 }
@@ -340,11 +345,6 @@
         })();
     </script>
 
-    <script src="js/env-loader.js"></script>
-    <script src="js/config.js"></script>
-    <script src="js/auth.js"></script>
-    <script src="js/api.js"></script>
-    <script src="js/ui.js"></script>
     <script src="js/app.js"></script>
 </body>
 </html>

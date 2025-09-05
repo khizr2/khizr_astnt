@@ -1,63 +1,61 @@
 const express = require('express');
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
 const { supabase } = require('../database/connection');
 const { logger } = require('../utils/logger');
 
 const router = express.Router();
 
-// Register
+// Register - Now handled by Supabase auth (this endpoint can be removed or kept for legacy)
+// This endpoint is kept for compatibility but redirects to Supabase auth
 router.post('/register', async (req, res) => {
     try {
         const { email, password, name, phone, timezone } = req.body;
 
         if (!email || !password || !name) {
-            return res.status(400).json({ error: 'Email, password, and name are required' });
+            return res.status(400).json({
+                error: 'Registration should be handled by Supabase auth',
+                suggestion: 'Use Supabase auth.signUp() from the frontend'
+            });
         }
 
-        // Check if user exists
-        const { data: existingUser, error: checkError } = await supabase
-            .from('users')
-            .select('id')
-            .eq('email', email)
-            .single();
+        // Create user in Supabase auth
+        const { data: authData, error: authError } = await supabase.auth.signUp({
+            email,
+            password,
+            options: {
+                data: {
+                    name,
+                    phone: phone || null,
+                    timezone: timezone || 'UTC'
+                }
+            }
+        });
 
-        if (existingUser) {
-            return res.status(409).json({ error: 'User already exists' });
+        if (authError) {
+            return res.status(400).json({ error: authError.message });
         }
 
-        // Hash password
-        const saltRounds = 10;
-        const passwordHash = await bcrypt.hash(password, saltRounds);
+        // Also create user record in our users table
+        if (authData.user) {
+            const { error: dbError } = await supabase
+                .from('users')
+                .insert([{
+                    id: authData.user.id,
+                    email,
+                    password_hash: '', // Not needed for Supabase auth
+                    name,
+                    phone: phone || null,
+                    timezone: timezone || 'UTC'
+                }]);
 
-        // Create user
-        const { data: user, error: createError } = await supabase
-            .from('users')
-            .insert([{
-                email,
-                password_hash: passwordHash,
-                name,
-                phone: phone || null,
-                timezone: timezone || 'UTC'
-            }])
-            .select('id, email, name')
-            .single();
-
-        if (createError) {
-            throw createError;
+            if (dbError && !dbError.message.includes('duplicate key')) {
+                logger.error('Database user creation error:', dbError);
+            }
         }
-
-        // Generate JWT
-        const token = jwt.sign(
-            { userId: user.id, email: user.email },
-            process.env.JWT_SECRET,
-            { expiresIn: '30d' }
-        );
 
         res.status(201).json({
             message: 'User created successfully',
-            user: { id: user.id, email: user.email, name: user.name },
-            token
+            user: authData.user,
+            session: authData.session
         });
 
     } catch (error) {
@@ -66,43 +64,57 @@ router.post('/register', async (req, res) => {
     }
 });
 
-// Login
+// Login - Now handled by Supabase auth
 router.post('/login', async (req, res) => {
     try {
         const { email, password } = req.body;
 
         if (!email || !password) {
-            return res.status(400).json({ error: 'Email and password are required' });
+            return res.status(400).json({
+                error: 'Login should be handled by Supabase auth',
+                suggestion: 'Use Supabase auth.signInWithPassword() from the frontend'
+            });
         }
 
-        // Find user
-        const { data: user, error: findError } = await supabase
-            .from('users')
-            .select('id, email, name, password_hash')
-            .eq('email', email)
-            .single();
+        // Authenticate with Supabase
+        const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+            email,
+            password
+        });
 
-        if (findError || !user) {
-            return res.status(401).json({ error: 'Invalid credentials' });
+        if (authError) {
+            return res.status(401).json({ error: authError.message });
         }
 
-        // Verify password
-        const isValidPassword = await bcrypt.compare(password, user.password_hash);
-        if (!isValidPassword) {
-            return res.status(401).json({ error: 'Invalid credentials' });
-        }
+        // Ensure user exists in our users table
+        if (authData.user) {
+            const { data: existingUser } = await supabase
+                .from('users')
+                .select('id, email, name')
+                .eq('id', authData.user.id)
+                .single();
 
-        // Generate JWT
-        const token = jwt.sign(
-            { userId: user.id, email: user.email },
-            process.env.JWT_SECRET,
-            { expiresIn: '30d' }
-        );
+            if (!existingUser) {
+                // Create user record if it doesn't exist
+                const { error: dbError } = await supabase
+                    .from('users')
+                    .insert([{
+                        id: authData.user.id,
+                        email: authData.user.email,
+                        password_hash: '', // Not needed for Supabase auth
+                        name: authData.user.user_metadata?.name || authData.user.email
+                    }]);
+
+                if (dbError && !dbError.message.includes('duplicate key')) {
+                    logger.error('Database user creation error:', dbError);
+                }
+            }
+        }
 
         res.json({
             message: 'Login successful',
-            user: { id: user.id, email: user.email, name: user.name },
-            token
+            user: authData.user,
+            session: authData.session
         });
 
     } catch (error) {
@@ -111,11 +123,11 @@ router.post('/login', async (req, res) => {
     }
 });
 
-// Logout
+// Logout - handled by Supabase auth
 router.post('/logout', async (req, res) => {
     try {
-        // For JWT-based auth, logout is handled client-side by removing token
-        // This endpoint exists for consistency and future session management
+        // For Supabase auth, logout is handled client-side
+        // This endpoint exists for consistency
         res.json({ message: 'Logout successful' });
     } catch (error) {
         logger.error('Logout error:', error);
@@ -123,43 +135,31 @@ router.post('/logout', async (req, res) => {
     }
 });
 
-// Refresh token
-router.post('/refresh', async (req, res) => {
+// Get current user session
+router.get('/session', async (req, res) => {
     try {
-        const token = req.headers.authorization?.split(' ')[1];
-        if (!token) {
-            return res.status(401).json({ error: 'No token provided' });
+        const authHeader = req.headers.authorization;
+        if (!authHeader) {
+            return res.status(401).json({ error: 'No authorization header' });
         }
 
-        // Verify current token
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        
-        // Generate new token
-        const newToken = jwt.sign(
-            { userId: decoded.userId, email: decoded.email },
-            process.env.JWT_SECRET,
-            { expiresIn: '30d' }
-        );
+        const token = authHeader.split(' ')[1];
+        const { data: { user }, error } = await supabase.auth.getUser(token);
 
-        res.json({ token: newToken });
-    } catch (error) {
-        logger.error('Token refresh error:', error);
-        res.status(401).json({ error: 'Invalid token' });
-    }
-});
-
-// Validate token
-router.post('/validate', async (req, res) => {
-    try {
-        const token = req.headers.authorization?.split(' ')[1];
-        if (!token) {
-            return res.status(401).json({ error: 'No token provided' });
+        if (error || !user) {
+            return res.status(401).json({ error: 'Invalid session' });
         }
 
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        res.json({ valid: true, userId: decoded.userId, email: decoded.email });
+        res.json({
+            user: {
+                id: user.id,
+                email: user.email,
+                name: user.user_metadata?.name || user.email
+            }
+        });
     } catch (error) {
-        res.status(401).json({ valid: false, error: 'Invalid token' });
+        logger.error('Session check error:', error);
+        res.status(500).json({ error: 'Internal server error' });
     }
 });
 

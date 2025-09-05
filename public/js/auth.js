@@ -168,6 +168,14 @@ class AuthManager {
 
     async validateToken() {
         try {
+            // Check if Supabase client is available
+            if (!window.supabase) {
+                console.warn('Supabase client not available, falling back to basic token check');
+                // Fallback: just check if we have a token in localStorage
+                const token = localStorage.getItem('khizr_assistant_auth');
+                return !!token;
+            }
+
             // Use Supabase to validate the current session
             const { data: { session }, error } = await window.supabase.auth.getSession();
 
@@ -275,7 +283,10 @@ class AuthManager {
 
     // Check authentication on app initialization
     async checkAppAuth() {
+        console.log('Checking app authentication...');
+
         if (!this.isLoggedIn()) {
+            console.log('Not logged in, redirecting to login');
             window.location.href = '/';
             return false;
         }
@@ -283,11 +294,13 @@ class AuthManager {
         // Validate token with server
         const isValid = await this.validateToken();
         if (!isValid) {
+            console.log('Token validation failed, clearing auth and redirecting');
             this.clearAuth();
             window.location.href = '/';
             return false;
         }
 
+        console.log('Authentication check passed');
         return true;
     }
 }

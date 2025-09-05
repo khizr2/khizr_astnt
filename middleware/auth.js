@@ -1,4 +1,3 @@
-const jwt = require('jsonwebtoken');
 const { supabase } = require('../database/connection');
 const { logger } = require('../utils/logger');
 
@@ -11,20 +10,21 @@ const authenticateToken = async (req, res, next) => {
     }
 
     try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        
-        // Verify user still exists
-        const { data: user, error } = await supabase
-            .from('users')
-            .select('id, email, name')
-            .eq('id', decoded.userId)
-            .single();
-        
-        if (error || !user) {
-            return res.status(401).json({ error: 'Invalid token' });
+        // Verify with Supabase auth
+        const { data: { user: supabaseUser }, error } = await supabase.auth.getUser(token);
+
+        if (error || !supabaseUser) {
+            logger.error('Supabase auth verification failed:', error);
+            return res.status(403).json({ error: 'Invalid or expired token' });
         }
 
-        req.user = user;
+        // Set user info from Supabase
+        req.user = {
+            id: supabaseUser.id,
+            email: supabaseUser.email,
+            name: supabaseUser.user_metadata?.name || supabaseUser.email
+        };
+
         next();
     } catch (error) {
         logger.error('Token verification failed:', error);

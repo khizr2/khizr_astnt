@@ -248,6 +248,14 @@ class APIClient {
     async getDaddyAnalytics() {
         return this.request('/api/agents/daddy/analytics');
     }
+
+    // AI Note Processing
+    async processAINote(note) {
+        return this.request('/api/ai/process-note', {
+            method: 'POST',
+            body: JSON.stringify({ note })
+        });
+    }
 }
 
 // Create and export singleton instance

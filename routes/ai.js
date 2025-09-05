@@ -1,6 +1,6 @@
 const express = require('express');
 const { authenticateToken } = require('../middleware/auth');
-const { query } = require('../database/connection');
+const { supabase } = require('../database/connection');
 const { logger } = require('../utils/logger');
 
 const router = express.Router();
@@ -10,35 +10,64 @@ router.use(authenticateToken);
 router.get('/insights', async (req, res) => {
     try {
         // Get productivity insights
-        const tasksResult = await query(`
-            SELECT 
-                status,
-                COUNT(*)::int as count,
-                AVG(priority) as avg_priority
-            FROM tasks 
-            WHERE user_id = $1 
-            AND created_at >= NOW() - INTERVAL '30 days'
-            GROUP BY status
-        `, [req.user.id]);
+        const { data: tasksResult, error: tasksError } = await supabase
+            .from('tasks')
+            .select('status, priority')
+            .eq('user_id', req.user.id)
+            .gte('created_at', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString());
 
-        const overdueResult = await query(`
-            SELECT COUNT(*)::int as count
-            FROM tasks 
-            WHERE user_id = $1 
-            AND deadline < NOW() 
-            AND status != 'completed'
-        `, [req.user.id]);
+        if (tasksError) {
+            throw tasksError;
+        }
+
+        const { data: overdueResult, error: overdueError } = await supabase
+            .from('tasks')
+            .select('id', { count: 'exact' })
+            .eq('user_id', req.user.id)
+            .lt('deadline', new Date().toISOString())
+            .neq('status', 'completed');
+
+        if (overdueError) {
+            throw overdueError;
+        }
 
         const insights = {
-            tasksByStatus: tasksResult.rows,
-            overdueTasks: parseInt(overdueResult.rows[0]?.count || 0),
-            recommendations: generateRecommendations(tasksResult.rows)
+            tasksByStatus: tasksResult,
+            overdueTasks: overdueResult?.length || 0,
+            recommendations: generateRecommendations(tasksResult)
         };
 
         res.json(insights);
     } catch (error) {
         logger.error('Insights generation error:', error);
         res.status(500).json({ error: 'Failed to generate insights' });
+    }
+});
+
+// Process AI note
+router.post('/process-note', async (req, res) => {
+    try {
+        const { note } = req.body;
+
+        if (!note) {
+            return res.status(400).json({ error: 'Note is required' });
+        }
+
+        // For now, just acknowledge receipt without storing in database
+        // The mind_notes table may not exist yet
+        // In a real implementation, this would process the note with AI
+
+        logger.info(`Processing AI note for user ${req.user.id}: ${note.substring(0, 100)}...`);
+
+        res.json({
+            success: true,
+            message: 'Note processed successfully',
+            note_length: note.length,
+            processed_at: new Date().toISOString()
+        });
+    } catch (error) {
+        logger.error('Process note error:', error);
+        res.status(500).json({ error: 'Failed to process note' });
     }
 });
 

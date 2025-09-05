@@ -437,8 +437,25 @@ CREATE TABLE IF NOT EXISTS user_learning_patterns (
 );
 
 -- ===========================================
+-- Mind Notes table
+CREATE TABLE mind_notes (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    content TEXT NOT NULL,
+    processed BOOLEAN DEFAULT FALSE,
+    ai_summary TEXT,
+    ai_tags JSONB,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 -- USER PREFERENCE INDEXES
 -- ===========================================
+
+-- Mind notes indexes
+CREATE INDEX IF NOT EXISTS idx_mind_notes_user_id ON mind_notes(user_id);
+CREATE INDEX IF NOT EXISTS idx_mind_notes_created_at ON mind_notes(created_at);
+CREATE INDEX IF NOT EXISTS idx_mind_notes_processed ON mind_notes(processed);
 
 -- User preferences indexes
 CREATE INDEX IF NOT EXISTS idx_user_preferences_user_type_key ON user_preferences(user_id, preference_type, preference_key);

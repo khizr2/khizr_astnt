@@ -508,6 +508,29 @@ function detectMessageType(message) {
   return 'general_chat';
 }
 
+// Get chat history
+router.get('/history', async (req, res) => {
+  try {
+    const { limit = 50, offset = 0 } = req.query;
+
+    // For now, return empty array since we don't have a dedicated chat messages table
+    // In the future, this could query a chat_messages table or agent_conversations
+    const messages = [];
+
+    res.json({
+      success: true,
+      messages: messages,
+      total: messages.length
+    });
+  } catch (error) {
+    logger.error('Get chat history error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to load chat history'
+    });
+  }
+});
+
 // Feedback endpoint for learning from user responses
 router.post('/feedback', async (req, res) => {
   try {

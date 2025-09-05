@@ -1,6 +1,5 @@
 const { supabase } = require('./database/connection');
 const { logger } = require('./utils/logger');
-const jwt = require('jsonwebtoken');
 
 // Environment validation following their pattern
 if (!process.env.SUPABASE_URL || !process.env.SUPABASE_ANON_KEY) {
