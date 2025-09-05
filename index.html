@@ -284,11 +284,9 @@
 
                 if (session?.user) {
                     console.log('User is authenticated, redirecting to main app...');
-                    // Store session data for the app
-                    localStorage.setItem('khizr_assistant_auth', JSON.stringify({
-                        token: session.access_token,
-                        user: session.user
-                    }));
+                    // Store session data in the format expected by auth.js
+                    localStorage.setItem('khizr_assistant_auth', session.access_token);
+                    localStorage.setItem('user_data', JSON.stringify(session.user));
                     isCheckingAuth = false;
                     window.location.href = '/app.html';
                 } else {
@@ -340,11 +338,9 @@
                 }
 
                 if (data.session && data.user) {
-                    // Store session data for the app
-                    localStorage.setItem('khizr_assistant_auth', JSON.stringify({
-                        token: data.session.access_token,
-                        user: data.user
-                    }));
+                    // Store session data in the format expected by auth.js
+                    localStorage.setItem('khizr_assistant_auth', data.session.access_token);
+                    localStorage.setItem('user_data', JSON.stringify(data.user));
 
                     console.log('Login successful, redirecting to main app...');
                     // Redirect to main app
@@ -392,11 +388,9 @@
                 }
 
                 if (data.session && data.user) {
-                    // Store session data for the app
-                    localStorage.setItem('khizr_assistant_auth', JSON.stringify({
-                        token: data.session.access_token,
-                        user: data.user
-                    }));
+                    // Store session data in the format expected by auth.js
+                    localStorage.setItem('khizr_assistant_auth', data.session.access_token);
+                    localStorage.setItem('user_data', JSON.stringify(data.user));
 
                     console.log('Registration successful, redirecting to main app...');
                     // Redirect to main app
